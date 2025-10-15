@@ -77,6 +77,10 @@ app.get("/test-retry", (req: Request, res: Response) => {
       req.socket.destroy();
       break;
 
+    case "hang":
+      // do literally nothing
+      break;
+
     case "random":
     default:
       const shouldFail = Math.random() < 0.7;
