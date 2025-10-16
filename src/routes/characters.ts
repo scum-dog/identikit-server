@@ -38,11 +38,8 @@ router.get("/me", authenticateUser, async (req: Request, res: Response) => {
         upload_id: character.id,
         user_id: character.user_id,
         creator_name: character.name,
-        creation_time: character.created_at,
-        edit_time:
-          character.last_edited_at !== character.created_at
-            ? character.last_edited_at
-            : null,
+        created_at: character.created_at,
+        last_edited_at: character.last_edited_at,
         location: {
           country: character.country,
           region: character.region,
@@ -53,7 +50,6 @@ router.get("/me", authenticateUser, async (req: Request, res: Response) => {
             ? JSON.parse(character.character_data)
             : character.character_data,
         date_of_birth: character.date_of_birth,
-        eye_color: character.eye_color,
         edit_count: character.edit_count,
         is_deleted: character.is_deleted,
         deleted_at: character.deleted_at,
@@ -92,7 +88,6 @@ router.post(
         region: req.body.location?.region,
         city: req.body.location?.city,
         dateOfBirth: req.body.date_of_birth,
-        eyeColor: req.body.eye_color,
         heightCm: req.body.character_data.static.height_cm,
         weightKg: req.body.character_data.static.weight_kg,
       };
@@ -117,7 +112,6 @@ router.post(
           },
           character_data: JSON.parse(newCharacter.character_data),
           date_of_birth: newCharacter.date_of_birth,
-          eye_color: newCharacter.eye_color,
           edit_count: newCharacter.edit_count,
           is_deleted: newCharacter.is_deleted,
           deleted_at: newCharacter.deleted_at,
@@ -149,7 +143,6 @@ router.put(
 
       if (req.body.creator_name) updates.name = req.body.creator_name;
       if (req.body.date_of_birth) updates.dateOfBirth = req.body.date_of_birth;
-      if (req.body.eye_color) updates.eyeColor = req.body.eye_color;
       if (req.body.location) {
         if (req.body.location.country !== undefined)
           updates.country = req.body.location.country;
@@ -180,11 +173,8 @@ router.put(
           upload_id: updatedCharacter.id,
           user_id: updatedCharacter.user_id,
           creator_name: updatedCharacter.name,
-          creation_time: updatedCharacter.created_at,
-          edit_time:
-            updatedCharacter.last_edited_at !== updatedCharacter.created_at
-              ? updatedCharacter.last_edited_at
-              : null,
+          created_at: updatedCharacter.created_at,
+          last_edited_at: updatedCharacter.last_edited_at,
           location: {
             country: updatedCharacter.country,
             region: updatedCharacter.region,
@@ -192,7 +182,6 @@ router.put(
           },
           character_data: JSON.parse(updatedCharacter.character_data),
           date_of_birth: updatedCharacter.date_of_birth,
-          eye_color: updatedCharacter.eye_color,
           edit_count: updatedCharacter.edit_count,
           is_deleted: updatedCharacter.is_deleted,
           deleted_at: updatedCharacter.deleted_at,

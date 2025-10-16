@@ -219,7 +219,6 @@ export const characterUploadSchema = z.object({
     .min(new Date("1900-01-01"))
     .max(new Date())
     .optional(),
-  eye_color: eyeColorEnum.optional(),
 });
 
 export const characterUpdateSchema = z
@@ -230,7 +229,6 @@ export const characterUpdateSchema = z
       .min(new Date("1900-01-01"))
       .max(new Date())
       .optional(),
-    eye_color: eyeColorEnum.optional(),
     location: z
       .object({
         country: z.string().trim().max(100).or(z.literal("")).optional(),
