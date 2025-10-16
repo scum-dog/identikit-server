@@ -240,7 +240,6 @@ export function generateMockCharacter(userId?: string, uploadId?: string) {
     date_of_birth: randomDate(new Date(1970, 0, 1), new Date(2005, 11, 31))
       .toISOString()
       .split("T")[0],
-    eye_color: randomChoice(eyeColors),
     edit_count: hasBeenEdited ? randomInt(1, 5) : 0,
     is_deleted: false,
     deleted_at: null,

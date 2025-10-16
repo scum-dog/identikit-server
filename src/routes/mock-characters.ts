@@ -88,7 +88,6 @@ router.post(
         date_of_birth: req.body.date_of_birth
           ? new Date(req.body.date_of_birth).toISOString().split("T")[0]
           : null,
-        eye_color: req.body.eye_color,
         edit_count: 0,
         is_deleted: false,
         deleted_at: null,
@@ -153,7 +152,6 @@ router.put(
         updates.date_of_birth = new Date(req.body.date_of_birth)
           .toISOString()
           .split("T")[0];
-      if (req.body.eye_color) updates.eye_color = req.body.eye_color;
       if (req.body.location) {
         updates.location = {
           country:
