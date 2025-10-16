@@ -1,23 +1,112 @@
-import express, { Request, Response } from "express";
+import express, { Request, Response, NextFunction } from "express";
 import cors from "cors";
 import dotenv from "dotenv";
+import helmet from "helmet";
+import rateLimit from "express-rate-limit";
+import authRoutes from "./routes/auth";
+import characterRoutes from "./routes/characters";
+import adminRoutes from "./routes/admin";
+import mockAuthRoutes from "./routes/mock-auth";
+import mockCharacterRoutes from "./routes/mock-characters";
+import mockAdminRoutes from "./routes/mock-admin";
+import "./database";
 
 dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+const environment = process.env.NODE_ENV || "development";
+const version = "0.1.0";
 
-app.use(cors());
-app.use(express.json());
+app.use(helmet());
+
+app.use(
+  cors({
+    origin: process.env.CORS_ORIGIN || "*",
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+  }),
+);
+
+app.use(express.json({ limit: "10mb" }));
+app.use(express.urlencoded({ extended: true, limit: "10mb" }));
+
+const globalRateLimit = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 100,
+  message: {
+    error: "Too many requests from this IP. Please try again later",
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+app.use(globalRateLimit);
 
 app.get("/ping", (req: Request, res: Response) => {
   res.json({
     message: "pong",
     timestamp: new Date().toISOString(),
-    environment: process.env.NODE_ENV,
+    environment: environment,
+    version: version,
   });
 });
 
+app.use("/api/auth", authRoutes);
+app.use("/api/characters", characterRoutes);
+app.use("/api/admin", adminRoutes);
+
+// mock endpoints for testing
+app.use("/mock/api/auth", mockAuthRoutes);
+app.use("/mock/api/characters", mockCharacterRoutes);
+app.use("/mock/api/admin", mockAdminRoutes);
+
+app.get("/api", (req: Request, res: Response) => {
+  res.json({
+    version: version,
+    endpoints: {
+      auth: {
+        "GET /api/auth/newgrounds/url": "Get Newgrounds OAuth URL",
+        "POST /api/auth/newgrounds/callback": "Handle OAuth callback",
+        "POST /api/auth/verify": "Verify current session",
+        "GET /api/auth/me": "Get current user info",
+        "POST /api/auth/logout": "Logout",
+      },
+      characters: {
+        "GET /api/characters/me": "Get user's character",
+        "POST /api/characters": "Create new character",
+        "PUT /api/characters/me": "Update user's character",
+        "GET /api/characters/plaza": "Get plaza characters",
+        "GET /api/characters/:id": "Get character by ID",
+      },
+      admin: {
+        "GET /api/admin/characters": "List all characters (admin)",
+        "GET /api/admin/character/:id": "Get character details (admin)",
+        "DELETE /api/admin/character/:id": "Delete character (admin)",
+        "GET /api/admin/users": "List all users (admin)",
+        "GET /api/admin/actions": "Get admin action history",
+        "GET /api/admin/stats": "Get platform statistics",
+      },
+      mock: {
+        "GET /mock/api/auth/me": "Mock current user info",
+        "GET /mock/api/characters/me": "Mock user's character",
+        "POST /mock/api/characters": "Mock character creation",
+        "PUT /mock/api/characters/me": "Mock character update",
+        "GET /mock/api/characters/plaza": "Mock plaza characters",
+        "GET /mock/api/characters/:id": "Mock character by ID",
+        "GET /mock/api/admin/characters": "Mock admin character list",
+        "GET /mock/api/admin/character/:id": "Mock admin character details",
+        "DELETE /mock/api/admin/character/:id": "Mock admin character deletion",
+        "GET /mock/api/admin/users": "Mock admin user list",
+        "GET /mock/api/admin/actions": "Mock admin action history",
+        "GET /mock/api/admin/stats": "Mock platform statistics",
+      },
+    },
+  });
+});
+
+// test endpoint for various connection problems
 app.get("/test-retry", (req: Request, res: Response) => {
   const failureType = (req.query.type as string) || "random";
   const attempt = parseInt(req.query.attempt as string) || 1;
@@ -105,10 +194,28 @@ app.get("/test-retry", (req: Request, res: Response) => {
   }
 });
 
+app.use((error: Error, req: Request, res: Response, next: NextFunction) => {
+  console.error("Global error handler:", error);
+
+  if (res.headersSent) {
+    return next(error);
+  }
+
+  res.status(500).json({
+    error: "Internal server error",
+    message:
+      environment === "development" ? error.message : "Something went wrong",
+  });
+});
+
 app.use((req: Request, res: Response) => {
-  res.status(404).json({ error: "Route not found" });
+  res.status(404).json({
+    error: "Route not found",
+    path: req.path,
+    method: req.method,
+  });
 });
 
 app.listen(PORT, () => {
-  console.log(`listening on port ${PORT}`);
+  console.log(`listening on port ${PORT} in ${environment}`);
 });
