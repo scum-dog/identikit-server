@@ -9,14 +9,15 @@ import adminRoutes from "./routes/admin";
 import mockAuthRoutes from "./routes/mock-auth";
 import mockCharacterRoutes from "./routes/mock-characters";
 import mockAdminRoutes from "./routes/mock-admin";
+import { validateConfig } from "./auth/configValidation";
 import "./database";
 
 dotenv.config();
+validateConfig();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 const environment = process.env.NODE_ENV || "development";
-const version = "0.1.0";
 
 app.use(helmet());
 
@@ -38,8 +39,6 @@ const globalRateLimit = rateLimit({
   message: {
     error: "Too many requests from this IP. Please try again later",
   },
-  standardHeaders: true,
-  legacyHeaders: false,
 });
 
 app.use(globalRateLimit);
@@ -49,7 +48,6 @@ app.get("/ping", (req: Request, res: Response) => {
     message: "pong",
     timestamp: new Date().toISOString(),
     environment: environment,
-    version: version,
   });
 });
 
@@ -57,18 +55,20 @@ app.use("/api/auth", authRoutes);
 app.use("/api/characters", characterRoutes);
 app.use("/api/admin", adminRoutes);
 
-// mock endpoints for testing
 app.use("/mock/api/auth", mockAuthRoutes);
 app.use("/mock/api/characters", mockCharacterRoutes);
 app.use("/mock/api/admin", mockAdminRoutes);
 
 app.get("/api", (req: Request, res: Response) => {
   res.json({
-    version: version,
     endpoints: {
+      system: {
+        "GET /ping": "Pong (hopefully)",
+      },
       auth: {
         "GET /api/auth/newgrounds/url": "Get Newgrounds OAuth URL",
-        "POST /api/auth/newgrounds/callback": "Handle OAuth callback",
+        "GET /api/auth/itchio/url": "Get Itch.io OAuth URL",
+        "GET /api/auth/google/url": "Get Google OAuth URL",
         "POST /api/auth/verify": "Verify current session",
         "GET /api/auth/me": "Get current user info",
         "POST /api/auth/logout": "Logout",
@@ -88,8 +88,20 @@ app.get("/api", (req: Request, res: Response) => {
         "GET /api/admin/actions": "Get admin action history",
         "GET /api/admin/stats": "Get platform statistics",
       },
+      oauth_callbacks: {
+        "GET /api/auth/newgrounds/callback":
+          "Newgrounds OAuth callback (internal use)",
+        "GET /api/auth/itchio/callback":
+          "Itch.io OAuth callback (internal use)",
+        "GET /api/auth/google/callback": "Google OAuth callback (internal use)",
+      },
+      testing: {
+        "GET /test-retry": "Testing endpoint for various failure types",
+      },
       mock: {
-        "GET /mock/api/auth/me": "Mock current user info",
+        "GET /mock/api/auth/newgrounds/me": "Mock Newgrounds user info",
+        "GET /mock/api/auth/itch/me": "Mock itch.io user info",
+        "GET /mock/api/auth/google/me": "Mock Google user info",
         "GET /mock/api/characters/me": "Mock user's character",
         "POST /mock/api/characters": "Mock character creation",
         "PUT /mock/api/characters/me": "Mock character update",
@@ -106,7 +118,6 @@ app.get("/api", (req: Request, res: Response) => {
   });
 });
 
-// test endpoint for various connection problems
 app.get("/test-retry", (req: Request, res: Response) => {
   const failureType = (req.query.type as string) || "random";
   const attempt = parseInt(req.query.attempt as string) || 1;
@@ -171,7 +182,7 @@ app.get("/test-retry", (req: Request, res: Response) => {
       break;
 
     case "random":
-    default:
+    default: {
       const shouldFail = Math.random() < 0.7;
       if (shouldFail) {
         const errorCodes = [500, 502, 503, 504];
@@ -191,6 +202,7 @@ app.get("/test-retry", (req: Request, res: Response) => {
         });
       }
       break;
+    }
   }
 });
 

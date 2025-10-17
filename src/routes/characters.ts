@@ -6,8 +6,15 @@ import {
   characterUploadSchema,
   characterUpdateSchema,
 } from "../validation";
-import { authenticateUser } from "../auth";
+import { authenticateUser } from "../auth/middleware";
 import rateLimit from "express-rate-limit";
+import {
+  CharacterRouteUpdates,
+  PlazaQueryRequest,
+  PlazaCharacterData,
+  DatabaseQueryResult,
+  CanEditResult,
+} from "../types";
 
 const router = Router();
 const characterRateLimit = rateLimit({
@@ -110,7 +117,10 @@ router.post(
             region: newCharacter.region,
             city: newCharacter.city,
           },
-          character_data: JSON.parse(newCharacter.character_data),
+          character_data:
+            typeof newCharacter.character_data === "string"
+              ? JSON.parse(newCharacter.character_data)
+              : newCharacter.character_data,
           date_of_birth: newCharacter.date_of_birth,
           edit_count: newCharacter.edit_count,
           is_deleted: newCharacter.is_deleted,
@@ -139,7 +149,7 @@ router.put(
         return res.status(404).json({ error: "No character found to update" });
       }
 
-      const updates: any = {};
+      const updates: CharacterRouteUpdates = {};
 
       if (req.body.creator_name) updates.name = req.body.creator_name;
       if (req.body.date_of_birth) updates.dateOfBirth = req.body.date_of_birth;
@@ -180,7 +190,10 @@ router.put(
             region: updatedCharacter.region,
             city: updatedCharacter.city,
           },
-          character_data: JSON.parse(updatedCharacter.character_data),
+          character_data:
+            typeof updatedCharacter.character_data === "string"
+              ? JSON.parse(updatedCharacter.character_data)
+              : updatedCharacter.character_data,
           date_of_birth: updatedCharacter.date_of_birth,
           edit_count: updatedCharacter.edit_count,
           is_deleted: updatedCharacter.is_deleted,
@@ -210,7 +223,7 @@ router.get(
   async (req: Request, res: Response) => {
     try {
       const { country, region, limit } =
-        (req as any).validatedQuery || req.query;
+        (req as PlazaQueryRequest).validatedQuery || req.query;
 
       let characters;
 
@@ -226,22 +239,26 @@ router.get(
         );
       }
 
-      const formattedCharacters = characters.map((char: any) => ({
-        upload_id: char.id,
-        creator_name: char.name,
-        creation_time: char.created_at,
-        edit_time:
-          char.last_edited_at !== char.created_at ? char.last_edited_at : null,
-        location: {
-          country: char.country,
-          region: char.region,
-          city: char.city,
-        },
-        character_data:
-          typeof char.character_data === "string"
-            ? JSON.parse(char.character_data)
-            : char.character_data,
-      }));
+      const formattedCharacters = characters.map(
+        (char: PlazaCharacterData) => ({
+          upload_id: char.id,
+          creator_name: char.name,
+          creation_time: char.created_at,
+          edit_time:
+            char.last_edited_at !== char.created_at
+              ? char.last_edited_at
+              : null,
+          location: {
+            country: char.country,
+            region: char.region,
+            city: char.city,
+          },
+          character_data:
+            typeof char.character_data === "string"
+              ? JSON.parse(char.character_data)
+              : char.character_data,
+        }),
+      );
 
       res.json({
         characters: formattedCharacters,
@@ -260,10 +277,10 @@ router.get("/:id", async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
 
-    const result = await query(
+    const result = (await query(
       "SELECT id, name, character_data, country, region, city, created_at, last_edited_at FROM characters WHERE id = $1 AND is_deleted = false",
       [id],
-    );
+    )) as DatabaseQueryResult<PlazaCharacterData>;
 
     if (result.rows.length === 0) {
       return res.status(404).json({ error: "Character not found" });
@@ -303,10 +320,10 @@ async function canUserEditCharacter(
   userId: string,
 ): Promise<boolean> {
   try {
-    const result = await query(
+    const result = (await query(
       "SELECT can_user_edit_character($1, $2) as can_edit",
       [characterId, userId],
-    );
+    )) as DatabaseQueryResult<CanEditResult>;
     return result.rows[0].can_edit;
   } catch (error) {
     console.error("Check edit permissions error:", error);

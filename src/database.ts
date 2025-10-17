@@ -1,5 +1,14 @@
-import { Pool, PoolClient } from "pg";
+import { Pool, PoolClient, QueryResult, QueryResultRow } from "pg";
 import dotenv from "dotenv";
+import {
+  CharacterCreateData,
+  CharacterUpdateData,
+  SearchParams,
+  DatabaseCharacter,
+  CanEditResult,
+  DatabaseUser,
+  PlazaCharacterResult,
+} from "./types";
 
 dotenv.config();
 
@@ -24,7 +33,10 @@ pool.on("error", (err) => {
   process.exit(-1);
 });
 
-export const query = async (text: string, params?: any[]): Promise<any> => {
+export const query = async <T extends QueryResultRow = QueryResultRow>(
+  text: string,
+  params?: unknown[],
+): Promise<QueryResult<T>> => {
   const start = Date.now();
   try {
     const res = await pool.query(text, params);
@@ -44,7 +56,7 @@ export const getClient = async (): Promise<PoolClient> => {
 
 export const userQueries = {
   findByPlatformId: async (platform: string, platformUserId: string) => {
-    const result = await query(
+    const result = await query<DatabaseUser>(
       "SELECT * FROM users WHERE platform = $1 AND platform_user_id = $2",
       [platform, platformUserId],
     );
@@ -57,7 +69,7 @@ export const userQueries = {
     username: string,
     email?: string,
   ) => {
-    const result = await query(
+    const result = await query<DatabaseUser>(
       `INSERT INTO users (platform, platform_user_id, username, email)
        VALUES ($1, $2, $3, $4)
        RETURNING *`,
@@ -75,7 +87,7 @@ export const userQueries = {
 export const characterQueries = {
   // Get user's character
   findByUserId: async (userId: string) => {
-    const result = await query(
+    const result = await query<DatabaseCharacter>(
       "SELECT * FROM characters WHERE user_id = $1 AND is_deleted = false",
       [userId],
     );
@@ -83,7 +95,7 @@ export const characterQueries = {
   },
 
   // create new character
-  create: async (userId: string, characterData: any) => {
+  create: async (userId: string, characterData: CharacterCreateData) => {
     const {
       name,
       dateOfBirth,
@@ -95,7 +107,7 @@ export const characterQueries = {
       characterJson,
     } = characterData;
 
-    const result = await query(
+    const result = await query<DatabaseCharacter>(
       `INSERT INTO characters
        (user_id, name, date_of_birth, height_cm, weight_kg,
         country, region, city, character_data)
@@ -117,8 +129,12 @@ export const characterQueries = {
   },
 
   // update character (with validation)
-  update: async (characterId: string, userId: string, updates: any) => {
-    const canEdit = await query(
+  update: async (
+    characterId: string,
+    userId: string,
+    updates: CharacterUpdateData,
+  ) => {
+    const canEdit = await query<CanEditResult>(
       "SELECT can_user_edit_character($1, $2) as can_edit",
       [characterId, userId],
     );
@@ -129,7 +145,7 @@ export const characterQueries = {
       );
     }
 
-    const oldCharacter = await query(
+    const oldCharacter = await query<DatabaseCharacter>(
       "SELECT * FROM characters WHERE id = $1 AND user_id = $2",
       [characterId, userId],
     );
@@ -148,7 +164,7 @@ export const characterQueries = {
       city,
       characterJson,
     } = updates;
-    const result = await query(
+    const result = await query<DatabaseCharacter>(
       `UPDATE characters
        SET name = $3, date_of_birth = $4, height_cm = $5, weight_kg = $6,
            country = $7, region = $8, city = $9,
@@ -183,9 +199,10 @@ export const characterQueries = {
 
   // get random characters for plaza
   getRandomCharacters: async (limit: number = 100) => {
-    const result = await query("SELECT * FROM get_random_characters($1)", [
-      limit,
-    ]);
+    const result = await query<PlazaCharacterResult>(
+      "SELECT * FROM get_random_characters($1)",
+      [limit],
+    );
     return result.rows;
   },
 
@@ -196,7 +213,7 @@ export const characterQueries = {
     limit: number = 100,
   ) => {
     let whereClause = "WHERE is_deleted = false";
-    const params: any[] = [];
+    const params: SearchParams = [];
     let paramCount = 0;
 
     if (country) {
@@ -221,7 +238,7 @@ export const characterQueries = {
     `;
     params.push(limit);
 
-    const result = await query(query_text, params);
+    const result = await query<PlazaCharacterResult>(query_text, params);
     return result.rows;
   },
 

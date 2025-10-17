@@ -29,8 +29,7 @@ router.get("/characters", (req: Request, res: Response) => {
 
     characters.sort(
       (a, b) =>
-        new Date(b.creation_time).getTime() -
-        new Date(a.creation_time).getTime(),
+        new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
     );
 
     const total = characters.length;
@@ -42,8 +41,8 @@ router.get("/characters", (req: Request, res: Response) => {
         upload_id: char.upload_id,
         creator_name: char.creator_name,
         location: char.location,
-        creation_time: char.creation_time,
-        edit_time: char.edit_time,
+        creation_time: char.created_at,
+        edit_time: char.last_edited_at,
         edit_count: char.edit_count,
         is_deleted: char.is_deleted,
         deleted_at: char.deleted_at,
@@ -80,7 +79,7 @@ router.get("/character/:id", (req: Request, res: Response) => {
     }
 
     const user = mockDataStore.getUser(character.user_id);
-    const editHistory = mockDataStore.getEditHistory(character.id);
+    const editHistory = mockDataStore.getEditHistory(character.upload_id);
 
     const characterWithDetails = {
       ...character,
@@ -162,7 +161,7 @@ router.get("/users", (req: Request, res: Response) => {
     const limit = Math.min(parseInt(req.query.limit as string) || 50, 100);
     const offset = (page - 1) * limit;
 
-    let users = mockDataStore.getUsers();
+    const users = mockDataStore.getUsers();
     const characters = mockDataStore.getCharacters();
 
     users.sort(
@@ -249,7 +248,7 @@ router.get("/stats", (req: Request, res: Response) => {
 
     let totalEdits = 0;
     characters.forEach((char) => {
-      const history = mockDataStore.getEditHistory(char.id);
+      const history = mockDataStore.getEditHistory(char.upload_id);
       totalEdits += history.filter(
         (edit) => edit.edit_type === "user_edit",
       ).length;
@@ -277,10 +276,10 @@ router.get("/stats", (req: Request, res: Response) => {
 
     const countryCounts = new Map<string, number>();
     characters
-      .filter((char) => !char.is_deleted && char.country)
+      .filter((char) => !char.is_deleted && char.location.country)
       .forEach((char) => {
-        const count = countryCounts.get(char.country!) || 0;
-        countryCounts.set(char.country!, count + 1);
+        const count = countryCounts.get(char.location.country!) || 0;
+        countryCounts.set(char.location.country!, count + 1);
       });
 
     const topCountries = Array.from(countryCounts.entries())

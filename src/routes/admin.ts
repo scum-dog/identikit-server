@@ -2,8 +2,16 @@ import { Router, Request, Response } from "express";
 import { characterQueries, query } from "../database";
 import { validateRequest } from "../validation";
 import { z } from "zod";
-import { authenticateUser, requireAdmin } from "../auth";
+import { authenticateUser, requireAdmin } from "../auth/middleware";
 import rateLimit from "express-rate-limit";
+import {
+  AdminCharacterListResult,
+  AdminCharacterDetailResult,
+  AdminEditHistoryResult,
+  AdminCharacterSimpleResult,
+  AdminUserListResult,
+  AdminActionListResult,
+} from "../types";
 
 const router = Router();
 const adminRateLimit = rateLimit({
@@ -28,7 +36,7 @@ router.get("/characters", async (req: Request, res: Response) => {
     const whereClause = showDeleted ? "" : "WHERE is_deleted = false";
     const orderBy = "ORDER BY created_at DESC";
 
-    const result = await query(
+    const result = await query<AdminCharacterListResult>(
       `
       SELECT
         c.id, c.name, c.country, c.region, c.city,
@@ -44,7 +52,7 @@ router.get("/characters", async (req: Request, res: Response) => {
       [limit, offset],
     );
 
-    const countResult = await query(`
+    const countResult = await query<{ total: number }>(`
       SELECT COUNT(*) as total
       FROM characters c
       ${whereClause}
@@ -55,7 +63,7 @@ router.get("/characters", async (req: Request, res: Response) => {
       pagination: {
         page,
         limit,
-        total: parseInt(countResult.rows[0].total),
+        total: parseInt(countResult.rows[0].total.toString()),
         totalPages: Math.ceil(countResult.rows[0].total / limit),
       },
     });
@@ -70,7 +78,7 @@ router.get("/character/:id", async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
 
-    const result = await query(
+    const result = await query<AdminCharacterDetailResult>(
       `
       SELECT
         c.*,
@@ -89,7 +97,7 @@ router.get("/character/:id", async (req: Request, res: Response) => {
 
     const character = result.rows[0];
 
-    const editHistory = await query(
+    const editHistory = await query<AdminEditHistoryResult>(
       `
       SELECT
         ce.*,
@@ -136,7 +144,7 @@ router.delete(
       const { id } = req.params;
       const { reason } = req.body;
 
-      const charResult = await query(
+      const charResult = await query<AdminCharacterSimpleResult>(
         "SELECT id, name, user_id, is_deleted FROM characters WHERE id = $1",
         [id],
       );
@@ -176,7 +184,7 @@ router.get("/users", async (req: Request, res: Response) => {
     const limit = Math.min(parseInt(req.query.limit as string) || 50, 100);
     const offset = (page - 1) * limit;
 
-    const result = await query(
+    const result = await query<AdminUserListResult>(
       `
       SELECT
         u.id, u.username, u.platform, u.platform_user_id,
@@ -191,14 +199,16 @@ router.get("/users", async (req: Request, res: Response) => {
       [limit, offset],
     );
 
-    const countResult = await query("SELECT COUNT(*) as total FROM users");
+    const countResult = await query<{ total: number }>(
+      "SELECT COUNT(*) as total FROM users",
+    );
 
     res.json({
       users: result.rows,
       pagination: {
         page,
         limit,
-        total: parseInt(countResult.rows[0].total),
+        total: parseInt(countResult.rows[0].total.toString()),
         totalPages: Math.ceil(countResult.rows[0].total / limit),
       },
     });
@@ -215,7 +225,7 @@ router.get("/actions", async (req: Request, res: Response) => {
     const limit = Math.min(parseInt(req.query.limit as string) || 50, 100);
     const offset = (page - 1) * limit;
 
-    const result = await query(
+    const result = await query<AdminActionListResult>(
       `
       SELECT
         aa.*,
@@ -232,7 +242,7 @@ router.get("/actions", async (req: Request, res: Response) => {
       [limit, offset],
     );
 
-    const countResult = await query(
+    const countResult = await query<{ total: number }>(
       "SELECT COUNT(*) as total FROM admin_actions",
     );
 
@@ -241,7 +251,7 @@ router.get("/actions", async (req: Request, res: Response) => {
       pagination: {
         page,
         limit,
-        total: parseInt(countResult.rows[0].total),
+        total: parseInt(countResult.rows[0].total.toString()),
         totalPages: Math.ceil(countResult.rows[0].total / limit),
       },
     });
@@ -255,25 +265,29 @@ router.get("/actions", async (req: Request, res: Response) => {
 router.get("/stats", async (req: Request, res: Response) => {
   try {
     const stats = await Promise.all([
-      query("SELECT COUNT(*) as total_users FROM users"),
-      query(
+      query<{ total_users: number }>(
+        "SELECT COUNT(*) as total_users FROM users",
+      ),
+      query<{ total_characters: number }>(
         "SELECT COUNT(*) as total_characters FROM characters WHERE is_deleted = false",
       ),
-      query(
+      query<{ deleted_characters: number }>(
         "SELECT COUNT(*) as deleted_characters FROM characters WHERE is_deleted = true",
       ),
-      query(
+      query<{ total_edits: number }>(
         "SELECT COUNT(*) as total_edits FROM character_edits WHERE edit_type = 'user_edit'",
       ),
-      query("SELECT COUNT(*) as admin_actions FROM admin_actions"),
-      query(`
+      query<{ admin_actions: number }>(
+        "SELECT COUNT(*) as admin_actions FROM admin_actions",
+      ),
+      query<{ date: string; count: number }>(`
         SELECT DATE(created_at) as date, COUNT(*) as count
         FROM characters
         WHERE created_at >= NOW() - INTERVAL '30 days'
         GROUP BY DATE(created_at)
         ORDER BY date DESC
       `),
-      query(`
+      query<{ country: string; count: number }>(`
         SELECT country, COUNT(*) as count
         FROM characters
         WHERE is_deleted = false AND country IS NOT NULL
@@ -285,11 +299,11 @@ router.get("/stats", async (req: Request, res: Response) => {
 
     res.json({
       overview: {
-        totalUsers: parseInt(stats[0].rows[0].total_users),
-        totalCharacters: parseInt(stats[1].rows[0].total_characters),
-        deletedCharacters: parseInt(stats[2].rows[0].deleted_characters),
-        totalEdits: parseInt(stats[3].rows[0].total_edits),
-        adminActions: parseInt(stats[4].rows[0].admin_actions),
+        totalUsers: stats[0].rows[0].total_users,
+        totalCharacters: stats[1].rows[0].total_characters,
+        deletedCharacters: stats[2].rows[0].deleted_characters,
+        totalEdits: stats[3].rows[0].total_edits,
+        adminActions: stats[4].rows[0].admin_actions,
       },
       dailyCreations: stats[5].rows,
       topCountries: stats[6].rows,

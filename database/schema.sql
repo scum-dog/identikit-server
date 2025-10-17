@@ -80,6 +80,18 @@ CREATE TABLE admin_actions (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
+-- user sessions for authentication
+CREATE TABLE user_sessions (
+    session_id VARCHAR(64) PRIMARY KEY,
+    user_id UUID NOT NULL REFERENCES users(id),
+    platform VARCHAR(50) NOT NULL,
+    platform_user_id VARCHAR(255) NOT NULL,
+    username VARCHAR(255) NOT NULL,
+    is_admin BOOLEAN NOT NULL DEFAULT false,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    expires_at TIMESTAMP WITH TIME ZONE NOT NULL
+);
+
 -- indexes for performance
 CREATE INDEX idx_characters_user_id ON characters(user_id);
 CREATE INDEX idx_characters_created_at ON characters(created_at);
@@ -94,6 +106,7 @@ CREATE INDEX idx_character_edits_edited_at ON character_edits(edited_at);
 CREATE INDEX idx_users_platform ON users(platform, platform_user_id);
 CREATE INDEX idx_admin_actions_admin_user ON admin_actions(admin_user_id);
 CREATE INDEX idx_admin_actions_created_at ON admin_actions(created_at);
+CREATE INDEX idx_user_sessions_expires_at ON user_sessions(expires_at);
 
 -- functions for business logic
 

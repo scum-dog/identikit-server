@@ -1,5 +1,15 @@
 import { CharacterData } from "./validation";
 import { randomUUID } from "crypto";
+import {
+  AccessoryType,
+  SkinColor,
+  EyeColor,
+  HairColor,
+  MockUser,
+  MockCharacter,
+  MockEditHistory,
+  MockAdminAction,
+} from "./types";
 
 const firstNames = [
   "John",
@@ -75,7 +85,7 @@ const cities = {
   Tokyo: ["Shibuya", "Shinjuku", "Harajuku", "Akihabara"],
 };
 
-const skinColors = [
+const skinColors: SkinColor[] = [
   "pale",
   "light",
   "medium",
@@ -85,7 +95,7 @@ const skinColors = [
   "very-dark",
 ];
 
-const eyeColors = [
+const eyeColors: EyeColor[] = [
   "brown",
   "blue",
   "green",
@@ -95,7 +105,7 @@ const eyeColors = [
   "violet",
 ];
 
-const hairColors = [
+const hairColors: HairColor[] = [
   "black",
   "brown",
   "blonde",
@@ -108,7 +118,7 @@ const hairColors = [
   "pink",
 ];
 
-const accessoryTypes = [
+const accessoryTypes: (AccessoryType | "none")[] = [
   "glasses",
   "hat",
   "earrings",
@@ -163,7 +173,7 @@ export function generateMockCharacterData(): CharacterData {
       };
     } else {
       return {
-        type: type as any,
+        type: type,
         asset_id: generateAssetId(),
         offset_y: generateOffset(),
       };
@@ -201,9 +211,9 @@ export function generateMockCharacterData(): CharacterData {
       head_shape: {
         shape_id: generateShapeId("HD"),
       },
-      skin_color: randomChoice(skinColors) as any,
-      eye_color: randomChoice(eyeColors) as any,
-      hair_color: randomChoice(hairColors) as any,
+      skin_color: randomChoice(skinColors),
+      eye_color: randomChoice(eyeColors),
+      hair_color: randomChoice(hairColors),
       height_cm: randomInt(150, 200),
       weight_kg: randomInt(50, 120),
     },
@@ -340,10 +350,10 @@ export function generateMockAdminAction() {
 
 // persistent mock data store
 export class MockDataStore {
-  private characters: Map<string, any> = new Map();
-  private users: Map<string, any> = new Map();
-  private adminActions: any[] = [];
-  private editHistories: Map<string, any[]> = new Map();
+  private characters: Map<string, MockCharacter> = new Map();
+  private users: Map<string, MockUser> = new Map();
+  private adminActions: MockAdminAction[] = [];
+  private editHistories: Map<string, MockEditHistory[]> = new Map();
 
   constructor() {
     this.initializeData();
@@ -405,12 +415,12 @@ export class MockDataStore {
     return this.editHistories.get(characterId) || [];
   }
 
-  addCharacter(character: any) {
+  addCharacter(character: MockCharacter) {
     this.characters.set(character.upload_id, character);
     this.editHistories.set(character.upload_id, []);
   }
 
-  updateCharacter(uploadId: string, updates: any) {
+  updateCharacter(uploadId: string, updates: Partial<MockCharacter>) {
     const character = this.characters.get(uploadId);
     if (character) {
       const updatedCharacter = {

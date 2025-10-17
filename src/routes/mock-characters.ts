@@ -7,6 +7,7 @@ import {
   characterUpdateSchema,
 } from "../validation";
 import { randomUUID } from "crypto";
+import { MockCharacterRouteUpdates, PlazaQueryRequest } from "../types";
 
 const router = Router();
 
@@ -123,8 +124,8 @@ router.put(
       }
 
       const creationDate = new Date(character.created_at);
-      const lastEditDate = character.edit_time
-        ? new Date(character.edit_time)
+      const lastEditDate = character.last_edited_at
+        ? new Date(character.last_edited_at)
         : creationDate;
       const now = new Date();
 
@@ -146,7 +147,7 @@ router.put(
         });
       }
 
-      const updates: any = {};
+      const updates: MockCharacterRouteUpdates = {};
       if (req.body.creator_name) updates.creator_name = req.body.creator_name;
       if (req.body.date_of_birth)
         updates.date_of_birth = new Date(req.body.date_of_birth)
@@ -199,7 +200,7 @@ router.get("/plaza", validatePlazaQuery, (req: Request, res: Response) => {
       country,
       region,
       limit = 100,
-    } = (req as any).validatedQuery || req.query;
+    } = (req as PlazaQueryRequest).validatedQuery || req.query;
     let characters = mockDataStore
       .getCharacters()
       .filter((char) => !char.is_deleted);

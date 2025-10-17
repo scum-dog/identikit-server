@@ -291,8 +291,13 @@ export const adminActionSchema = z.object({
 });
 
 export const oauthCallbackSchema = z.object({
-  platform: z.enum(["newgrounds", "itch"]),
+  platform: z.enum(["newgrounds", "itch", "google"]),
   code: z.string().min(1, "Authorization code is required"),
+  state: z.string().optional(),
+});
+
+export const itchTokenSchema = z.object({
+  access_token: z.string().min(1, "Access token is required"),
   state: z.string().optional(),
 });
 
@@ -314,6 +319,7 @@ export type PlazaSearch = {
 };
 export type AdminAction = z.infer<typeof adminActionSchema>;
 export type OAuthCallback = z.infer<typeof oauthCallbackSchema>;
+export type ItchToken = z.infer<typeof itchTokenSchema>;
 
 export const validateRequest = <T>(schema: z.ZodSchema<T>) => {
   return (req: Request, res: Response, next: NextFunction) => {
@@ -393,17 +399,19 @@ export const validatePlazaQuery = (
 };
 
 export const validateCharacterOwnership = async (
-  userId: string,
-  characterId: string,
+  _userId: string,
+  _characterId: string,
 ) => {
   // would normally check db to make sure the user owns the character
+  // TODO: come back to this when DB is ready
   return true;
 };
 
 export const validateEditPermissions = async (
-  userId: string,
-  characterId: string,
+  _userId: string,
+  _characterId: string,
 ) => {
   // would normally check if user can edit (30d freeze/weekly limit)
+  // TODO: come back to this when DB is ready
   return true;
 };
