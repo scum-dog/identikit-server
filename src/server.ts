@@ -10,6 +10,7 @@ import mockAuthRoutes from "./routes/mock-auth";
 import mockCharacterRoutes from "./routes/mock-characters";
 import mockAdminRoutes from "./routes/mock-admin";
 import testRetryRoutes from "./routes/test-retry";
+import pingRoutes from "./routes/ping";
 import { validateConfig } from "./auth/configValidation";
 import "./database";
 
@@ -43,14 +44,7 @@ const globalRateLimit = rateLimit({
 });
 
 app.use(globalRateLimit);
-
-app.get("/ping", (req: Request, res: Response) => {
-  res.json({
-    message: "pong",
-    timestamp: new Date().toISOString(),
-    environment: environment,
-  });
-});
+app.use("/ping", pingRoutes);
 
 app.use("/api/auth", authRoutes);
 app.use("/api/characters", characterRoutes);
