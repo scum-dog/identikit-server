@@ -37,7 +37,6 @@ export class ItchOAuth implements OAuthProvider<ItchUser> {
     };
   }
 
-  // "code" is actually the access token from implicit flow
   async authenticateWithCode(
     accessToken: string,
     _state?: string,
@@ -67,6 +66,7 @@ export class ItchOAuth implements OAuthProvider<ItchUser> {
         userId: user.id,
         platform: "itchio",
         platformUserId: itchUser.id.toString(),
+        platformSessionId: accessToken,
         username: itchUser.username,
         isAdmin: user.is_admin,
       });
@@ -91,22 +91,33 @@ export class ItchOAuth implements OAuthProvider<ItchUser> {
         return null;
       }
 
-      // we need the access token to validate, but sessions don't store tokens
-      // so again, we'll trust the session if it exists and hasn't expired
-      const user = await userQueries.findByPlatformId(
-        "itchio",
-        session.platformUserId,
-      );
-      if (!user) {
-        return null;
+      if (session.platformSessionId) {
+        try {
+          const response = await axios.get(
+            `https://itch.io/api/1/${session.platformSessionId}/me`,
+          );
+          const data: ItchAuthResponse = response.data;
+
+          if (!data.user) {
+            console.log(
+              "Itch.io session no longer valid, invalidating local session",
+            );
+            return null;
+          }
+
+          return data.user;
+        } catch {
+          console.log(
+            "Itch.io session no longer valid, invalidating local session",
+          );
+          return null;
+        }
       }
 
-      return {
-        id: parseInt(session.platformUserId),
-        username: session.username,
-        display_name: user.username || session.username,
-        url: `https://${session.username}.itch.io`,
-      };
+      console.log(
+        "No platform session ID found, cannot re-validate with Itch.io",
+      );
+      return null;
     } catch (error) {
       console.error("Itch.io session validation error:", error);
       return null;

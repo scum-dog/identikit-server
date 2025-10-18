@@ -1,73 +1,84 @@
 import axios from "axios";
-import crypto from "crypto";
 import { AuthError } from "./base";
 import {
-  OAuthProvider,
-  AuthUrlResult,
   NewgroundsUser,
-  NewgroundsAuthResponse,
-  NewgroundsOAuthParams,
+  NewgroundsGatewayRequest,
+  NewgroundsGatewayResponse,
+  NewgroundsAuthRequest,
 } from "../types";
 import { SessionManager } from "./sessions";
 import { userQueries } from "../database";
 
-const NEWGROUNDS_API_BASE = "https://newgrounds.io/gateway_v3.php";
+const NEWGROUNDS_GATEWAY_URL = "https://newgrounds.io/gateway_v3.php";
 
-export class NewgroundsOAuth implements OAuthProvider<NewgroundsUser> {
+export class NewgroundsAuth {
   public readonly platform = "newgrounds" as const;
 
-  generateAuthUrl(): AuthUrlResult {
-    const appId = process.env.NEWGROUNDS_APP_ID!;
-    const redirectUri = process.env.NEWGROUNDS_REDIRECT_URI!;
-
-    const state = crypto.randomBytes(32).toString("hex");
-
-    const oauthParams: NewgroundsOAuthParams = {
-      app_id: appId,
-      redirect_uri: redirectUri,
-      response_type: "code",
-      scope: "user.read",
-      state,
-    };
-
-    const params = new URLSearchParams(oauthParams);
-
-    return {
-      authUrl: `https://newgrounds.io/oauth/authorize?${params.toString()}`,
-      state,
-      expiresAt: new Date(Date.now() + 10 * 60 * 1000), // 10 minutes
-    };
-  }
-
-  async authenticateWithCode(
-    code: string,
-    _state?: string,
-    _codeVerifier?: string,
-  ): Promise<{ sessionId: string; user: NewgroundsUser }> {
+  async checkSessionWithNewgrounds(
+    sessionId: string,
+  ): Promise<NewgroundsGatewayResponse> {
     const appId = process.env.NEWGROUNDS_APP_ID!;
 
     try {
-      const response = await axios.post(NEWGROUNDS_API_BASE, {
+      const gatewayRequest: NewgroundsGatewayRequest = {
         app_id: appId,
-        session_id: code,
-        call: {
+        session_id: sessionId,
+        execute: {
           component: "App.checkSession",
           parameters: {},
         },
-      });
+      };
 
-      const data: NewgroundsAuthResponse = response.data;
+      const response = await axios.post(
+        NEWGROUNDS_GATEWAY_URL,
+        gatewayRequest,
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        },
+      );
 
-      if (!data.success || !data.result?.user) {
+      return response.data as NewgroundsGatewayResponse;
+    } catch (error) {
+      console.error("Newgrounds gateway error:", error);
+      return {
+        success: false,
+        error: {
+          code: -1,
+          message: "Failed to communicate with Newgrounds API",
+        },
+      };
+    }
+  }
+
+  async authenticateWithSession(
+    authRequest: NewgroundsAuthRequest,
+  ): Promise<{ sessionId: string; user: NewgroundsUser }> {
+    try {
+      const gatewayResponse = await this.checkSessionWithNewgrounds(
+        authRequest.session_id,
+      );
+
+      if (!gatewayResponse.success || !gatewayResponse.result?.session?.user) {
         throw new AuthError(
-          data.error?.message || "Failed to authenticate with Newgrounds",
+          gatewayResponse.error?.message || "Invalid Newgrounds session",
           this.platform,
         );
       }
 
+      const ngSession = gatewayResponse.result.session;
+      const ngUser = ngSession.user!;
+
+      if (ngSession.expired) {
+        throw new AuthError("Newgrounds session has expired", this.platform);
+      }
+
       const newgroundsUser: NewgroundsUser = {
-        ...data.result.user,
-        username: data.result.user.name,
+        id: ngUser.id,
+        name: ngUser.name,
+        username: ngUser.name,
+        supporter: ngUser.supporter,
       };
 
       const user = await this.createOrUpdateUser(newgroundsUser);
@@ -76,18 +87,19 @@ export class NewgroundsOAuth implements OAuthProvider<NewgroundsUser> {
         userId: user.id,
         platform: "newgrounds",
         platformUserId: newgroundsUser.id.toString(),
+        platformSessionId: authRequest.session_id,
         username: newgroundsUser.username,
         isAdmin: user.is_admin,
       });
 
       return { sessionId, user: newgroundsUser };
     } catch (error) {
-      console.error("Newgrounds auth error:", error);
+      console.error("Newgrounds session auth error:", error);
       if (error instanceof AuthError) {
         throw error;
       }
       throw new AuthError(
-        "Failed to authenticate with Newgrounds",
+        "Failed to authenticate with Newgrounds session",
         this.platform,
       );
     }
@@ -100,27 +112,43 @@ export class NewgroundsOAuth implements OAuthProvider<NewgroundsUser> {
         return null;
       }
 
-      const appId = process.env.NEWGROUNDS_APP_ID!;
+      if (session.platformSessionId) {
+        const gatewayResponse = await this.checkSessionWithNewgrounds(
+          session.platformSessionId,
+        );
 
-      const response = await axios.post(NEWGROUNDS_API_BASE, {
-        app_id: appId,
-        session_id: sessionId,
-        call: {
-          component: "App.getCurrentUser",
-          parameters: {},
-        },
-      });
+        if (
+          !gatewayResponse.success ||
+          !gatewayResponse.result?.session?.user
+        ) {
+          console.log(
+            "Newgrounds session no longer valid, invalidating local session",
+          );
+          return null;
+        }
 
-      const data: NewgroundsAuthResponse = response.data;
+        const ngSession = gatewayResponse.result.session;
+        const ngUser = ngSession.user!;
 
-      if (!data.success || !data.result?.user) {
-        return null;
+        if (ngSession.expired) {
+          console.log(
+            "Newgrounds session has expired, invalidating local session",
+          );
+          return null;
+        }
+
+        return {
+          id: ngUser.id,
+          name: ngUser.name,
+          username: ngUser.name,
+          supporter: ngUser.supporter,
+        };
       }
 
-      return {
-        ...data.result.user,
-        username: data.result.user.name,
-      };
+      console.log(
+        "No platform session ID found, cannot re-validate with Newgrounds",
+      );
+      return null;
     } catch (error) {
       console.error("Newgrounds session validation error:", error);
       return null;
@@ -148,4 +176,4 @@ export class NewgroundsOAuth implements OAuthProvider<NewgroundsUser> {
   }
 }
 
-export const newgroundsAuth = new NewgroundsOAuth();
+export const newgroundsAuth = new NewgroundsAuth();

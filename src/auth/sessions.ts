@@ -16,13 +16,14 @@ export class SessionManager {
 
     await query(
       `INSERT INTO user_sessions
-       (session_id, user_id, platform, platform_user_id, username, is_admin, expires_at)
-       VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+       (session_id, user_id, platform, platform_user_id, platform_session_id, username, is_admin, expires_at)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
       [
         sessionId,
         sessionData.userId,
         sessionData.platform,
         sessionData.platformUserId,
+        sessionData.platformSessionId,
         sessionData.username,
         sessionData.isAdmin,
         expiresAt,
@@ -38,7 +39,7 @@ export class SessionManager {
     }
 
     const result = await query<DatabaseSession>(
-      `SELECT session_id, user_id, platform, platform_user_id, username, is_admin,
+      `SELECT session_id, user_id, platform, platform_user_id, platform_session_id, username, is_admin,
               created_at, expires_at
        FROM user_sessions
        WHERE session_id = $1 AND expires_at > NOW()`,
@@ -56,6 +57,7 @@ export class SessionManager {
       userId: session.user_id,
       platform: session.platform,
       platformUserId: session.platform_user_id,
+      platformSessionId: session.platform_session_id,
       username: session.username,
       isAdmin: session.is_admin,
       createdAt: session.created_at,

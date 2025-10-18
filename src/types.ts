@@ -246,6 +246,7 @@ export interface SessionData {
   userId: string;
   platform: Platform;
   platformUserId: string;
+  platformSessionId?: string;
   username: string;
   isAdmin: boolean;
   createdAt: Date;
@@ -256,6 +257,7 @@ export interface CreateSessionData {
   userId: string;
   platform: Platform;
   platformUserId: string;
+  platformSessionId?: string;
   username: string;
   isAdmin: boolean;
 }
@@ -306,14 +308,38 @@ export interface NewgroundsUser extends PlatformUser {
   supporter: boolean;
 }
 
-export interface NewgroundsAuthResponse {
+export interface NewgroundsGatewayRequest {
+  app_id: string;
+  session_id?: string;
+  execute: {
+    component: string;
+    parameters?: Record<string, unknown>;
+  };
+}
+
+export interface NewgroundsGatewayResponse {
   success: boolean;
   result?: {
-    user: NewgroundsUser;
+    session?: NewgroundsSession;
+    user?: NewgroundsUser;
+    [key: string]: unknown;
   };
   error?: {
+    code: number;
     message: string;
   };
+}
+
+export interface NewgroundsSession {
+  id: string;
+  user?: NewgroundsUser;
+  expired: boolean;
+  remember: boolean;
+  passport_url?: string;
+}
+
+export interface NewgroundsAuthRequest {
+  session_id: string;
 }
 
 export interface CharacterInfo {
@@ -420,18 +446,11 @@ export interface DatabaseSession {
   user_id: string;
   platform: Platform;
   platform_user_id: string;
+  platform_session_id?: string;
   username: string;
   is_admin: boolean;
   created_at: Date;
   expires_at: Date;
-}
-
-export interface NewgroundsOAuthParams extends Record<string, string> {
-  app_id: string;
-  redirect_uri: string;
-  response_type: "code";
-  scope: "user.read";
-  state: string;
 }
 
 export interface ItchOAuthParams extends Record<string, string> {

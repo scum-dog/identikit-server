@@ -71,6 +71,7 @@ CREATE TABLE user_sessions (
     user_id UUID NOT NULL REFERENCES users(id),
     platform VARCHAR(50) NOT NULL,
     platform_user_id VARCHAR(255) NOT NULL,
+    platform_session_id VARCHAR(255),
     username VARCHAR(255) NOT NULL,
     is_admin BOOLEAN NOT NULL DEFAULT false,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
@@ -201,74 +202,3 @@ CREATE TRIGGER check_character_not_deleted
     BEFORE UPDATE ON characters
     FOR EACH ROW
     EXECUTE FUNCTION prevent_deleted_character_edit();
-
--- sample data for development/testing
-INSERT INTO users (platform, platform_user_id, username, email, is_admin) VALUES
-('newgrounds', 'dev_user_1', 'testuser1', 'test1@example.com', false),
-('newgrounds', 'dev_user_2', 'testuser2', 'test2@example.com', false),
-('newgrounds', 'admin_user', 'admin', 'admin@scumdog.com', true);
-
--- sample character data following the specification
-INSERT INTO characters (user_id, name, height_cm, weight_kg, sex, country, region, city, character_data) VALUES
-(
-    (SELECT id FROM users WHERE username = 'testuser1'),
-    'Test Character',
-    182,
-    78,
-    'other',
-    'USA',
-    'California',
-    'San Francisco',
-    '{
-        "placeable_movable": {
-            "lips": {
-                "shape_id": "L_003",
-                "offset_y": 0.2
-            },
-            "nose": {
-                "shape_id": "N_012",
-                "offset_y": 0.1
-            },
-            "eyebrows": {
-                "shape_id": "EB_007",
-                "offset_y": 0.4
-            },
-            "eyes": {
-                "shape_id": "E_010",
-                "offset_y": 0.3,
-                "eye_color": "green"
-            },
-            "accessories": {
-                "slot_1": {
-                    "type": "glasses",
-                    "asset_id": "A_002",
-                    "offset_y": 0.3
-                },
-                "slot_2": {
-                    "type": "mustache",
-                    "asset_id": "A_117",
-                    "offset_y": 0.2
-                },
-                "slot_3": {
-                    "type": "none",
-                    "asset_id": null,
-                    "offset_y": null
-                }
-            }
-        },
-        "static": {
-            "hair": {
-                "style_id": "H_021",
-                "hair_color": "brown"
-            },
-            "head_shape": {
-                "shape_id": "HD_004",
-                "skin_color": "medium-tan"
-            },
-            "height_cm": 182,
-            "weight_kg": 78,
-            "sex": "other",
-            "date_of_birth": "1990-05-15"
-        }
-    }'::jsonb
-);

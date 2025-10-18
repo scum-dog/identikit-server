@@ -1,72 +1,44 @@
 import { Router, Request, Response } from "express";
 import { newgroundsAuth } from "../../auth/newgrounds";
-import { userQueries } from "../../database";
+import { NewgroundsAuthRequest } from "../../types";
+import { newgroundsAuthSchema } from "../../validation";
 
 const router = Router();
 
-// GET /auth/newgrounds/url - get newgrounds OAuth URL
-router.get("/url", (req: Request, res: Response) => {
+// POST /auth/newgrounds/authenticate - authenticate with Newgrounds session
+router.post("/authenticate", async (req: Request, res: Response) => {
   try {
-    const { authUrl, state, expiresAt } = newgroundsAuth.generateAuthUrl();
+    const validationResult = newgroundsAuthSchema.safeParse(req.body);
 
-    res.json({
-      authUrl,
-      state,
-      expiresAt,
-    });
-  } catch (error) {
-    console.error("Get Newgrounds auth URL error:", error);
-    res.status(500).json({ error: "Failed to generate authentication URL" });
-  }
-});
-
-// GET /auth/newgrounds/callback - OAuth callback endpoint
-router.get("/callback", async (req: Request, res: Response) => {
-  try {
-    const { code, state } = req.query;
-
-    if (!code) {
+    if (!validationResult.success) {
       return res.status(400).json({
         success: false,
-        error: "missing_parameters",
-        message: "Missing code parameter",
+        error: "validation_error",
+        message: "Invalid request parameters",
+        details: validationResult.error.issues,
       });
     }
 
+    const authRequest: NewgroundsAuthRequest = {
+      session_id: validationResult.data.session_id,
+    };
+
     const { sessionId, user: ngUser } =
-      await newgroundsAuth.authenticateWithCode(
-        code as string,
-        state as string,
-      );
-
-    let user = await userQueries.findByPlatformId(
-      "newgrounds",
-      ngUser.id.toString(),
-    );
-
-    if (!user) {
-      user = await userQueries.create(
-        "newgrounds",
-        ngUser.id.toString(),
-        ngUser.username,
-      );
-    } else {
-      await userQueries.updateLastLogin(user.id);
-    }
+      await newgroundsAuth.authenticateWithSession(authRequest);
 
     res.json({
       success: true,
       sessionId,
       user: {
-        id: user.id,
-        username: user.username,
-        platform: user.platform,
-        isAdmin: user.is_admin || false,
+        id: ngUser.id,
+        username: ngUser.username,
+        platform: "newgrounds",
+        supporter: ngUser.supporter,
       },
       message: "Newgrounds authentication successful",
     });
   } catch (error) {
-    console.error("Newgrounds callback error:", error);
+    console.error("Newgrounds authentication error:", error);
     res.status(401).json({
       success: false,
       error: "authentication_failed",

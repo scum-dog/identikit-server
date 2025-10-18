@@ -62,7 +62,8 @@ app.get("/", (req: Request, res: Response) => {
         "GET /ping": "Pong (hopefully)",
       },
       auth: {
-        "GET /auth/newgrounds/url": "Get Newgrounds OAuth URL",
+        "POST /auth/newgrounds/authenticate":
+          "Authenticate with Newgrounds session",
         "GET /auth/itchio/url": "Get Itch.io OAuth URL",
         "GET /auth/google/url": "Get Google OAuth URL",
         "POST /auth/verify": "Verify current session",
@@ -83,8 +84,6 @@ app.get("/", (req: Request, res: Response) => {
         "GET /admin/users": "List all users (admin)",
       },
       oauth_callbacks: {
-        "GET /auth/newgrounds/callback":
-          "Newgrounds OAuth callback (internal use)",
         "GET /auth/itchio/callback": "Itch.io OAuth callback (internal use)",
         "GET /auth/google/callback": "Google OAuth callback (internal use)",
       },

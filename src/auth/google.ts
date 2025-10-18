@@ -54,6 +54,7 @@ export class GoogleAuth implements OAuthProvider<GoogleUser> {
         userId: user.id,
         platform: "google",
         platformUserId: googleUser.id,
+        platformSessionId: tokens.refresh_token,
         username: googleUser.username,
         isAdmin: user.is_admin,
       });
@@ -77,6 +78,29 @@ export class GoogleAuth implements OAuthProvider<GoogleUser> {
       code,
       grant_type: "authorization_code",
       redirect_uri: this.redirectUri!,
+    };
+
+    const response = await axios.post(
+      "https://oauth2.googleapis.com/token",
+      new URLSearchParams(tokenData),
+      {
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+      },
+    );
+
+    return response.data;
+  }
+
+  private async refreshAccessToken(
+    refreshToken: string,
+  ): Promise<{ access_token: string }> {
+    const tokenData = {
+      client_id: this.clientId!,
+      client_secret: this.clientSecret!,
+      refresh_token: refreshToken,
+      grant_type: "refresh_token",
     };
 
     const response = await axios.post(
@@ -138,23 +162,27 @@ export class GoogleAuth implements OAuthProvider<GoogleUser> {
         return null;
       }
 
-      // we could refresh the token here in future if needed,
-      // but for now we'll trust the session if it exists
-      const user = await userQueries.findByPlatformId(
-        "google",
-        session.platformUserId,
-      );
-      if (!user) {
-        return null;
+      if (session.platformSessionId) {
+        try {
+          const tokens = await this.refreshAccessToken(
+            session.platformSessionId,
+          );
+
+          const googleUser = await this.fetchUserProfile(tokens.access_token);
+
+          return googleUser;
+        } catch {
+          console.log(
+            "Google session no longer valid, invalidating local session",
+          );
+          return null;
+        }
       }
 
-      return {
-        id: session.platformUserId,
-        username: session.username,
-        email: user.email || "",
-        name: user.username || session.username,
-        email_verified: true,
-      };
+      console.log(
+        "No platform session ID found, cannot re-validate with Google",
+      );
+      return null;
     } catch (error) {
       console.error("Google session validation error:", error);
       return null;

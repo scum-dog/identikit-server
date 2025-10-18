@@ -298,9 +298,13 @@ export const adminActionSchema = z.object({
 });
 
 export const oauthCallbackSchema = z.object({
-  platform: z.enum(["newgrounds", "itch", "google"]),
+  platform: z.enum(["itch", "google"]),
   code: z.string().min(1, "Authorization code is required"),
   state: z.string().optional(),
+});
+
+export const newgroundsAuthSchema = z.object({
+  session_id: z.string().min(1, "Session ID is required"),
 });
 
 export const itchTokenSchema = z.object({
