@@ -13,7 +13,6 @@ router.get("/url", (req: Request, res: Response) => {
       authUrl,
       state,
       expiresAt,
-      instructions: "Redirect user to this URL for Newgrounds authentication",
     });
   } catch (error) {
     console.error("Get Newgrounds auth URL error:", error);

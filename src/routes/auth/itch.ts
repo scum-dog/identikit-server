@@ -13,7 +13,6 @@ router.get("/url", (req: Request, res: Response) => {
       authUrl,
       state,
       expiresAt,
-      instructions: "Redirect user to this URL for itch.io authentication",
     });
   } catch (error) {
     console.error("Get itch.io auth URL error:", error);
