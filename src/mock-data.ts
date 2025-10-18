@@ -197,6 +197,7 @@ export function generateMockCharacterData(): CharacterData {
       eyes: {
         shape_id: generateShapeId("E"),
         offset_y: generateOffset(),
+        eye_color: randomChoice(eyeColors),
       },
       accessories: {
         slot_1: generateAccessory(),
@@ -207,13 +208,12 @@ export function generateMockCharacterData(): CharacterData {
     static: {
       hair: {
         style_id: generateShapeId("H"),
+        hair_color: randomChoice(hairColors),
       },
       head_shape: {
         shape_id: generateShapeId("HD"),
+        skin_color: randomChoice(skinColors),
       },
-      skin_color: randomChoice(skinColors),
-      eye_color: randomChoice(eyeColors),
-      hair_color: randomChoice(hairColors),
       height_cm: randomInt(150, 200),
       weight_kg: randomInt(50, 120),
     },

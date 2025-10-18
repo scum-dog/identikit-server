@@ -76,6 +76,7 @@ export const characterDataSchema = z.object({
     eyes: z.object({
       shape_id: shapeIdSchema("E"),
       offset_y: offsetSchema,
+      eye_color: eyeColorEnum,
     }),
     accessories: z.object({
       slot_1: accessorySlotSchema,
@@ -86,32 +87,31 @@ export const characterDataSchema = z.object({
   static: z.object({
     hair: z.object({
       style_id: shapeIdSchema("H"),
+      hair_color: z.enum([
+        "black",
+        "brown",
+        "blonde",
+        "red",
+        "gray",
+        "white",
+        "blue",
+        "green",
+        "purple",
+        "pink",
+      ]),
     }),
     head_shape: z.object({
       shape_id: shapeIdSchema("HD"),
+      skin_color: z.enum([
+        "pale",
+        "light",
+        "medium",
+        "medium-tan",
+        "tan",
+        "dark",
+        "very-dark",
+      ]),
     }),
-    skin_color: z.enum([
-      "pale",
-      "light",
-      "medium",
-      "medium-tan",
-      "tan",
-      "dark",
-      "very-dark",
-    ]),
-    eye_color: eyeColorEnum,
-    hair_color: z.enum([
-      "black",
-      "brown",
-      "blonde",
-      "red",
-      "gray",
-      "white",
-      "blue",
-      "green",
-      "purple",
-      "pink",
-    ]),
     height_cm: z.number().int().min(50).max(250),
     weight_kg: z.number().int().min(20).max(300),
   }),
@@ -142,6 +142,7 @@ export const characterDataUpdateSchema = z.object({
         .object({
           shape_id: shapeIdSchema("E"),
           offset_y: offsetSchema,
+          eye_color: eyeColorEnum.optional(),
         })
         .optional(),
       accessories: z
@@ -158,38 +159,37 @@ export const characterDataUpdateSchema = z.object({
       hair: z
         .object({
           style_id: shapeIdSchema("H"),
+          hair_color: z
+            .enum([
+              "black",
+              "brown",
+              "blonde",
+              "red",
+              "gray",
+              "white",
+              "blue",
+              "green",
+              "purple",
+              "pink",
+            ])
+            .optional(),
         })
         .optional(),
       head_shape: z
         .object({
           shape_id: shapeIdSchema("HD"),
+          skin_color: z
+            .enum([
+              "pale",
+              "light",
+              "medium",
+              "medium-tan",
+              "tan",
+              "dark",
+              "very-dark",
+            ])
+            .optional(),
         })
-        .optional(),
-      skin_color: z
-        .enum([
-          "pale",
-          "light",
-          "medium",
-          "medium-tan",
-          "tan",
-          "dark",
-          "very-dark",
-        ])
-        .optional(),
-      eye_color: eyeColorEnum.optional(),
-      hair_color: z
-        .enum([
-          "black",
-          "brown",
-          "blonde",
-          "red",
-          "gray",
-          "white",
-          "blue",
-          "green",
-          "purple",
-          "pink",
-        ])
         .optional(),
       height_cm: z.number().int().min(50).max(250).optional(),
       weight_kg: z.number().int().min(20).max(300).optional(),

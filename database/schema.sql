@@ -28,7 +28,6 @@ CREATE TABLE characters (
     date_of_birth DATE,
     height_cm INTEGER CHECK (height_cm > 0 AND height_cm < 300),
     weight_kg INTEGER CHECK (weight_kg > 0 AND weight_kg < 500),
-    eye_color VARCHAR(50),
 
     -- location data
     country VARCHAR(100),
@@ -224,14 +223,13 @@ INSERT INTO users (platform, platform_user_id, username, email, is_admin) VALUES
 ('newgrounds', 'admin_user', 'admin', 'admin@scumdog.com', true);
 
 -- sample character data following the specification
-INSERT INTO characters (user_id, name, date_of_birth, height_cm, weight_kg, eye_color, country, region, city, character_data) VALUES
+INSERT INTO characters (user_id, name, date_of_birth, height_cm, weight_kg, country, region, city, character_data) VALUES
 (
     (SELECT id FROM users WHERE username = 'testuser1'),
     'Test Character',
     '1990-05-15',
     182,
     78,
-    'green',
     'USA',
     'California',
     'San Francisco',
@@ -251,7 +249,8 @@ INSERT INTO characters (user_id, name, date_of_birth, height_cm, weight_kg, eye_
             },
             "eyes": {
                 "shape_id": "E_010",
-                "offset_y": 0.3
+                "offset_y": 0.3,
+                "eye_color": "green"
             },
             "accessories": {
                 "slot_1": {
@@ -273,14 +272,13 @@ INSERT INTO characters (user_id, name, date_of_birth, height_cm, weight_kg, eye_
         },
         "static": {
             "hair": {
-                "style_id": "H_021"
+                "style_id": "H_021",
+                "hair_color": "brown"
             },
             "head_shape": {
-                "shape_id": "HD_004"
-            },
-            "skin_color": "medium-tan",
-            "eye_color": "green",
-            "hair_color": "brown"
+                "shape_id": "HD_004",
+                "skin_color": "medium-tan"
+            }
         }
     }'::jsonb
 );
