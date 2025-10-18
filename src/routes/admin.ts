@@ -10,7 +10,6 @@ import {
   AdminEditHistoryResult,
   AdminCharacterSimpleResult,
   AdminUserListResult,
-  AdminActionListResult,
 } from "../types";
 
 const router = Router();
@@ -215,102 +214,6 @@ router.get("/users", async (req: Request, res: Response) => {
   } catch (error) {
     console.error("Admin get users error:", error);
     res.status(500).json({ error: "Failed to fetch users" });
-  }
-});
-
-// GET /api/admin/actions - get admin action history
-router.get("/actions", async (req: Request, res: Response) => {
-  try {
-    const page = parseInt(req.query.page as string) || 1;
-    const limit = Math.min(parseInt(req.query.limit as string) || 50, 100);
-    const offset = (page - 1) * limit;
-
-    const result = await query<AdminActionListResult>(
-      `
-      SELECT
-        aa.*,
-        admin_user.username as admin_username,
-        target_char.name as target_character_name,
-        target_user.username as target_username
-      FROM admin_actions aa
-      JOIN users admin_user ON aa.admin_user_id = admin_user.id
-      LEFT JOIN characters target_char ON aa.target_character_id = target_char.id
-      LEFT JOIN users target_user ON aa.target_user_id = target_user.id
-      ORDER BY aa.created_at DESC
-      LIMIT $1 OFFSET $2
-    `,
-      [limit, offset],
-    );
-
-    const countResult = await query<{ total: number }>(
-      "SELECT COUNT(*) as total FROM admin_actions",
-    );
-
-    res.json({
-      actions: result.rows,
-      pagination: {
-        page,
-        limit,
-        total: parseInt(countResult.rows[0].total.toString()),
-        totalPages: Math.ceil(countResult.rows[0].total / limit),
-      },
-    });
-  } catch (error) {
-    console.error("Admin get actions error:", error);
-    res.status(500).json({ error: "Failed to fetch admin actions" });
-  }
-});
-
-// GET /api/admin/stats - get platform statistics
-router.get("/stats", async (req: Request, res: Response) => {
-  try {
-    const stats = await Promise.all([
-      query<{ total_users: number }>(
-        "SELECT COUNT(*) as total_users FROM users",
-      ),
-      query<{ total_characters: number }>(
-        "SELECT COUNT(*) as total_characters FROM characters WHERE is_deleted = false",
-      ),
-      query<{ deleted_characters: number }>(
-        "SELECT COUNT(*) as deleted_characters FROM characters WHERE is_deleted = true",
-      ),
-      query<{ total_edits: number }>(
-        "SELECT COUNT(*) as total_edits FROM character_edits WHERE edit_type = 'user_edit'",
-      ),
-      query<{ admin_actions: number }>(
-        "SELECT COUNT(*) as admin_actions FROM admin_actions",
-      ),
-      query<{ date: string; count: number }>(`
-        SELECT DATE(created_at) as date, COUNT(*) as count
-        FROM characters
-        WHERE created_at >= NOW() - INTERVAL '30 days'
-        GROUP BY DATE(created_at)
-        ORDER BY date DESC
-      `),
-      query<{ country: string; count: number }>(`
-        SELECT country, COUNT(*) as count
-        FROM characters
-        WHERE is_deleted = false AND country IS NOT NULL
-        GROUP BY country
-        ORDER BY count DESC
-        LIMIT 10
-      `),
-    ]);
-
-    res.json({
-      overview: {
-        totalUsers: stats[0].rows[0].total_users,
-        totalCharacters: stats[1].rows[0].total_characters,
-        deletedCharacters: stats[2].rows[0].deleted_characters,
-        totalEdits: stats[3].rows[0].total_edits,
-        adminActions: stats[4].rows[0].admin_actions,
-      },
-      dailyCreations: stats[5].rows,
-      topCountries: stats[6].rows,
-    });
-  } catch (error) {
-    console.error("Admin get stats error:", error);
-    res.status(500).json({ error: "Failed to fetch statistics" });
   }
 });
 

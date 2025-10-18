@@ -61,23 +61,9 @@ CREATE TABLE character_edits (
     new_value JSONB,
 
     -- when and why
-    edit_type VARCHAR(20) DEFAULT 'user_edit' CHECK (edit_type IN ('user_edit', 'admin_action')),
     edited_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- admin actions log for moderation tracking
-CREATE TABLE admin_actions (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    admin_user_id UUID NOT NULL REFERENCES users(id),
-    target_character_id UUID REFERENCES characters(id),
-    target_user_id UUID REFERENCES users(id),
-
-    action_type VARCHAR(30) NOT NULL CHECK (action_type IN ('delete_character', 'ban_user', 'unban_user')),
-    reason TEXT,
-    metadata JSONB, -- Additional action details
-
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-);
 
 -- user sessions for authentication
 CREATE TABLE user_sessions (
@@ -104,8 +90,6 @@ CREATE INDEX idx_character_edits_character_id ON character_edits(character_id);
 CREATE INDEX idx_character_edits_edited_at ON character_edits(edited_at);
 
 CREATE INDEX idx_users_platform ON users(platform, platform_user_id);
-CREATE INDEX idx_admin_actions_admin_user ON admin_actions(admin_user_id);
-CREATE INDEX idx_admin_actions_created_at ON admin_actions(created_at);
 CREATE INDEX idx_user_sessions_expires_at ON user_sessions(expires_at);
 
 -- functions for business logic
@@ -139,8 +123,7 @@ BEGIN
     INTO recent_edits
     FROM character_edits
     WHERE character_id = character_uuid
-      AND edited_at > NOW() - INTERVAL '7 days'
-      AND edit_type = 'user_edit';
+      AND edited_at > NOW() - INTERVAL '7 days';
 
     -- allow edit if no recent edits
     RETURN recent_edits = 0;

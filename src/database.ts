@@ -247,28 +247,10 @@ export const characterQueries = {
     adminUserId: string,
     reason: string,
   ) => {
-    const client = await getClient();
-    try {
-      await client.query("BEGIN");
-
-      await client.query(
-        "UPDATE characters SET is_deleted = true, deleted_at = NOW(), deleted_by = $2 WHERE id = $1",
-        [characterId, adminUserId],
-      );
-
-      await client.query(
-        `INSERT INTO admin_actions (admin_user_id, target_character_id, action_type, reason)
-         VALUES ($1, $2, 'delete_character', $3)`,
-        [adminUserId, characterId, reason],
-      );
-
-      await client.query("COMMIT");
-    } catch (error) {
-      await client.query("ROLLBACK");
-      throw error;
-    } finally {
-      client.release();
-    }
+    await query(
+      "UPDATE characters SET is_deleted = true, deleted_at = NOW(), deleted_by = $2 WHERE id = $1",
+      [characterId, adminUserId],
+    );
   },
 };
 

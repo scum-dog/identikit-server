@@ -9,7 +9,6 @@ import {
   MockUser,
   MockCharacter,
   MockEditHistory,
-  MockAdminAction,
 } from "./types";
 
 const firstNames = [
@@ -281,18 +280,15 @@ export function generateMockEditHistory(
   characterId: string,
   count: number = 5,
 ) {
-  const editTypes = ["user_edit", "admin_edit", "system_edit"];
   const history = [];
 
   for (let i = 0; i < count; i++) {
-    const editType = randomChoice(editTypes);
     const editedAt = randomDate(new Date(2023, 0, 1), new Date());
 
     history.push({
       id: randomUUID(),
       character_id: characterId,
-      user_id: editType === "system_edit" ? null : randomUUID(),
-      edit_type: editType,
+      user_id: randomUUID(),
       changes: {
         fields_changed: randomChoice([
           ["creator_name"],
@@ -304,10 +300,7 @@ export function generateMockEditHistory(
         new_values: {},
       },
       edited_at: editedAt.toISOString(),
-      editor_username:
-        editType === "system_edit"
-          ? null
-          : `${randomChoice(firstNames)}${randomInt(100, 999)}`,
+      editor_username: `${randomChoice(firstNames)}${randomInt(100, 999)}`,
     });
   }
 
@@ -316,47 +309,10 @@ export function generateMockEditHistory(
   );
 }
 
-export function generateMockAdminAction() {
-  const actions = [
-    "delete_character",
-    "restore_character",
-    "ban_user",
-    "unban_user",
-  ];
-  const action = randomChoice(actions);
-  const createdAt = randomDate(new Date(2023, 0, 1), new Date());
-
-  return {
-    id: randomUUID(),
-    admin_user_id: randomUUID(),
-    action_type: action,
-    target_character_id: action.includes("character") ? randomUUID() : null,
-    target_user_id: action.includes("user") ? randomUUID() : null,
-    reason: randomChoice([
-      "Inappropriate content",
-      "Violates community guidelines",
-      "Legal request",
-    ]),
-    metadata: {
-      ip_address: `${randomInt(1, 255)}.${randomInt(1, 255)}.${randomInt(1, 255)}.${randomInt(1, 255)}`,
-      user_agent: "Mock Admin Interface",
-    },
-    created_at: createdAt.toISOString(),
-    admin_username: `Admin${randomInt(1, 10)}`,
-    target_character_name: action.includes("character")
-      ? randomChoice(firstNames)
-      : null,
-    target_username: action.includes("user")
-      ? `${randomChoice(firstNames)}${randomInt(100, 999)}`
-      : null,
-  };
-}
-
 // persistent mock data store
 export class MockDataStore {
   private characters: Map<string, MockCharacter> = new Map();
   private users: Map<string, MockUser> = new Map();
-  private adminActions: MockAdminAction[] = [];
   private editHistories: Map<string, MockEditHistory[]> = new Map();
 
   constructor() {
@@ -382,17 +338,6 @@ export class MockDataStore {
       const user = generateMockUser();
       this.users.set(user.id, user);
     }
-
-    // generate 25 admin actions
-    for (let i = 0; i < 25; i++) {
-      this.adminActions.push(generateMockAdminAction());
-    }
-
-    // sort admin actions by newest first
-    this.adminActions.sort(
-      (a, b) =>
-        new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
-    );
   }
 
   getCharacters() {
@@ -409,10 +354,6 @@ export class MockDataStore {
 
   getUser(id: string) {
     return this.users.get(id);
-  }
-
-  getAdminActions() {
-    return [...this.adminActions];
   }
 
   getEditHistory(characterId: string) {
@@ -446,25 +387,6 @@ export class MockDataStore {
       character.deleted_at = new Date().toISOString();
       character.deleted_by = adminUserId;
 
-      // log to mock admin actins
-      const adminAction = {
-        id: randomUUID(),
-        admin_user_id: adminUserId,
-        action_type: "delete_character",
-        target_character_id: uploadId,
-        target_user_id: character.user_id,
-        reason,
-        metadata: {
-          ip_address: "127.0.0.1",
-          user_agent: "Mock Admin Interface",
-        },
-        created_at: new Date().toISOString(),
-        admin_username: "MockAdmin",
-        target_character_name: character.creator_name,
-        target_username: null,
-      };
-
-      this.adminActions.unshift(adminAction);
       return character;
     }
     return null;

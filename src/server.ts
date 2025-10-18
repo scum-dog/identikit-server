@@ -81,8 +81,6 @@ app.get("/api", (req: Request, res: Response) => {
         "GET /api/admin/character/:id": "Get character details (admin)",
         "DELETE /api/admin/character/:id": "Delete character (admin)",
         "GET /api/admin/users": "List all users (admin)",
-        "GET /api/admin/actions": "Get admin action history",
-        "GET /api/admin/stats": "Get platform statistics",
       },
       oauth_callbacks: {
         "GET /api/auth/newgrounds/callback":
@@ -107,8 +105,6 @@ app.get("/api", (req: Request, res: Response) => {
         "GET /mock/api/admin/character/:id": "Mock admin character details",
         "DELETE /mock/api/admin/character/:id": "Mock admin character deletion",
         "GET /mock/api/admin/users": "Mock admin user list",
-        "GET /mock/api/admin/actions": "Mock admin action history",
-        "GET /mock/api/admin/stats": "Mock platform statistics",
       },
     },
   });

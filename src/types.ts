@@ -172,7 +172,6 @@ export interface MockEditHistory {
   id: string;
   character_id: string;
   user_id: string | null;
-  edit_type: string;
   changes: {
     fields_changed: string[];
     old_values: object;
@@ -180,23 +179,6 @@ export interface MockEditHistory {
   };
   edited_at: string;
   editor_username: string | null;
-}
-
-export interface MockAdminAction {
-  id: string;
-  admin_user_id: string;
-  action_type: string;
-  target_character_id: string | null;
-  target_user_id: string | null;
-  reason: string;
-  metadata: {
-    ip_address: string;
-    user_agent: string;
-  };
-  created_at: string;
-  admin_username: string;
-  target_character_name: string | null;
-  target_username: string | null;
 }
 
 export interface QueryValidationRequest extends Request {
@@ -399,7 +381,6 @@ export interface AdminEditHistoryResult {
   id: string;
   character_id: string;
   user_id: string | null;
-  edit_type: string;
   changes: object;
   edited_at: string;
   editor_username: string | null;
@@ -421,20 +402,6 @@ export interface AdminUserListResult {
   last_login: string;
   is_admin: boolean;
   character_count: number;
-}
-
-export interface AdminActionListResult {
-  id: string;
-  admin_user_id: string;
-  action_type: string;
-  target_character_id: string | null;
-  target_user_id: string | null;
-  reason: string;
-  metadata: object;
-  created_at: string;
-  admin_username: string;
-  target_character_name: string | null;
-  target_username: string | null;
 }
 
 export interface DatabaseUser {
