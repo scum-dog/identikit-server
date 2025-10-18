@@ -158,7 +158,7 @@ router.delete(
         return res.status(409).json({ error: "Character is already deleted" });
       }
 
-      await characterQueries.adminDelete(id, req.user!.id, reason);
+      await characterQueries.adminDelete(id, req.user!.id);
 
       res.json({
         success: true,

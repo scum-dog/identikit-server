@@ -128,11 +128,7 @@ router.delete(
         return res.status(409).json({ error: "Character is already deleted" });
       }
 
-      const deletedCharacter = mockDataStore.deleteCharacter(
-        id,
-        MOCK_ADMIN.id,
-        reason,
-      );
+      const deletedCharacter = mockDataStore.deleteCharacter(id, MOCK_ADMIN.id);
 
       if (!deletedCharacter) {
         return res.status(500).json({ error: "Failed to delete character" });

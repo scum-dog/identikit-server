@@ -242,11 +242,7 @@ export const characterQueries = {
     return result.rows;
   },
 
-  adminDelete: async (
-    characterId: string,
-    adminUserId: string,
-    reason: string,
-  ) => {
+  adminDelete: async (characterId: string, adminUserId: string) => {
     await query(
       "UPDATE characters SET is_deleted = true, deleted_at = NOW(), deleted_by = $2 WHERE id = $1",
       [characterId, adminUserId],

@@ -357,7 +357,10 @@ export const validateQuery = <T>(schema: z.ZodSchema<T>) => {
   return (req: Request, res: Response, next: NextFunction) => {
     try {
       const validatedData = schema.parse(req.query);
-      req.query = validatedData as any;
+      req.query = validatedData as Record<
+        string,
+        string | string[] | undefined
+      >;
       next();
     } catch (error) {
       if (error instanceof z.ZodError) {
@@ -385,7 +388,9 @@ export const validatePlazaQuery = (
 ) => {
   try {
     const validatedData = plazaSearchSchema.parse(req.query);
-    (req as any).validatedQuery = validatedData;
+    (
+      req as Request & { validatedQuery: z.infer<typeof plazaSearchSchema> }
+    ).validatedQuery = validatedData;
     next();
   } catch (error) {
     if (error instanceof z.ZodError) {

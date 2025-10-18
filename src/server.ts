@@ -93,9 +93,7 @@ app.get("/api", (req: Request, res: Response) => {
         "GET /test-retry": "Testing endpoint for various failure types",
       },
       mock: {
-        "GET /mock/api/auth/newgrounds/me": "Mock Newgrounds user info",
-        "GET /mock/api/auth/itch/me": "Mock itch.io user info",
-        "GET /mock/api/auth/google/me": "Mock Google user info",
+        "GET /mock/api/auth/me": "Mock user info",
         "GET /mock/api/characters/me": "Mock user's character",
         "POST /mock/api/characters": "Mock character creation",
         "PUT /mock/api/characters/me": "Mock character update",

@@ -380,7 +380,7 @@ export class MockDataStore {
     return null;
   }
 
-  deleteCharacter(uploadId: string, adminUserId: string, reason: string) {
+  deleteCharacter(uploadId: string, adminUserId: string) {
     const character = this.characters.get(uploadId);
     if (character && !character.is_deleted) {
       character.is_deleted = true;
