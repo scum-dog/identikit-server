@@ -115,6 +115,14 @@ export const characterDataSchema = z.object({
     height_cm: z.number().int().min(50).max(250),
     weight_kg: z.number().int().min(20).max(300),
     sex: z.enum(["male", "female", "other"]),
+    date_of_birth: z
+      .string()
+      .regex(/^\d{4}-\d{2}-\d{2}$/, "Date must be in YYYY-MM-DD format")
+      .refine((date) => {
+        const d = new Date(date);
+        return d >= new Date("1900-01-01") && d <= new Date();
+      }, "Date must be between 1900-01-01 and today")
+      .optional(),
   }),
 });
 
@@ -195,6 +203,14 @@ export const characterDataUpdateSchema = z.object({
       height_cm: z.number().int().min(50).max(250).optional(),
       weight_kg: z.number().int().min(20).max(300).optional(),
       sex: z.enum(["male", "female", "other"]).optional(),
+      date_of_birth: z
+        .string()
+        .regex(/^\d{4}-\d{2}-\d{2}$/, "Date must be in YYYY-MM-DD format")
+        .refine((date) => {
+          const d = new Date(date);
+          return d >= new Date("1900-01-01") && d <= new Date();
+        }, "Date must be between 1900-01-01 and today")
+        .optional(),
     })
     .optional(),
 });
@@ -215,22 +231,11 @@ export const characterUploadSchema = z.object({
     .optional(),
 
   character_data: characterDataSchema,
-
-  date_of_birth: z.coerce
-    .date()
-    .min(new Date("1900-01-01"))
-    .max(new Date())
-    .optional(),
 });
 
 export const characterUpdateSchema = z
   .object({
     creator_name: z.string().trim().min(1).max(100).optional(),
-    date_of_birth: z.coerce
-      .date()
-      .min(new Date("1900-01-01"))
-      .max(new Date())
-      .optional(),
     location: z
       .object({
         country: z.string().trim().max(100).or(z.literal("")).optional(),

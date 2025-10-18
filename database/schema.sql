@@ -25,7 +25,6 @@ CREATE TABLE characters (
 
     -- basic character info
     name VARCHAR(100) NOT NULL,
-    date_of_birth DATE,
     height_cm INTEGER CHECK (height_cm > 0 AND height_cm < 300),
     weight_kg INTEGER CHECK (weight_kg > 0 AND weight_kg < 500),
     sex VARCHAR(10) NOT NULL DEFAULT 'other' CHECK (sex IN ('male', 'female', 'other')),
@@ -227,11 +226,10 @@ INSERT INTO users (platform, platform_user_id, username, email, is_admin) VALUES
 ('newgrounds', 'admin_user', 'admin', 'admin@scumdog.com', true);
 
 -- sample character data following the specification
-INSERT INTO characters (user_id, name, date_of_birth, height_cm, weight_kg, sex, country, region, city, character_data) VALUES
+INSERT INTO characters (user_id, name, height_cm, weight_kg, sex, country, region, city, character_data) VALUES
 (
     (SELECT id FROM users WHERE username = 'testuser1'),
     'Test Character',
-    '1990-05-15',
     182,
     78,
     'other',
@@ -286,7 +284,8 @@ INSERT INTO characters (user_id, name, date_of_birth, height_cm, weight_kg, sex,
             },
             "height_cm": 182,
             "weight_kg": 78,
-            "sex": "other"
+            "sex": "other",
+            "date_of_birth": "1990-05-15"
         }
     }'::jsonb
 );

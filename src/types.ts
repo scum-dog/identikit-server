@@ -8,7 +8,6 @@ export interface DatabaseQueryResult<T = unknown> {
 
 export interface CharacterCreateData {
   name: string;
-  dateOfBirth?: string;
   heightCm?: number;
   weightKg?: number;
   sex?: string;
@@ -20,7 +19,6 @@ export interface CharacterCreateData {
 
 export interface CharacterUpdateData {
   name?: string;
-  dateOfBirth?: string;
   heightCm?: number;
   weightKg?: number;
   sex?: string;
@@ -34,7 +32,6 @@ export interface DatabaseCharacter {
   id: string;
   user_id: string;
   name: string;
-  date_of_birth: string;
   height_cm: number;
   weight_kg: number;
   sex: string;
@@ -56,7 +53,6 @@ export interface CanEditResult {
 
 export interface CharacterRouteUpdates {
   name?: string;
-  dateOfBirth?: string;
   country?: string;
   region?: string;
   city?: string;
@@ -88,7 +84,6 @@ export interface PlazaCharacterData {
 
 export interface MockCharacterRouteUpdates {
   creator_name?: string;
-  date_of_birth?: string;
   location?: {
     country: string | null;
     region: string | null | undefined;
@@ -167,7 +162,6 @@ export interface MockCharacter {
   };
   country?: string | null; // alias for location.country
   character_data: object;
-  date_of_birth: string | null;
   edit_count: number;
   is_deleted: boolean;
   deleted_at: string | null;
@@ -381,7 +375,6 @@ export interface AdminCharacterDetailResult {
   id: string;
   user_id: string;
   name: string;
-  date_of_birth: string;
   height_cm: number;
   weight_kg: number;
   country: string;

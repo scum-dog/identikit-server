@@ -149,10 +149,6 @@ router.put(
 
       const updates: MockCharacterRouteUpdates = {};
       if (req.body.creator_name) updates.creator_name = req.body.creator_name;
-      if (req.body.date_of_birth)
-        updates.date_of_birth = new Date(req.body.date_of_birth)
-          .toISOString()
-          .split("T")[0];
       if (req.body.location) {
         updates.location = {
           country:

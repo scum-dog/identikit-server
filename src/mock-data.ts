@@ -220,6 +220,9 @@ export function generateMockCharacterData(): CharacterData {
       height_cm: randomInt(150, 200),
       weight_kg: randomInt(50, 120),
       sex: randomChoice(sexOptions),
+      date_of_birth: randomDate(new Date(1970, 0, 1), new Date(2005, 11, 31))
+        .toISOString()
+        .split("T")[0],
     },
   };
 }
@@ -251,9 +254,6 @@ export function generateMockCharacter(userId?: string, uploadId?: string) {
       city: Math.random() > 0.3 ? city : null,
     },
     character_data: characterData,
-    date_of_birth: randomDate(new Date(1970, 0, 1), new Date(2005, 11, 31))
-      .toISOString()
-      .split("T")[0],
     edit_count: hasBeenEdited ? randomInt(1, 5) : 0,
     is_deleted: false,
     deleted_at: null,

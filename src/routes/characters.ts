@@ -56,7 +56,6 @@ router.get("/me", authenticateUser, async (req: Request, res: Response) => {
           typeof character.character_data === "string"
             ? JSON.parse(character.character_data)
             : character.character_data,
-        date_of_birth: character.date_of_birth,
         edit_count: character.edit_count,
         is_deleted: character.is_deleted,
         deleted_at: character.deleted_at,
@@ -122,7 +121,6 @@ router.post(
             typeof newCharacter.character_data === "string"
               ? JSON.parse(newCharacter.character_data)
               : newCharacter.character_data,
-          date_of_birth: newCharacter.date_of_birth,
           edit_count: newCharacter.edit_count,
           is_deleted: newCharacter.is_deleted,
           deleted_at: newCharacter.deleted_at,
@@ -153,7 +151,6 @@ router.put(
       const updates: CharacterRouteUpdates = {};
 
       if (req.body.creator_name) updates.name = req.body.creator_name;
-      if (req.body.date_of_birth) updates.dateOfBirth = req.body.date_of_birth;
       if (req.body.location) {
         if (req.body.location.country !== undefined)
           updates.country = req.body.location.country;
@@ -198,7 +195,6 @@ router.put(
             typeof updatedCharacter.character_data === "string"
               ? JSON.parse(updatedCharacter.character_data)
               : updatedCharacter.character_data,
-          date_of_birth: updatedCharacter.date_of_birth,
           edit_count: updatedCharacter.edit_count,
           is_deleted: updatedCharacter.is_deleted,
           deleted_at: updatedCharacter.deleted_at,

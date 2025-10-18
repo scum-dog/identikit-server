@@ -98,7 +98,6 @@ export const characterQueries = {
   create: async (userId: string, characterData: CharacterCreateData) => {
     const {
       name,
-      dateOfBirth,
       heightCm,
       weightKg,
       sex,
@@ -110,14 +109,13 @@ export const characterQueries = {
 
     const result = await query<DatabaseCharacter>(
       `INSERT INTO characters
-       (user_id, name, date_of_birth, height_cm, weight_kg, sex,
+       (user_id, name, height_cm, weight_kg, sex,
         country, region, city, character_data)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
        RETURNING *`,
       [
         userId,
         name,
-        dateOfBirth,
         heightCm,
         weightKg,
         sex,
@@ -158,7 +156,6 @@ export const characterQueries = {
 
     const {
       name,
-      dateOfBirth,
       heightCm,
       weightKg,
       sex,
@@ -169,16 +166,15 @@ export const characterQueries = {
     } = updates;
     const result = await query<DatabaseCharacter>(
       `UPDATE characters
-       SET name = $3, date_of_birth = $4, height_cm = $5, weight_kg = $6, sex = $7,
-           country = $8, region = $9, city = $10,
-           character_data = $11, last_edited_at = NOW(), edit_count = edit_count + 1
+       SET name = $3, height_cm = $4, weight_kg = $5, sex = $6,
+           country = $7, region = $8, city = $9,
+           character_data = $10, last_edited_at = NOW(), edit_count = edit_count + 1
        WHERE id = $1 AND user_id = $2
        RETURNING *`,
       [
         characterId,
         userId,
         name,
-        dateOfBirth,
         heightCm,
         weightKg,
         sex,
