@@ -261,7 +261,7 @@ export function generateMockCharacter(userId?: string, uploadId?: string) {
 }
 
 export function generateMockUser(userId?: string) {
-  const platforms = ["newgrounds", "itch"];
+  const platforms = ["newgrounds", "itch", "google"];
   const platform = randomChoice(platforms);
 
   return {
