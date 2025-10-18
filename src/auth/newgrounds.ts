@@ -1,6 +1,6 @@
 import axios from "axios";
 import crypto from "crypto";
-import { AuthError, ConfigError } from "./base";
+import { AuthError } from "./base";
 import {
   OAuthProvider,
   AuthUrlResult,
@@ -17,15 +17,8 @@ export class NewgroundsOAuth implements OAuthProvider<NewgroundsUser> {
   public readonly platform = "newgrounds" as const;
 
   generateAuthUrl(): AuthUrlResult {
-    const appId = process.env.NEWGROUNDS_APP_ID;
-    const redirectUri = process.env.NEWGROUNDS_REDIRECT_URI;
-
-    if (!appId || !redirectUri) {
-      throw new ConfigError(
-        "Newgrounds OAuth not configured - missing NEWGROUNDS_APP_ID or NEWGROUNDS_REDIRECT_URI",
-        this.platform,
-      );
-    }
+    const appId = process.env.NEWGROUNDS_APP_ID!;
+    const redirectUri = process.env.NEWGROUNDS_REDIRECT_URI!;
 
     const state = crypto.randomBytes(32).toString("hex");
 
@@ -51,12 +44,7 @@ export class NewgroundsOAuth implements OAuthProvider<NewgroundsUser> {
     _state?: string,
     _codeVerifier?: string,
   ): Promise<{ sessionId: string; user: NewgroundsUser }> {
-    const appId = process.env.NEWGROUNDS_APP_ID;
-    const encryptionKey = process.env.NEWGROUNDS_ENCRYPTION_KEY;
-
-    if (!appId || !encryptionKey) {
-      throw new ConfigError("Newgrounds API not configured", this.platform);
-    }
+    const appId = process.env.NEWGROUNDS_APP_ID!;
 
     try {
       const response = await axios.post(NEWGROUNDS_API_BASE, {
@@ -112,10 +100,7 @@ export class NewgroundsOAuth implements OAuthProvider<NewgroundsUser> {
         return null;
       }
 
-      const appId = process.env.NEWGROUNDS_APP_ID;
-      if (!appId) {
-        throw new ConfigError("Newgrounds API not configured", this.platform);
-      }
+      const appId = process.env.NEWGROUNDS_APP_ID!;
 
       const response = await axios.post(NEWGROUNDS_API_BASE, {
         app_id: appId,

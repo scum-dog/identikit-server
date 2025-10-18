@@ -1,6 +1,6 @@
 import axios from "axios";
 import crypto from "crypto";
-import { AuthError, ConfigError } from "./base";
+import { AuthError } from "./base";
 import {
   OAuthProvider,
   AuthUrlResult,
@@ -15,15 +15,8 @@ export class ItchOAuth implements OAuthProvider<ItchUser> {
   public readonly platform = "itchio" as const;
 
   generateAuthUrl(): AuthUrlResult {
-    const clientId = process.env.ITCH_IO_CLIENT_ID;
-    const redirectUri = process.env.ITCH_IO_REDIRECT_URI;
-
-    if (!clientId || !redirectUri) {
-      throw new ConfigError(
-        "Itch.io OAuth not configured - missing ITCH_IO_CLIENT_ID or ITCH_IO_REDIRECT_URI",
-        this.platform,
-      );
-    }
+    const clientId = process.env.ITCH_IO_CLIENT_ID!;
+    const redirectUri = process.env.ITCH_IO_REDIRECT_URI!;
 
     const state = crypto.randomBytes(32).toString("hex");
 

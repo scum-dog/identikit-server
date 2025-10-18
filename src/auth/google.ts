@@ -1,6 +1,6 @@
 import axios from "axios";
 import crypto from "crypto";
-import { AuthError, ConfigError } from "./base";
+import { AuthError } from "./base";
 import {
   OAuthProvider,
   AuthUrlResult,
@@ -19,14 +19,6 @@ export class GoogleAuth implements OAuthProvider<GoogleUser> {
   private readonly redirectUri = process.env.GOOGLE_REDIRECT_URI;
 
   generateAuthUrl(): AuthUrlResult {
-    if (!this.isConfigured()) {
-      throw new ConfigError(
-        "Google OAuth not configured. Missing: " +
-          this.getMissingConfig().join(", "),
-        this.platform,
-      );
-    }
-
     const state = crypto.randomBytes(32).toString("hex");
 
     const oauthParams: GoogleOAuthParams = {
@@ -53,10 +45,6 @@ export class GoogleAuth implements OAuthProvider<GoogleUser> {
     _state?: string,
     _codeVerifier?: string,
   ): Promise<{ sessionId: string; user: GoogleUser }> {
-    if (!this.isConfigured()) {
-      throw new AuthError("Google OAuth not configured", this.platform);
-    }
-
     try {
       const tokens = await this.exchangeCodeForTokens(code);
       const googleUser = await this.fetchUserProfile(tokens.access_token);
@@ -171,18 +159,6 @@ export class GoogleAuth implements OAuthProvider<GoogleUser> {
       console.error("Google session validation error:", error);
       return null;
     }
-  }
-
-  isConfigured(): boolean {
-    return !!(this.clientId && this.clientSecret && this.redirectUri);
-  }
-
-  getMissingConfig(): string[] {
-    const missing = [];
-    if (!this.clientId) missing.push("GOOGLE_CLIENT_ID");
-    if (!this.clientSecret) missing.push("GOOGLE_CLIENT_SECRET");
-    if (!this.redirectUri) missing.push("GOOGLE_REDIRECT_URI");
-    return missing;
   }
 }
 
