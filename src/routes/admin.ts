@@ -24,7 +24,7 @@ router.use(authenticateUser);
 router.use(requireAdmin);
 router.use(adminRateLimit);
 
-// GET /api/admin/characters - get all characters for moderation
+// GET /admin/characters - get all characters for moderation
 router.get("/characters", async (req: Request, res: Response) => {
   try {
     const page = parseInt(req.query.page as string) || 1;
@@ -72,7 +72,7 @@ router.get("/characters", async (req: Request, res: Response) => {
   }
 });
 
-// GET /api/admin/character/:id - get specific character with full details
+// GET /admin/character/:id - get specific character with full details
 router.get("/character/:id", async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
@@ -126,7 +126,7 @@ router.get("/character/:id", async (req: Request, res: Response) => {
   }
 });
 
-// DELETE /api/admin/character/:id - delete a character
+// DELETE /admin/character/:id - delete a character
 router.delete(
   "/character/:id",
   validateRequest(
@@ -176,7 +176,7 @@ router.delete(
   },
 );
 
-// GET /api/admin/users - get all users for management
+// GET /admin/users - get all users for management
 router.get("/users", async (req: Request, res: Response) => {
   try {
     const page = parseInt(req.query.page as string) || 1;

@@ -31,7 +31,7 @@ const MOCK_GOOGLE_USER = {
   isAdmin: false,
 };
 
-// GET /mock/api/auth/me - get mock user info
+// GET /mock/auth/me - get mock user info
 router.get("/me", (_req: Request, res: Response) => {
   try {
     const mockUsers = [MOCK_USER, MOCK_ITCH_USER, MOCK_GOOGLE_USER];

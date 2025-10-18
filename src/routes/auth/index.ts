@@ -13,7 +13,7 @@ router.use("/newgrounds", newgroundsRoutes);
 router.use("/itchio", itchRoutes);
 router.use("/google", googleRoutes);
 
-// POST /api/auth/verify - verify current session
+// POST /auth/verify - verify current session
 router.post("/verify", authenticateUser, (req: Request, res: Response) => {
   res.json({
     valid: true,
@@ -26,7 +26,7 @@ router.post("/verify", authenticateUser, (req: Request, res: Response) => {
   });
 });
 
-// GET /api/auth/me - get current user info
+// GET /auth/me - get current user info
 router.get("/me", authenticateUser, async (req: Request, res: Response) => {
   try {
     const character = await query<CharacterInfo>(
@@ -50,7 +50,7 @@ router.get("/me", authenticateUser, async (req: Request, res: Response) => {
   }
 });
 
-// POST /api/auth/logout - logout (mainly for client-side cleanup)
+// POST /auth/logout - logout (mainly for client-side cleanup)
 router.post("/logout", (req: Request, res: Response) => {
   res.json({
     success: true,

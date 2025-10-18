@@ -4,7 +4,7 @@ import { userQueries } from "../../database";
 
 const router = Router();
 
-// GET /api/auth/itchio/url - get itch.io OAuth URL
+// GET /auth/itchio/url - get itch.io OAuth URL
 router.get("/url", (req: Request, res: Response) => {
   try {
     const { authUrl, state, expiresAt } = itchAuth.generateAuthUrl();
@@ -20,7 +20,7 @@ router.get("/url", (req: Request, res: Response) => {
   }
 });
 
-// GET /api/auth/itchio/callback - OAuth callback endpoint
+// GET /auth/itchio/callback - OAuth callback endpoint
 router.get("/callback", async (req: Request, res: Response) => {
   try {
     const { access_token, state } = req.query;

@@ -46,63 +46,62 @@ const globalRateLimit = rateLimit({
 app.use(globalRateLimit);
 app.use("/ping", pingRoutes);
 
-app.use("/api/auth", authRoutes);
-app.use("/api/characters", characterRoutes);
-app.use("/api/admin", adminRoutes);
+app.use("/auth", authRoutes);
+app.use("/characters", characterRoutes);
+app.use("/admin", adminRoutes);
 
-app.use("/mock/api/auth", mockAuthRoutes);
-app.use("/mock/api/characters", mockCharacterRoutes);
-app.use("/mock/api/admin", mockAdminRoutes);
+app.use("/mock/auth", mockAuthRoutes);
+app.use("/mock/characters", mockCharacterRoutes);
+app.use("/mock/admin", mockAdminRoutes);
 app.use("/test-retry", testRetryRoutes);
 
-app.get("/api", (req: Request, res: Response) => {
+app.get("/", (req: Request, res: Response) => {
   res.json({
     endpoints: {
       system: {
         "GET /ping": "Pong (hopefully)",
       },
       auth: {
-        "GET /api/auth/newgrounds/url": "Get Newgrounds OAuth URL",
-        "GET /api/auth/itchio/url": "Get Itch.io OAuth URL",
-        "GET /api/auth/google/url": "Get Google OAuth URL",
-        "POST /api/auth/verify": "Verify current session",
-        "GET /api/auth/me": "Get current user info",
-        "POST /api/auth/logout": "Logout",
+        "GET /auth/newgrounds/url": "Get Newgrounds OAuth URL",
+        "GET /auth/itchio/url": "Get Itch.io OAuth URL",
+        "GET /auth/google/url": "Get Google OAuth URL",
+        "POST /auth/verify": "Verify current session",
+        "GET /auth/me": "Get current user info",
+        "POST /auth/logout": "Logout (mainly for client cleanup)",
       },
       characters: {
-        "GET /api/characters/me": "Get user's character",
-        "POST /api/characters": "Create new character",
-        "PUT /api/characters/me": "Update user's character",
-        "GET /api/characters/plaza": "Get plaza characters",
-        "GET /api/characters/:id": "Get character by ID",
+        "GET /characters/me": "Get user's character",
+        "POST /characters": "Create new character",
+        "PUT /characters/me": "Update user's character",
+        "GET /characters/plaza": "Get plaza characters",
+        "GET /characters/:id": "Get character by ID",
       },
       admin: {
-        "GET /api/admin/characters": "List all characters (admin)",
-        "GET /api/admin/character/:id": "Get character details (admin)",
-        "DELETE /api/admin/character/:id": "Delete character (admin)",
-        "GET /api/admin/users": "List all users (admin)",
+        "GET /admin/characters": "List all characters (admin)",
+        "GET /admin/character/:id": "Get character details (admin)",
+        "DELETE /admin/character/:id": "Delete character (admin)",
+        "GET /admin/users": "List all users (admin)",
       },
       oauth_callbacks: {
-        "GET /api/auth/newgrounds/callback":
+        "GET /auth/newgrounds/callback":
           "Newgrounds OAuth callback (internal use)",
-        "GET /api/auth/itchio/callback":
-          "Itch.io OAuth callback (internal use)",
-        "GET /api/auth/google/callback": "Google OAuth callback (internal use)",
+        "GET /auth/itchio/callback": "Itch.io OAuth callback (internal use)",
+        "GET /auth/google/callback": "Google OAuth callback (internal use)",
       },
       testing: {
         "GET /test-retry": "Testing endpoint for various failure types",
       },
       mock: {
-        "GET /mock/api/auth/me": "Mock user info",
-        "GET /mock/api/characters/me": "Mock user's character",
-        "POST /mock/api/characters": "Mock character creation",
-        "PUT /mock/api/characters/me": "Mock character update",
-        "GET /mock/api/characters/plaza": "Mock plaza characters",
-        "GET /mock/api/characters/:id": "Mock character by ID",
-        "GET /mock/api/admin/characters": "Mock admin character list",
-        "GET /mock/api/admin/character/:id": "Mock admin character details",
-        "DELETE /mock/api/admin/character/:id": "Mock admin character deletion",
-        "GET /mock/api/admin/users": "Mock admin user list",
+        "GET /mock/auth/me": "Mock user info",
+        "GET /mock/characters/me": "Mock user's character",
+        "POST /mock/characters": "Mock character creation",
+        "PUT /mock/characters/me": "Mock character update",
+        "GET /mock/characters/plaza": "Mock plaza characters",
+        "GET /mock/characters/:id": "Mock character by ID",
+        "GET /mock/admin/characters": "Mock admin character list",
+        "GET /mock/admin/character/:id": "Mock admin character details",
+        "DELETE /mock/admin/character/:id": "Mock admin character deletion",
+        "GET /mock/admin/users": "Mock admin user list",
       },
     },
   });

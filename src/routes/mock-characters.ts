@@ -19,7 +19,7 @@ const MOCK_USER = {
   isAdmin: false,
 };
 
-// GET /mock/api/characters/me - get mock user's character
+// GET /mock/characters/me - get mock user's character
 router.get("/me", (req: Request, res: Response) => {
   try {
     const characters = mockDataStore.getCharacters();
@@ -55,7 +55,7 @@ router.get("/me", (req: Request, res: Response) => {
   }
 });
 
-// POST /mock/api/characters - create new mock character
+// POST /mock/characters - create new mock character
 router.post(
   "/",
   validateRequest(characterUploadSchema),
@@ -108,7 +108,7 @@ router.post(
   },
 );
 
-// PUT /mock/api/characters/me - update mock user's mock character
+// PUT /mock/characters/me - update mock user's mock character
 router.put(
   "/me",
   validateRequest(characterUpdateSchema),
@@ -189,7 +189,7 @@ router.put(
   },
 );
 
-// GET /mock/api/characters/plaza - get mock characters for plaza display
+// GET /mock/characters/plaza - get mock characters for plaza display
 router.get("/plaza", validatePlazaQuery, (req: Request, res: Response) => {
   try {
     const {
@@ -245,7 +245,7 @@ router.get("/plaza", validatePlazaQuery, (req: Request, res: Response) => {
   }
 });
 
-// GET /mock/api/characters/:id - get specific mock character by ID
+// GET /mock/characters/:id - get specific mock character by ID
 router.get("/:id", (req: Request, res: Response) => {
   try {
     const { id } = req.params;

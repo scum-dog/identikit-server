@@ -29,7 +29,7 @@ const uploadRateLimit = rateLimit({
   message: { error: "Upload limit exceeded, please try again later" },
 });
 
-// GET /api/characters/me - get current user's character
+// GET /characters/me - get current user's character
 router.get("/me", authenticateUser, async (req: Request, res: Response) => {
   try {
     const character = await characterQueries.findByUserId(req.user!.id);
@@ -69,7 +69,7 @@ router.get("/me", authenticateUser, async (req: Request, res: Response) => {
   }
 });
 
-// POST /api/characters - create new character
+// POST /characters - create new character
 router.post(
   "/",
   authenticateUser,
@@ -134,7 +134,7 @@ router.post(
   },
 );
 
-// PUT /api/characters/me - update current user's character
+// PUT /characters/me - update current user's character
 router.put(
   "/me",
   authenticateUser,
@@ -216,7 +216,7 @@ router.put(
   },
 );
 
-// GET /api/characters/plaza - get characters for plaza display
+// GET /characters/plaza - get characters for plaza display
 router.get(
   "/plaza",
   validatePlazaQuery,
@@ -272,7 +272,7 @@ router.get(
   },
 );
 
-// GET /api/characters/:id - get specific character by ID
+// GET /characters/:id - get specific character by ID
 router.get("/:id", async (req: Request, res: Response) => {
   try {
     const { id } = req.params;

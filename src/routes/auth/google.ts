@@ -14,7 +14,7 @@ router.get("/url", async (req: Request, res: Response) => {
   }
 });
 
-// GET /api/auth/google/callback - OAuth callback endpoint
+// GET /auth/google/callback - OAuth callback endpoint
 router.get("/callback", async (req: Request, res: Response) => {
   try {
     const { code, state } = req.query;

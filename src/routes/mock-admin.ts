@@ -13,7 +13,7 @@ const MOCK_ADMIN = {
   isAdmin: true,
 };
 
-// GET /mock/api/admin/characters - get mock characters for moderation
+// GET /mock/admin/characters - get mock characters for moderation
 router.get("/characters", (req: Request, res: Response) => {
   try {
     const page = parseInt(req.query.page as string) || 1;
@@ -68,7 +68,7 @@ router.get("/characters", (req: Request, res: Response) => {
   }
 });
 
-// GET /mock/api/admin/character/:id - get specific mock character with full details
+// GET /mock/admin/character/:id - get specific mock character with full details
 router.get("/character/:id", (req: Request, res: Response) => {
   try {
     const { id } = req.params;
@@ -101,7 +101,7 @@ router.get("/character/:id", (req: Request, res: Response) => {
   }
 });
 
-// DELETE /mock/api/admin/character/:id - delete a mock character
+// DELETE /mock/admin/character/:id - delete a mock character
 router.delete(
   "/character/:id",
   validateRequest(
@@ -150,7 +150,7 @@ router.delete(
   },
 );
 
-// GET /mock/api/admin/users - get all mock users for management
+// GET /mock/admin/users - get all mock users for management
 router.get("/users", (req: Request, res: Response) => {
   try {
     const page = parseInt(req.query.page as string) || 1;

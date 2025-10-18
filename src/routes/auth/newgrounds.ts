@@ -4,7 +4,7 @@ import { userQueries } from "../../database";
 
 const router = Router();
 
-// GET /api/auth/newgrounds/url - get newgrounds OAuth URL
+// GET /auth/newgrounds/url - get newgrounds OAuth URL
 router.get("/url", (req: Request, res: Response) => {
   try {
     const { authUrl, state, expiresAt } = newgroundsAuth.generateAuthUrl();
@@ -20,7 +20,7 @@ router.get("/url", (req: Request, res: Response) => {
   }
 });
 
-// GET /api/auth/newgrounds/callback - OAuth callback endpoint
+// GET /auth/newgrounds/callback - OAuth callback endpoint
 router.get("/callback", async (req: Request, res: Response) => {
   try {
     const { code, state } = req.query;
