@@ -97,6 +97,7 @@ router.post(
         dateOfBirth: req.body.date_of_birth,
         heightCm: req.body.character_data.static.height_cm,
         weightKg: req.body.character_data.static.weight_kg,
+        sex: req.body.character_data.static.sex,
       };
 
       const newCharacter = await characterQueries.create(
@@ -168,6 +169,9 @@ router.put(
         }
         if (req.body.character_data.static?.weight_kg) {
           updates.weightKg = req.body.character_data.static.weight_kg;
+        }
+        if (req.body.character_data.static?.sex) {
+          updates.sex = req.body.character_data.static.sex;
         }
       }
 
@@ -278,7 +282,7 @@ router.get("/:id", async (req: Request, res: Response) => {
     const { id } = req.params;
 
     const result = (await query(
-      "SELECT id, name, character_data, country, region, city, created_at, last_edited_at FROM characters WHERE id = $1 AND is_deleted = false",
+      "SELECT id, name, character_data, country, region, city, sex, created_at, last_edited_at FROM characters WHERE id = $1 AND is_deleted = false",
       [id],
     )) as DatabaseQueryResult<PlazaCharacterData>;
 

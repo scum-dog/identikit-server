@@ -101,6 +101,7 @@ export const characterQueries = {
       dateOfBirth,
       heightCm,
       weightKg,
+      sex,
       country,
       region,
       city,
@@ -109,9 +110,9 @@ export const characterQueries = {
 
     const result = await query<DatabaseCharacter>(
       `INSERT INTO characters
-       (user_id, name, date_of_birth, height_cm, weight_kg,
+       (user_id, name, date_of_birth, height_cm, weight_kg, sex,
         country, region, city, character_data)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
        RETURNING *`,
       [
         userId,
@@ -119,6 +120,7 @@ export const characterQueries = {
         dateOfBirth,
         heightCm,
         weightKg,
+        sex,
         country,
         region,
         city,
@@ -159,6 +161,7 @@ export const characterQueries = {
       dateOfBirth,
       heightCm,
       weightKg,
+      sex,
       country,
       region,
       city,
@@ -166,9 +169,9 @@ export const characterQueries = {
     } = updates;
     const result = await query<DatabaseCharacter>(
       `UPDATE characters
-       SET name = $3, date_of_birth = $4, height_cm = $5, weight_kg = $6,
-           country = $7, region = $8, city = $9,
-           character_data = $10, last_edited_at = NOW(), edit_count = edit_count + 1
+       SET name = $3, date_of_birth = $4, height_cm = $5, weight_kg = $6, sex = $7,
+           country = $8, region = $9, city = $10,
+           character_data = $11, last_edited_at = NOW(), edit_count = edit_count + 1
        WHERE id = $1 AND user_id = $2
        RETURNING *`,
       [
@@ -178,6 +181,7 @@ export const characterQueries = {
         dateOfBirth,
         heightCm,
         weightKg,
+        sex,
         country,
         region,
         city,
@@ -230,7 +234,7 @@ export const characterQueries = {
 
     paramCount++;
     const query_text = `
-      SELECT id, name, character_data, country, region, city, created_at, last_edited_at
+      SELECT id, name, character_data, country, region, city, sex, created_at, last_edited_at
       FROM characters
       ${whereClause}
       ORDER BY RANDOM()

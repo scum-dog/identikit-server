@@ -28,6 +28,7 @@ CREATE TABLE characters (
     date_of_birth DATE,
     height_cm INTEGER CHECK (height_cm > 0 AND height_cm < 300),
     weight_kg INTEGER CHECK (weight_kg > 0 AND weight_kg < 500),
+    sex VARCHAR(10) NOT NULL DEFAULT 'other' CHECK (sex IN ('male', 'female', 'other')),
 
     -- location data
     country VARCHAR(100),
@@ -98,6 +99,7 @@ CREATE INDEX idx_characters_random ON characters(id); -- For random selection
 CREATE INDEX idx_characters_active ON characters(is_deleted) WHERE is_deleted = false;
 CREATE INDEX idx_characters_location_country ON characters(country) WHERE country IS NOT NULL;
 CREATE INDEX idx_characters_location_region ON characters(region) WHERE region IS NOT NULL;
+CREATE INDEX idx_characters_sex ON characters(sex);
 
 CREATE INDEX idx_character_edits_character_id ON character_edits(character_id);
 CREATE INDEX idx_character_edits_edited_at ON character_edits(edited_at);
@@ -155,6 +157,7 @@ RETURNS TABLE (
     country VARCHAR(100),
     region VARCHAR(100),
     city VARCHAR(100),
+    sex VARCHAR(10),
     created_at TIMESTAMP WITH TIME ZONE,
     last_edited_at TIMESTAMP WITH TIME ZONE
 ) AS $$
@@ -167,6 +170,7 @@ BEGIN
         c.country,
         c.region,
         c.city,
+        c.sex,
         c.created_at,
         c.last_edited_at
     FROM characters c
@@ -223,13 +227,14 @@ INSERT INTO users (platform, platform_user_id, username, email, is_admin) VALUES
 ('newgrounds', 'admin_user', 'admin', 'admin@scumdog.com', true);
 
 -- sample character data following the specification
-INSERT INTO characters (user_id, name, date_of_birth, height_cm, weight_kg, country, region, city, character_data) VALUES
+INSERT INTO characters (user_id, name, date_of_birth, height_cm, weight_kg, sex, country, region, city, character_data) VALUES
 (
     (SELECT id FROM users WHERE username = 'testuser1'),
     'Test Character',
     '1990-05-15',
     182,
     78,
+    'other',
     'USA',
     'California',
     'San Francisco',
@@ -278,7 +283,10 @@ INSERT INTO characters (user_id, name, date_of_birth, height_cm, weight_kg, coun
             "head_shape": {
                 "shape_id": "HD_004",
                 "skin_color": "medium-tan"
-            }
+            },
+            "height_cm": 182,
+            "weight_kg": 78,
+            "sex": "other"
         }
     }'::jsonb
 );

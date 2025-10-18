@@ -114,6 +114,7 @@ export const characterDataSchema = z.object({
     }),
     height_cm: z.number().int().min(50).max(250),
     weight_kg: z.number().int().min(20).max(300),
+    sex: z.enum(["male", "female", "other"]),
   }),
 });
 
@@ -193,6 +194,7 @@ export const characterDataUpdateSchema = z.object({
         .optional(),
       height_cm: z.number().int().min(50).max(250).optional(),
       weight_kg: z.number().int().min(20).max(300).optional(),
+      sex: z.enum(["male", "female", "other"]).optional(),
     })
     .optional(),
 });

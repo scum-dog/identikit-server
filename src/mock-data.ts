@@ -5,6 +5,7 @@ import {
   SkinColor,
   EyeColor,
   HairColor,
+  Sex,
   MockUser,
   MockCharacter,
   MockEditHistory,
@@ -131,6 +132,8 @@ const accessoryTypes: (AccessoryType | "none")[] = [
   "none",
 ];
 
+const sexOptions: Sex[] = ["male", "female", "other"];
+
 function randomChoice<T>(array: T[]): T {
   return array[Math.floor(Math.random() * array.length)];
 }
@@ -216,6 +219,7 @@ export function generateMockCharacterData(): CharacterData {
       },
       height_cm: randomInt(150, 200),
       weight_kg: randomInt(50, 120),
+      sex: randomChoice(sexOptions),
     },
   };
 }

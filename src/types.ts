@@ -11,6 +11,7 @@ export interface CharacterCreateData {
   dateOfBirth?: string;
   heightCm?: number;
   weightKg?: number;
+  sex?: string;
   country?: string;
   region?: string;
   city?: string;
@@ -22,6 +23,7 @@ export interface CharacterUpdateData {
   dateOfBirth?: string;
   heightCm?: number;
   weightKg?: number;
+  sex?: string;
   country?: string;
   region?: string;
   city?: string;
@@ -35,6 +37,7 @@ export interface DatabaseCharacter {
   date_of_birth: string;
   height_cm: number;
   weight_kg: number;
+  sex: string;
   country: string;
   region: string;
   city: string;
@@ -60,6 +63,7 @@ export interface CharacterRouteUpdates {
   characterJson?: object;
   heightCm?: number;
   weightKg?: number;
+  sex?: string;
 }
 
 export interface PlazaQueryRequest {
@@ -78,6 +82,7 @@ export interface PlazaCharacterData {
   country: string;
   region: string;
   city: string;
+  sex: string;
   character_data: string | object;
 }
 
@@ -132,6 +137,8 @@ export type HairColor =
   | "green"
   | "purple"
   | "pink";
+
+export type Sex = "male" | "female" | "other";
 
 export interface MockUser {
   id: string;
@@ -348,6 +355,7 @@ export interface PlazaCharacterResult {
   country: string;
   region: string;
   city: string;
+  sex: string;
   created_at: string;
   last_edited_at: string;
 }
