@@ -54,38 +54,40 @@ export const getClient = async (): Promise<PoolClient> => {
   return client;
 };
 
-export const userQueries = {
-  findByPlatformId: async (platform: string, platformUserId: string) => {
-    const result = await query<DatabaseUser>(
-      "SELECT * FROM users WHERE platform = $1 AND platform_user_id = $2",
-      [platform, platformUserId],
-    );
-    return result.rows[0];
-  },
+// export const userQueries = {
+//   findByPlatformId: async (platform: string, platformUserId: string) => {
+//     const result = await query<DatabaseUser>(
+//       "SELECT * FROM users WHERE platform = $1 AND platform_user_id = $2",
+//       [platform, platformUserId],
+//     );
+//     return result.rows[0];
+//   },
 
-  create: async (
-    platform: string,
-    platformUserId: string,
-    username: string,
-    email?: string,
-  ) => {
-    const result = await query<DatabaseUser>(
-      `INSERT INTO users (platform, platform_user_id, username, email)
-       VALUES ($1, $2, $3, $4)
-       RETURNING *`,
-      [platform, platformUserId, username, email],
-    );
-    return result.rows[0];
-  },
+//   create: async (
+//     platform: string,
+//     platformUserId: string,
+//     username: string,
+//     email?: string,
+//   ) => {
+//     const result = await query<DatabaseUser>(
+//       `INSERT INTO users (platform, platform_user_id, username, email)
+//        VALUES ($1, $2, $3, $4)
+//        RETURNING *`,
+//       [platform, platformUserId, username, email],
+//     );
+//     return result.rows[0];
+//   },
 
-  updateLastLogin: async (userId: string) => {
-    await query("UPDATE users SET last_login = NOW() WHERE id = $1", [userId]);
-  },
-};
+//   updateLastLogin: async (userId: string) => {
+//     await query("UPDATE users SET last_login = NOW() WHERE id = $1", [userId]);
+//   },
+// };
+
+import { mockUserOps } from "./mock-auth-storage";
+export const userQueries = mockUserOps;
 
 // character-related database operations
 export const characterQueries = {
-  // Get user's character
   findByUserId: async (userId: string) => {
     const result = await query<DatabaseCharacter>(
       "SELECT * FROM characters WHERE user_id = $1 AND is_deleted = false",
