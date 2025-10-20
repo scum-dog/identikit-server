@@ -1,4 +1,5 @@
 import axios from "axios";
+import crypto from "crypto";
 import { AuthError } from "./base";
 import {
   NewgroundsUser,
@@ -14,6 +15,15 @@ const NEWGROUNDS_GATEWAY_URL = "https://newgrounds.io/gateway_v3.php";
 export class NewgroundsAuth {
   public readonly platform = "newgrounds" as const;
 
+  private createRequestSignature(request: NewgroundsGatewayRequest): string {
+    const encryptionKey = process.env.NEWGROUNDS_ENCRYPTION_KEY!;
+    const requestString = JSON.stringify(request);
+    return crypto
+      .createHash("md5")
+      .update(requestString + encryptionKey)
+      .digest("hex");
+  }
+
   async checkSessionWithNewgrounds(
     sessionId: string,
   ): Promise<NewgroundsGatewayResponse> {
@@ -28,6 +38,8 @@ export class NewgroundsAuth {
           parameters: {},
         },
       };
+
+      gatewayRequest.secure = this.createRequestSignature(gatewayRequest);
 
       const response = await axios.post(
         NEWGROUNDS_GATEWAY_URL,
