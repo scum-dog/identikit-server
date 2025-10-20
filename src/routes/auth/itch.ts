@@ -1,4 +1,5 @@
 import { Router, Request, Response } from "express";
+import crypto from "crypto";
 import { itchAuth } from "../../auth/itch";
 import { userQueries } from "../../database";
 
@@ -22,7 +23,9 @@ router.get("/url", (req: Request, res: Response) => {
 
 // GET /auth/itchio/callback - serve HTML for token extraction
 router.get("/callback", (req: Request, res: Response) => {
-  const html = `<!DOCTYPE html><html><body><script>
+  const nonce = crypto.randomBytes(16).toString("base64");
+
+  const html = `<!DOCTYPE html><html><body><script nonce="${nonce}">
 const hash = window.location.hash.substring(1);
 const params = new URLSearchParams(hash);
 const accessToken = params.get('access_token');
@@ -45,6 +48,10 @@ if (accessToken) {
 </script></body></html>`;
 
   res.setHeader("Content-Type", "text/html");
+  res.setHeader(
+    "Content-Security-Policy",
+    `script-src 'self' 'nonce-${nonce}'`,
+  );
   res.send(html);
 });
 
