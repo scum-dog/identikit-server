@@ -120,10 +120,16 @@ export class NewgroundsAuth {
       console.log("Newgrounds response:", {
         success: response.data.success,
         hasResult: !!response.data.result,
-        hasSession: !!response.data.result?.session,
-        hasUser: !!response.data.result?.session?.user,
+        hasData: !!response.data.result?.data,
+        hasSession: !!response.data.result?.data?.session,
+        hasUser: !!response.data.result?.data?.session?.user,
         error: response.data.error,
       });
+
+      console.log(
+        "Full checkSession response:",
+        JSON.stringify(response.data, null, 2),
+      );
 
       return response.data as NewgroundsGatewayResponse;
     } catch (error) {
@@ -155,14 +161,17 @@ export class NewgroundsAuth {
         authRequest.session_id,
       );
 
-      if (!gatewayResponse.success || !gatewayResponse.result?.session?.user) {
+      if (
+        !gatewayResponse.success ||
+        !gatewayResponse.result?.data?.session?.user
+      ) {
         throw new AuthError(
           gatewayResponse.error?.message || "Invalid Newgrounds session",
           this.platform,
         );
       }
 
-      const ngSession = gatewayResponse.result.session;
+      const ngSession = gatewayResponse.result.data.session;
       const ngUser = ngSession.user!;
 
       if (ngSession.expired) {
@@ -214,7 +223,7 @@ export class NewgroundsAuth {
 
         if (
           !gatewayResponse.success ||
-          !gatewayResponse.result?.session?.user
+          !gatewayResponse.result?.data?.session?.user
         ) {
           console.log(
             "Newgrounds session no longer valid, invalidating local session",
@@ -222,7 +231,7 @@ export class NewgroundsAuth {
           return null;
         }
 
-        const ngSession = gatewayResponse.result.session;
+        const ngSession = gatewayResponse.result.data.session;
         const ngUser = ngSession.user!;
 
         if (ngSession.expired) {

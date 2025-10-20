@@ -320,8 +320,13 @@ export interface NewgroundsGatewayRequest {
 export interface NewgroundsGatewayResponse {
   success: boolean;
   result?: {
-    session?: NewgroundsSession;
-    user?: NewgroundsUser;
+    component?: string;
+    data?: {
+      success?: boolean;
+      session?: NewgroundsSession;
+      user?: NewgroundsUser;
+      [key: string]: unknown;
+    };
     [key: string]: unknown;
   };
   error?: {
