@@ -14,6 +14,73 @@ const NEWGROUNDS_GATEWAY_URL = "https://newgrounds.io/gateway_v3.php";
 export class NewgroundsAuth {
   public readonly platform = "newgrounds" as const;
 
+  async startSession(): Promise<{ sessionId: string; passportUrl?: string }> {
+    const appId = process.env.NEWGROUNDS_APP_ID!;
+
+    try {
+      const gatewayRequest: NewgroundsGatewayRequest = {
+        app_id: appId,
+        execute: {
+          component: "App.startSession",
+          parameters: {
+            force: true,
+          },
+        },
+      };
+
+      console.log("Starting new Newgrounds session:", {
+        url: NEWGROUNDS_GATEWAY_URL,
+        appId,
+        component: "App.startSession",
+      });
+
+      const response = await axios.post(
+        NEWGROUNDS_GATEWAY_URL,
+        gatewayRequest,
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        },
+      );
+
+      console.log("Newgrounds startSession response:", {
+        success: response.data.success,
+        hasResult: !!response.data.result,
+        hasSession: !!response.data.result?.session,
+        sessionId: response.data.result?.session?.id
+          ? response.data.result.session.id.substring(0, 8) + "..."
+          : "none",
+        passportUrl: !!response.data.result?.session?.passport_url,
+        error: response.data.error,
+      });
+
+      if (!response.data.success || !response.data.result?.session?.id) {
+        throw new Error(
+          response.data.error?.message || "Failed to start session",
+        );
+      }
+
+      const session = response.data.result.session;
+      return {
+        sessionId: session.id,
+        passportUrl: session.passport_url,
+      };
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        console.error("Newgrounds startSession API error:", {
+          status: error.response?.status,
+          statusText: error.response?.statusText,
+          data: error.response?.data,
+          message: error.message,
+        });
+      } else {
+        console.error("Newgrounds startSession error:", error);
+      }
+      throw new Error("Failed to start Newgrounds session");
+    }
+  }
+
   async checkSessionWithNewgrounds(
     sessionId: string,
   ): Promise<NewgroundsGatewayResponse> {
