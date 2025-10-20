@@ -28,7 +28,7 @@ router.get("/callback", (req: Request, res: Response) => {
 <!DOCTYPE html>
 <html>
   <body>
-    <div id="status">Processing authentication...</div>
+    <div id="status" style="font-size: 200%;">Processing authentication...</div>
     
     <script nonce="${nonce}">
       const hash = window.location.hash.substring(1);
