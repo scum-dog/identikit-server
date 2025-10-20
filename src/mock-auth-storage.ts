@@ -29,7 +29,7 @@ const users = new Map<string, MockUser>();
 const sessions = new Map<string, MockSession>();
 const usersByPlatform = new Map<string, MockUser>();
 
-let cleanupInterval = setInterval(
+const cleanupInterval = setInterval(
   () => {
     const now = new Date();
     for (const [sessionId, session] of sessions.entries()) {
