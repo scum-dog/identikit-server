@@ -25,11 +25,15 @@ router.get("/url", (req: Request, res: Response) => {
 router.get("/callback", (req: Request, res: Response) => {
   const nonce = crypto.randomBytes(16).toString("base64");
 
-  const html = `<!DOCTYPE html><html><body><script nonce="${nonce}">
+  const html = `<!DOCTYPE html><html><body>
+<div id="status">Processing authentication...</div>
+<script nonce="${nonce}">
 const hash = window.location.hash.substring(1);
 const params = new URLSearchParams(hash);
 const accessToken = params.get('access_token');
 const state = params.get('state');
+
+console.log('Token extracted:', accessToken ? 'Yes' : 'No');
 
 if (accessToken) {
   fetch('/auth/itchio/callback', {
@@ -39,11 +43,27 @@ if (accessToken) {
   })
   .then(response => response.json())
   .then(data => {
-    if (window.opener) {
-      window.opener.postMessage(data, '*');
-      window.close();
+    console.log('Auth response:', data);
+
+    if (data.success) {
+      document.getElementById('status').innerHTML = 'Authentication successful! Session ID: ' + data.sessionId;
+
+      if (window.opener) {
+        window.opener.postMessage(data, '*');
+        window.close();
+      } else {
+        document.getElementById('status').innerHTML += '<br><br>You can now close this window and return to your game.';
+      }
+    } else {
+      document.getElementById('status').innerHTML = 'Authentication failed: ' + data.message;
     }
+  })
+  .catch(error => {
+    console.error('Auth error:', error);
+    document.getElementById('status').innerHTML = 'Authentication failed: Network error';
   });
+} else {
+  document.getElementById('status').innerHTML = 'Authentication failed: No access token found';
 }
 </script></body></html>`;
 
