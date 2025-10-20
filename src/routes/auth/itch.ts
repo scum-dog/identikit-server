@@ -20,10 +20,38 @@ router.get("/url", (req: Request, res: Response) => {
   }
 });
 
-// GET /auth/itchio/callback - OAuth callback endpoint
-router.get("/callback", async (req: Request, res: Response) => {
+// GET /auth/itchio/callback - serve HTML for token extraction
+router.get("/callback", (req: Request, res: Response) => {
+  const html = `<!DOCTYPE html><html><body><script>
+const hash = window.location.hash.substring(1);
+const params = new URLSearchParams(hash);
+const accessToken = params.get('access_token');
+const state = params.get('state');
+
+if (accessToken) {
+  fetch('/auth/itchio/callback', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ access_token: accessToken, state: state })
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (window.opener) {
+      window.opener.postMessage(data, '*');
+      window.close();
+    }
+  });
+}
+</script></body></html>`;
+
+  res.setHeader("Content-Type", "text/html");
+  res.send(html);
+});
+
+// POST /auth/itchio/callback - handle extracted token
+router.post("/callback", async (req: Request, res: Response) => {
   try {
-    const { access_token, state } = req.query;
+    const { access_token, state } = req.body;
 
     if (!access_token) {
       return res.status(400).json({
