@@ -22,9 +22,7 @@ export class NewgroundsAuth {
         app_id: appId,
         execute: {
           component: "App.startSession",
-          parameters: {
-            force: true,
-          },
+          parameters: {},
         },
       };
 
@@ -54,6 +52,8 @@ export class NewgroundsAuth {
         passportUrl: !!response.data.result?.session?.passport_url,
         error: response.data.error,
       });
+
+      console.log("Full startSession response:", JSON.stringify(response.data, null, 2));
 
       if (!response.data.success || !response.data.result?.session?.id) {
         throw new Error(
