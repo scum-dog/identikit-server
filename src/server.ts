@@ -85,7 +85,8 @@ app.get("/", (req: Request, res: Response) => {
       },
       oauth_callbacks: {
         "GET /auth/itchio/callback": "Itch.io OAuth callback (internal use)",
-        "POST /auth/itchio/callback": "Itch.io OAuth token handler (internal use)",
+        "POST /auth/itchio/callback":
+          "Itch.io OAuth token handler (internal use)",
         "GET /auth/google/callback": "Google OAuth callback (internal use)",
       },
       testing: {

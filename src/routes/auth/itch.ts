@@ -24,49 +24,48 @@ router.get("/url", (req: Request, res: Response) => {
 // GET /auth/itchio/callback - serve HTML for token extraction
 router.get("/callback", (req: Request, res: Response) => {
   const nonce = crypto.randomBytes(16).toString("base64");
-  const html = `<!DOCTYPE html><html><body>
-
+  const html = `
+<!DOCTYPE html>
+<html>
+  <body>
     <div id="status">Processing authentication...</div>
+    
     <script nonce="${nonce}">
-    const hash = window.location.hash.substring(1);
-    const params = new URLSearchParams(hash);
-    const accessToken = params.get('access_token');
-    const state = params.get('state');
-    
-    if (accessToken) {
-      fetch('/auth/itchio/callback', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ access_token: accessToken, state: state })
-      })
-    
-      .then(response => response.json())
-      .then(data => {
-        if (data.success) {
-          document.getElementById('status').innerHTML = 'Authentication successful!';
-    
-          if (window.opener) {
-            window.opener.postMessage(data, '*');
-            window.close();
-    
-          } else {
-            document.getElementById('status').innerHTML += '<br><br>You may now close this window and return to IDENTI-NET.';
-          }
-    
-        } else {
-          document.getElementById('status').innerHTML = 'Authentication failed: ' + data.message;
-        }
-      })
-    
-      .catch(error => {
-        document.getElementById('status').innerHTML = 'Authentication failed: Network error';
-      });
-    
-    } else {
-      document.getElementById('status').innerHTML = 'Authentication failed: No access token found';
-    }
-    
-    </script></body></html>`;
+      const hash = window.location.hash.substring(1);
+      const params = new URLSearchParams(hash);
+      const accessToken = params.get('access_token');
+      const state = params.get('state');
+
+      if (accessToken) {
+        fetch('/auth/itchio/callback', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ access_token: accessToken, state: state })
+        })
+          .then(response => response.json())
+          .then(data => {
+            if (data.success) {
+              document.getElementById('status').innerHTML = 'Authentication successful!';
+              if (window.opener) {
+                window.opener.postMessage(data, '*');
+                window.close();
+              } else {
+                document.getElementById('status').innerHTML += '<br><br>You may now close this window and return to IDENTI-NET.';
+              }
+            } else {
+              document.getElementById('status').innerHTML = 'Authentication failed: ' + data.message;
+            }
+          })
+          .catch(() => {
+            document.getElementById('status').innerHTML = 'Authentication failed: Network error';
+          });
+      } else {
+        document.getElementById('status').innerHTML = 'Authentication failed: No access token found';
+      }
+    </script>
+  </body>
+</html>
+`;
 
   res.setHeader("Content-Type", "text/html");
   res.setHeader(
