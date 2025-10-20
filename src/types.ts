@@ -315,7 +315,6 @@ export interface NewgroundsGatewayRequest {
     component: string;
     parameters?: Record<string, unknown>;
   };
-  secure?: string; // MD5 signature
 }
 
 export interface NewgroundsGatewayResponse {

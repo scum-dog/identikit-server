@@ -1,5 +1,4 @@
 import axios from "axios";
-import crypto from "crypto";
 import { AuthError } from "./base";
 import {
   NewgroundsUser,
@@ -14,15 +13,6 @@ const NEWGROUNDS_GATEWAY_URL = "https://newgrounds.io/gateway_v3.php";
 
 export class NewgroundsAuth {
   public readonly platform = "newgrounds" as const;
-
-  private createRequestSignature(request: NewgroundsGatewayRequest): string {
-    const encryptionKey = process.env.NEWGROUNDS_ENCRYPTION_KEY!;
-    const requestString = JSON.stringify(request);
-    return crypto
-      .createHash("md5")
-      .update(requestString + encryptionKey)
-      .digest("hex");
-  }
 
   async checkSessionWithNewgrounds(
     sessionId: string,
@@ -39,7 +29,12 @@ export class NewgroundsAuth {
         },
       };
 
-      gatewayRequest.secure = this.createRequestSignature(gatewayRequest);
+      console.log("Sending Newgrounds request:", {
+        url: NEWGROUNDS_GATEWAY_URL,
+        appId,
+        sessionId: sessionId.substring(0, 8) + "...",
+        component: "App.checkSession",
+      });
 
       const response = await axios.post(
         NEWGROUNDS_GATEWAY_URL,
@@ -51,9 +46,26 @@ export class NewgroundsAuth {
         },
       );
 
+      console.log("Newgrounds response:", {
+        success: response.data.success,
+        hasResult: !!response.data.result,
+        hasSession: !!response.data.result?.session,
+        hasUser: !!response.data.result?.session?.user,
+        error: response.data.error,
+      });
+
       return response.data as NewgroundsGatewayResponse;
     } catch (error) {
-      console.error("Newgrounds gateway error:", error);
+      if (axios.isAxiosError(error)) {
+        console.error("Newgrounds API error:", {
+          status: error.response?.status,
+          statusText: error.response?.statusText,
+          data: error.response?.data,
+          message: error.message,
+        });
+      } else {
+        console.error("Newgrounds gateway error:", error);
+      }
       return {
         success: false,
         error: {
