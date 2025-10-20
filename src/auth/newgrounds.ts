@@ -45,23 +45,27 @@ export class NewgroundsAuth {
       console.log("Newgrounds startSession response:", {
         success: response.data.success,
         hasResult: !!response.data.result,
-        hasSession: !!response.data.result?.session,
-        sessionId: response.data.result?.session?.id
-          ? response.data.result.session.id.substring(0, 8) + "..."
+        hasData: !!response.data.result?.data,
+        hasSession: !!response.data.result?.data?.session,
+        sessionId: response.data.result?.data?.session?.id
+          ? response.data.result.data.session.id.substring(0, 8) + "..."
           : "none",
-        passportUrl: !!response.data.result?.session?.passport_url,
+        passportUrl: !!response.data.result?.data?.session?.passport_url,
         error: response.data.error,
       });
 
-      console.log("Full startSession response:", JSON.stringify(response.data, null, 2));
+      console.log(
+        "Full startSession response:",
+        JSON.stringify(response.data, null, 2),
+      );
 
-      if (!response.data.success || !response.data.result?.session?.id) {
+      if (!response.data.success || !response.data.result?.data?.session?.id) {
         throw new Error(
           response.data.error?.message || "Failed to start session",
         );
       }
 
-      const session = response.data.result.session;
+      const session = response.data.result.data.session;
       return {
         sessionId: session.id,
         passportUrl: session.passport_url,

@@ -14,8 +14,7 @@ router.post("/start-session", async (req: Request, res: Response) => {
       success: true,
       sessionId,
       passportUrl,
-      message:
-        "New Newgrounds session created",
+      message: "New Newgrounds session created",
     });
   } catch (error) {
     console.error("Newgrounds start session error:", error);
