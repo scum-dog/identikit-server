@@ -33,8 +33,6 @@ const params = new URLSearchParams(hash);
 const accessToken = params.get('access_token');
 const state = params.get('state');
 
-console.log('Token extracted:', accessToken ? 'Yes' : 'No');
-
 if (accessToken) {
   fetch('/auth/itchio/callback', {
     method: 'POST',
@@ -43,23 +41,20 @@ if (accessToken) {
   })
   .then(response => response.json())
   .then(data => {
-    console.log('Auth response:', data);
-
     if (data.success) {
-      document.getElementById('status').innerHTML = 'Authentication successful! Session ID: ' + data.sessionId;
+      document.getElementById('status').innerHTML = 'Authentication successful!';
 
       if (window.opener) {
         window.opener.postMessage(data, '*');
         window.close();
       } else {
-        document.getElementById('status').innerHTML += '<br><br>You can now close this window and return to your game.';
+        document.getElementById('status').innerHTML += '<br><br>You may now close this window and return to IDENTI-NET.';
       }
     } else {
       document.getElementById('status').innerHTML = 'Authentication failed: ' + data.message;
     }
   })
   .catch(error => {
-    console.error('Auth error:', error);
     document.getElementById('status').innerHTML = 'Authentication failed: Network error';
   });
 } else {
