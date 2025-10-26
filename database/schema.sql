@@ -1,159 +1,136 @@
--- IDENTIKIT PLAZA DATABASE SCHEMA
+-- IDENTI-NET DATABASE SCHEMA
+CREATE EXTENSION if NOT EXISTS "uuid-ossp";
 
--- enable uuid extension for generating unique ids
-CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+CREATE EXTENSION if NOT EXISTS "pg_trgm";
 
--- users table for oauth authentication
+-- oauth users table
 CREATE TABLE users (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    platform VARCHAR(20) NOT NULL CHECK (platform IN ('newgrounds', 'itch')),
-    platform_user_id VARCHAR(100) NOT NULL,
-    username VARCHAR(100) NOT NULL,
-    email VARCHAR(255),
-    is_admin BOOLEAN DEFAULT false,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    last_login TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-
-    -- ensure one account per platform per user
-    UNIQUE(platform, platform_user_id)
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4 (),
+  platform VARCHAR(20) NOT NULL CHECK (platform IN ('newgrounds', 'itch', 'google')),
+  platform_user_id VARCHAR(100) NOT NULL,
+  username VARCHAR(100) NOT NULL,
+  is_admin BOOLEAN DEFAULT FALSE,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT now(),
+  last_login TIMESTAMP WITH TIME ZONE DEFAULT now(),
+  UNIQUE (platform, platform_user_id),
+  UNIQUE (username)
 );
 
 -- character uploads table
 CREATE TABLE characters (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-
-    -- basic character info
-    name VARCHAR(100) NOT NULL,
-    height_cm INTEGER CHECK (height_cm > 0 AND height_cm < 300),
-    weight_kg INTEGER CHECK (weight_kg > 0 AND weight_kg < 500),
-    sex VARCHAR(10) NOT NULL DEFAULT 'other' CHECK (sex IN ('male', 'female', 'other')),
-
-    -- location data
-    country VARCHAR(100),
-    region VARCHAR(100),
-    city VARCHAR(100),
-
-    -- character appearance data (json)
-    character_data JSONB NOT NULL,
-
-    -- timestamps and versioning
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    last_edited_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    edit_count INTEGER DEFAULT 0,
-    is_deleted BOOLEAN DEFAULT false,
-    deleted_at TIMESTAMP WITH TIME ZONE,
-    deleted_by UUID REFERENCES users(id),
-
-    -- ensure one character per user (unless deleted)
-    UNIQUE(user_id) WHERE is_deleted = false
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4 (),
+  user_id UUID NOT NULL REFERENCES users (id) ON DELETE CASCADE,
+  character_data JSONB NOT NULL,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT now(),
+  last_edited_at TIMESTAMP WITH TIME ZONE, -- nullable until first edit
+  is_edited BOOLEAN DEFAULT FALSE,
+  is_deleted BOOLEAN DEFAULT FALSE,
+  deleted_at TIMESTAMP WITH TIME ZONE,
+  deleted_by UUID REFERENCES users (id),
+  UNIQUE (user_id)
 );
 
--- edit history table for tracking changes
-CREATE TABLE character_edits (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    character_id UUID NOT NULL REFERENCES characters(id) ON DELETE CASCADE,
-    user_id UUID NOT NULL REFERENCES users(id),
-
-    -- what changed
-    field_changed VARCHAR(50), -- 'character_data', 'name', 'location', etc.
-    old_value JSONB,
-    new_value JSONB,
-
-    -- when and why
-    edited_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-);
-
-
--- user sessions for authentication
+-- user sessions table
 CREATE TABLE user_sessions (
-    session_id VARCHAR(64) PRIMARY KEY,
-    user_id UUID NOT NULL REFERENCES users(id),
-    platform VARCHAR(50) NOT NULL,
-    platform_user_id VARCHAR(255) NOT NULL,
-    platform_session_id VARCHAR(255),
-    username VARCHAR(255) NOT NULL,
-    is_admin BOOLEAN NOT NULL DEFAULT false,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    expires_at TIMESTAMP WITH TIME ZONE NOT NULL
+  session_id VARCHAR(64) PRIMARY KEY,
+  user_id UUID NOT NULL REFERENCES users (id),
+  platform VARCHAR(50) NOT NULL,
+  platform_user_id VARCHAR(255) NOT NULL,
+  platform_session_id VARCHAR(255),
+  username VARCHAR(255) NOT NULL,
+  is_admin BOOLEAN NOT NULL DEFAULT FALSE,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT now(),
+  expires_at TIMESTAMP WITH TIME ZONE NOT NULL
 );
 
--- indexes for performance
-CREATE INDEX idx_characters_user_id ON characters(user_id);
-CREATE INDEX idx_characters_created_at ON characters(created_at);
-CREATE INDEX idx_characters_random ON characters(id); -- For random selection
-CREATE INDEX idx_characters_active ON characters(is_deleted) WHERE is_deleted = false;
-CREATE INDEX idx_characters_location_country ON characters(country) WHERE country IS NOT NULL;
-CREATE INDEX idx_characters_location_region ON characters(region) WHERE region IS NOT NULL;
-CREATE INDEX idx_characters_sex ON characters(sex);
+-- indexes
+CREATE INDEX idx_characters_user_id ON characters (user_id);
 
-CREATE INDEX idx_character_edits_character_id ON character_edits(character_id);
-CREATE INDEX idx_character_edits_edited_at ON character_edits(edited_at);
+CREATE INDEX idx_characters_created_at ON characters (created_at);
 
-CREATE INDEX idx_users_platform ON users(platform, platform_user_id);
-CREATE INDEX idx_user_sessions_expires_at ON user_sessions(expires_at);
+CREATE INDEX idx_characters_random ON characters (id);
 
--- functions for business logic
+CREATE INDEX idx_characters_active ON characters (is_deleted)
+WHERE
+  is_deleted = FALSE;
 
--- function to check if user can edit character (30-day freeze + weekly limit)
-CREATE OR REPLACE FUNCTION can_user_edit_character(character_uuid UUID, user_uuid UUID)
-RETURNS BOOLEAN AS $$
+CREATE INDEX idx_characters_location_country ON characters USING gin (
+  (
+    character_data -> 'metadata' -> 'location' ->> 'country'
+  ) gin_trgm_ops
+)
+WHERE
+  character_data -> 'metadata' -> 'location' ->> 'country' IS NOT NULL;
+
+CREATE INDEX idx_characters_location_region ON characters USING gin (
+  (
+    character_data -> 'metadata' -> 'location' ->> 'region'
+  ) gin_trgm_ops
+)
+WHERE
+  character_data -> 'metadata' -> 'location' ->> 'region' IS NOT NULL;
+
+CREATE INDEX idx_characters_sex ON characters USING gin (
+  (
+    character_data -> 'character_data' -> 'static' ->> 'sex'
+  ) gin_trgm_ops
+);
+
+CREATE INDEX idx_users_platform ON users (platform, platform_user_id);
+
+CREATE INDEX idx_user_sessions_expires_at ON user_sessions (expires_at);
+
+CREATE OR REPLACE FUNCTION can_user_edit_character (character_uuid UUID, user_uuid UUID) returns BOOLEAN AS $$
 DECLARE
     char_created_at TIMESTAMP WITH TIME ZONE;
     last_edit_at TIMESTAMP WITH TIME ZONE;
-    recent_edits INTEGER;
 BEGIN
-    -- get character creation and last edit time
+
+    IF character_uuid IS NULL OR user_uuid IS NULL THEN
+        RAISE WARNING 'can_user_edit_character: NULL parameters provided (character_uuid: %, user_uuid: %)', character_uuid, user_uuid;
+        RETURN false;
+    END IF;
+
     SELECT created_at, last_edited_at
     INTO char_created_at, last_edit_at
     FROM characters
     WHERE id = character_uuid AND user_id = user_uuid AND is_deleted = false;
 
-    -- character doesn't exist or doesn't belong to user
     IF char_created_at IS NULL THEN
+        RAISE WARNING 'can_user_edit_character: Character % not found or not owned by user %', character_uuid, user_uuid;
         RETURN false;
     END IF;
 
-    -- check 30-day freeze period
     IF char_created_at + INTERVAL '30 days' > NOW() THEN
+        RAISE INFO 'can_user_edit_character: Character % still in 30-day freeze period', character_uuid;
         RETURN false;
     END IF;
 
-    -- check weekly edit limit (1 edit per week after freeze period)
-    SELECT COUNT(*)
-    INTO recent_edits
-    FROM character_edits
-    WHERE character_id = character_uuid
-      AND edited_at > NOW() - INTERVAL '7 days';
+    IF last_edit_at IS NOT NULL AND last_edit_at > NOW() - INTERVAL '7 days' THEN
+        RAISE INFO 'can_user_edit_character: Character % has recent edit at %, weekly limit exceeded', character_uuid, last_edit_at;
+        RETURN false;
+    END IF;
 
-    -- allow edit if no recent edits
-    RETURN recent_edits = 0;
+    RETURN true;
+
+EXCEPTION
+    WHEN OTHERS THEN
+        RAISE WARNING 'can_user_edit_character: Unexpected error for character % and user %: %', character_uuid, user_uuid, SQLERRM;
+        RETURN false;
 END;
-$$ LANGUAGE plpgsql;
+$$ language plpgsql;
 
--- function to get random characters for plaza
-CREATE OR REPLACE FUNCTION get_random_characters(limit_count INTEGER DEFAULT 100)
-RETURNS TABLE (
-    id UUID,
-    name VARCHAR(100),
-    character_data JSONB,
-    country VARCHAR(100),
-    region VARCHAR(100),
-    city VARCHAR(100),
-    sex VARCHAR(10),
-    created_at TIMESTAMP WITH TIME ZONE,
-    last_edited_at TIMESTAMP WITH TIME ZONE
+CREATE OR REPLACE FUNCTION get_random_characters (limit_count INTEGER DEFAULT 100) returns TABLE (
+  id UUID,
+  character_data JSONB,
+  created_at TIMESTAMP WITH TIME ZONE,
+  last_edited_at TIMESTAMP WITH TIME ZONE
 ) AS $$
 BEGIN
     RETURN QUERY
     SELECT
         c.id,
-        c.name,
         c.character_data,
-        c.country,
-        c.region,
-        c.city,
-        c.sex,
         c.created_at,
         c.last_edited_at
     FROM characters c
@@ -161,44 +138,42 @@ BEGIN
     ORDER BY RANDOM()
     LIMIT limit_count;
 END;
-$$ LANGUAGE plpgsql;
+$$ language plpgsql;
 
--- function to record character edit
-CREATE OR REPLACE FUNCTION record_character_edit(
-    char_id UUID,
-    user_id UUID,
-    field_name VARCHAR(50),
-    old_val JSONB,
-    new_val JSONB
-)
-RETURNS VOID AS $$
+CREATE OR REPLACE FUNCTION prevent_deleted_character_edit () returns trigger AS $$
 BEGIN
-    INSERT INTO character_edits (character_id, user_id, field_changed, old_value, new_value)
-    VALUES (char_id, user_id, field_name, old_val, new_val);
-
-    -- update character edit count and timestamp
-    UPDATE characters
-    SET
-        last_edited_at = NOW(),
-        edit_count = edit_count + 1
-    WHERE id = char_id;
-END;
-$$ LANGUAGE plpgsql;
-
--- triggers to maintain data integrity
-
--- trigger to prevent editing deleted characters
-CREATE OR REPLACE FUNCTION prevent_deleted_character_edit()
-RETURNS TRIGGER AS $$
-BEGIN
-    IF OLD.is_deleted = true THEN
-        RAISE EXCEPTION 'Cannot edit deleted character';
+    IF OLD IS NULL THEN
+        RAISE EXCEPTION 'prevent_deleted_character_edit: OLD record is NULL';
     END IF;
-    RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
 
-CREATE TRIGGER check_character_not_deleted
-    BEFORE UPDATE ON characters
-    FOR EACH ROW
-    EXECUTE FUNCTION prevent_deleted_character_edit();
+    IF OLD.is_deleted = true THEN
+        RAISE EXCEPTION 'Cannot edit deleted character with ID %', OLD.id;
+    END IF;
+
+    IF NEW.last_edited_at IS NOT NULL AND NEW.last_edited_at < NEW.created_at THEN
+        RAISE EXCEPTION 'Last edited time (%) cannot be before creation time (%) for character %',
+                       NEW.last_edited_at, NEW.created_at, NEW.id;
+    END IF;
+
+    RETURN NEW;
+
+EXCEPTION
+    WHEN OTHERS THEN
+        RAISE EXCEPTION 'prevent_deleted_character_edit: Unexpected error for character %: %',
+                       COALESCE(OLD.id, NEW.id), SQLERRM;
+END;
+$$ language plpgsql;
+
+CREATE TRIGGER check_character_not_deleted before
+UPDATE ON characters FOR each ROW
+EXECUTE function prevent_deleted_character_edit ();
+
+CREATE OR REPLACE FUNCTION cleanup_expired_sessions () returns INTEGER AS $$
+DECLARE
+    deleted_count integer;
+BEGIN
+    DELETE FROM user_sessions WHERE expires_at < NOW();
+    GET DIAGNOSTICS deleted_count = ROW_COUNT;
+    RETURN deleted_count;
+END;
+$$ language plpgsql;

@@ -5,10 +5,10 @@ import {
   CharacterUpdateData,
   SearchParams,
   DatabaseCharacter,
-  CanEditResult,
-  //  DatabaseUser,
+  DatabaseUser,
   PlazaCharacterResult,
 } from "./types";
+import { log } from "./logger";
 
 dotenv.config();
 
@@ -25,11 +25,11 @@ const pool = new Pool({
 
 // test db connection
 pool.on("connect", () => {
-  console.log("Connected to PostgreSQL database");
+  log.info("Connected to PostgreSQL database");
 });
 
 pool.on("error", (err) => {
-  console.error("Unexpected error on idle client:", err);
+  log.error("Unexpected error on idle client:", { error: err });
   process.exit(-1);
 });
 
@@ -41,10 +41,10 @@ export const query = async <T extends QueryResultRow = QueryResultRow>(
   try {
     const res = await pool.query(text, params);
     const duration = Date.now() - start;
-    console.log("Executed query", { text, duration, rows: res.rowCount });
+    log.debug("Executed query", { text, duration, rows: res.rowCount });
     return res;
   } catch (error) {
-    console.error("Database query error:", error);
+    log.error("Database query error:", { error });
     throw error;
   }
 };
@@ -54,37 +54,33 @@ export const getClient = async (): Promise<PoolClient> => {
   return client;
 };
 
-// export const userQueries = {
-//   findByPlatformId: async (platform: string, platformUserId: string) => {
-//     const result = await query<DatabaseUser>(
-//       "SELECT * FROM users WHERE platform = $1 AND platform_user_id = $2",
-//       [platform, platformUserId],
-//     );
-//     return result.rows[0];
-//   },
+export const userQueries = {
+  findByPlatformId: async (platform: string, platformUserId: string) => {
+    const result = await query<DatabaseUser>(
+      "SELECT * FROM users WHERE platform = $1 AND platform_user_id = $2",
+      [platform, platformUserId],
+    );
+    return result.rows[0];
+  },
 
-//   create: async (
-//     platform: string,
-//     platformUserId: string,
-//     username: string,
-//     email?: string,
-//   ) => {
-//     const result = await query<DatabaseUser>(
-//       `INSERT INTO users (platform, platform_user_id, username, email)
-//        VALUES ($1, $2, $3, $4)
-//        RETURNING *`,
-//       [platform, platformUserId, username, email],
-//     );
-//     return result.rows[0];
-//   },
+  create: async (
+    platform: string,
+    platformUserId: string,
+    username: string,
+  ) => {
+    const result = await query<DatabaseUser>(
+      `INSERT INTO users (platform, platform_user_id, username)
+       VALUES ($1, $2, $3)
+       RETURNING *`,
+      [platform, platformUserId, username],
+    );
+    return result.rows[0];
+  },
 
-//   updateLastLogin: async (userId: string) => {
-//     await query("UPDATE users SET last_login = NOW() WHERE id = $1", [userId]);
-//   },
-// };
-
-import { mockUserOps } from "./mock-auth-storage";
-export const userQueries = mockUserOps;
+  updateLastLogin: async (userId: string) => {
+    await query("UPDATE users SET last_login = NOW() WHERE id = $1", [userId]);
+  },
+};
 
 // character-related database operations
 export const characterQueries = {
@@ -98,34 +94,14 @@ export const characterQueries = {
 
   // create new character
   create: async (userId: string, characterData: CharacterCreateData) => {
-    const {
-      name,
-      heightCm,
-      weightKg,
-      sex,
-      country,
-      region,
-      city,
-      characterJson,
-    } = characterData;
+    const { characterJson } = characterData;
 
     const result = await query<DatabaseCharacter>(
       `INSERT INTO characters
-       (user_id, name, height_cm, weight_kg, sex,
-        country, region, city, character_data)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+       (user_id, character_data)
+       VALUES ($1, $2)
        RETURNING *`,
-      [
-        userId,
-        name,
-        heightCm,
-        weightKg,
-        sex,
-        country,
-        region,
-        city,
-        JSON.stringify(characterJson),
-      ],
+      [userId, JSON.stringify(characterJson)],
     );
     return result.rows[0];
   },
@@ -136,7 +112,7 @@ export const characterQueries = {
     userId: string,
     updates: CharacterUpdateData,
   ) => {
-    const canEdit = await query<CanEditResult>(
+    const canEdit = await query<{ can_edit: boolean }>(
       "SELECT can_user_edit_character($1, $2) as can_edit",
       [characterId, userId],
     );
@@ -147,54 +123,18 @@ export const characterQueries = {
       );
     }
 
-    const oldCharacter = await query<DatabaseCharacter>(
-      "SELECT * FROM characters WHERE id = $1 AND user_id = $2",
-      [characterId, userId],
-    );
-
-    if (oldCharacter.rows.length === 0) {
-      throw new Error("Character not found or not owned by user");
-    }
-
-    const {
-      name,
-      heightCm,
-      weightKg,
-      sex,
-      country,
-      region,
-      city,
-      characterJson,
-    } = updates;
+    const { characterJson } = updates;
     const result = await query<DatabaseCharacter>(
       `UPDATE characters
-       SET name = $3, height_cm = $4, weight_kg = $5, sex = $6,
-           country = $7, region = $8, city = $9,
-           character_data = $10, last_edited_at = NOW(), edit_count = edit_count + 1
+       SET character_data = $3, last_edited_at = NOW(), is_edited = TRUE
        WHERE id = $1 AND user_id = $2
        RETURNING *`,
-      [
-        characterId,
-        userId,
-        name,
-        heightCm,
-        weightKg,
-        sex,
-        country,
-        region,
-        city,
-        JSON.stringify(characterJson),
-      ],
+      [characterId, userId, JSON.stringify(characterJson)],
     );
 
-    // record the edit in history
-    await query(`SELECT record_character_edit($1, $2, $3, $4, $5)`, [
-      characterId,
-      userId,
-      "full_update",
-      JSON.stringify(oldCharacter.rows[0]),
-      JSON.stringify(result.rows[0]),
-    ]);
+    if (result.rows.length === 0) {
+      throw new Error("Character not found or not owned by user");
+    }
 
     return result.rows[0];
   },
@@ -220,19 +160,19 @@ export const characterQueries = {
 
     if (country) {
       paramCount++;
-      whereClause += ` AND country ILIKE $${paramCount}`;
+      whereClause += ` AND character_data->'metadata'->'location'->>'country' ILIKE $${paramCount}`;
       params.push(`%${country}%`);
     }
 
     if (region) {
       paramCount++;
-      whereClause += ` AND region ILIKE $${paramCount}`;
+      whereClause += ` AND character_data->'metadata'->'location'->>'region' ILIKE $${paramCount}`;
       params.push(`%${region}%`);
     }
 
     paramCount++;
     const query_text = `
-      SELECT id, name, character_data, country, region, city, sex, created_at, last_edited_at
+      SELECT id, character_data, created_at, last_edited_at
       FROM characters
       ${whereClause}
       ORDER BY RANDOM()
