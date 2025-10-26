@@ -1,0 +1,51 @@
+import { query } from "./database";
+import { log } from "./logger";
+
+export class DatabaseScheduler {
+  private intervalId: ReturnType<typeof setInterval> | null = null;
+  private readonly cleanupIntervalMs: number;
+
+  constructor(cleanupIntervalMinutes: number = 60) {
+    this.cleanupIntervalMs = cleanupIntervalMinutes * 60 * 1000;
+  }
+
+  start(): void {
+    if (this.intervalId) {
+      log.warn("DatabaseScheduler is already running");
+      return;
+    }
+
+    log.info("Starting DatabaseScheduler", {
+      cleanupIntervalMinutes: this.cleanupIntervalMs / 60000,
+    });
+
+    this.runCleanup();
+
+    this.intervalId = setInterval(() => {
+      this.runCleanup();
+    }, this.cleanupIntervalMs);
+  }
+
+  stop(): void {
+    if (this.intervalId) {
+      clearInterval(this.intervalId);
+      this.intervalId = null;
+      log.info("DatabaseScheduler stopped");
+    }
+  }
+
+  private async runCleanup(): Promise<void> {
+    try {
+      const result = await query(
+        "SELECT cleanup_expired_sessions() as deleted_count",
+      );
+      const deletedCount = result.rows[0]?.deleted_count || 0;
+
+      log.info("Session cleanup completed", { deletedCount });
+    } catch (error) {
+      log.error("Session cleanup failed", {
+        error: error instanceof Error ? error.message : String(error),
+      });
+    }
+  }
+}
