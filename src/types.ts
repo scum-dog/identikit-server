@@ -7,59 +7,144 @@ export interface DatabaseQueryResult<T = unknown> {
 }
 
 export interface CharacterCreateData {
-  name: string;
-  heightCm?: number;
-  weightKg?: number;
-  sex?: string;
-  country?: string;
-  region?: string;
-  city?: string;
-  characterJson: object;
+  character_data: object;
+  characterJson?: object;
 }
 
 export interface CharacterUpdateData {
-  name?: string;
-  heightCm?: number;
-  weightKg?: number;
-  sex?: string;
-  country?: string;
-  region?: string;
-  city?: string;
+  character_data?: object;
   characterJson?: object;
 }
 
 export interface DatabaseCharacter {
   id: string;
   user_id: string;
-  name: string;
-  height_cm: number;
-  weight_kg: number;
-  sex: string;
-  country: string;
-  region: string;
-  city: string;
   character_data: string | object;
   created_at: string;
-  last_edited_at: string;
-  edit_count: number;
+  last_edited_at: string | null;
+  is_edited: boolean;
   is_deleted: boolean;
   deleted_at: string | null;
   deleted_by: string | null;
 }
 
-export interface CanEditResult {
-  can_edit: boolean;
+export interface CharacterMetadata {
+  upload_id: string;
+  user_id: string;
+  created_at: string;
+  last_edited_at: string | null;
+  is_edited: boolean;
+  canEdit: boolean;
+  is_deleted: boolean;
+  deleted_at: string | null;
+  deleted_by: string | null;
+  location: {
+    country: string;
+    region?: string;
+    city?: string;
+  };
 }
 
+export interface CharacterStatic {
+  name: string;
+  sex: "male" | "female" | "other";
+  date_of_birth: string;
+  height_in: number;
+  weight_lb: number;
+  head_shape: {
+    shape_id: string;
+    skin_color: SkinColor;
+  };
+  hair: {
+    style_id: string;
+    hair_color: HairColor;
+  };
+  facial_hair: {
+    shape_id: string;
+    facial_hair_color: HairColor;
+  };
+  chin: {
+    shape_id: string;
+  };
+}
+
+export interface CharacterPlaceableMovable {
+  eyes: {
+    shape_id: string;
+    eye_color: EyeColor;
+    offset_y: number;
+    scale: number;
+    rotation: number;
+    distance: number;
+  };
+  eyebrows: {
+    shape_id: string;
+    offset_y: number;
+    scale: number;
+    rotation: number;
+    distance: number;
+  };
+  nose: {
+    shape_id: string;
+    offset_y: number;
+    scale: number;
+  };
+  lips: {
+    shape_id: string;
+    offset_y: number;
+    scale: number;
+  };
+  age_lines: {
+    shape_id: string;
+    offset_y: number;
+    scale: number;
+    rotation: number;
+  };
+  accessories: {
+    slot_1?: AccessorySlot;
+    slot_2?: AccessorySlot;
+    slot_3?: AccessorySlot;
+  };
+}
+
+export interface CharacterDataStructure {
+  static: CharacterStatic;
+  placeable_movable: CharacterPlaceableMovable;
+}
+
+export interface FullCharacterData {
+  metadata: CharacterMetadata;
+  character_data: CharacterDataStructure;
+}
+
+export type AccessorySlot =
+  | {
+      type: "glasses";
+      asset_id: string;
+      offset_y: number;
+      rotation: number;
+      distance: number;
+    }
+  | {
+      type: "mustache";
+      asset_id: string;
+      offset_y: number;
+      rotation: number;
+      distance: number;
+    }
+  | {
+      type: "misc";
+      asset_id: string;
+      offset_x?: number;
+      offset_y: number;
+      scale?: number;
+      rotation: number;
+      distance: number;
+    };
+
 export interface CharacterRouteUpdates {
-  name?: string;
-  country?: string;
-  region?: string;
-  city?: string;
+  character_data?: object;
   characterJson?: object;
-  heightCm?: number;
-  weightKg?: number;
-  sex?: string;
 }
 
 export interface PlazaQueryRequest {
@@ -72,36 +157,28 @@ export interface PlazaQueryRequest {
 
 export interface PlazaCharacterData {
   id: string;
-  name: string;
   created_at: string;
-  last_edited_at: string;
-  country: string;
-  region: string;
-  city: string;
-  sex: string;
+  last_edited_at: string | null;
   character_data: string | object;
 }
 
 export interface MockCharacterRouteUpdates {
-  creator_name?: string;
-  location?: {
-    country: string | null;
-    region: string | null | undefined;
-    city: string | null | undefined;
-  };
   character_data?: object;
+  location?: {
+    country?: string | null;
+    region?: string | null;
+    city?: string | null;
+  };
+  metadata?: {
+    location?: {
+      country?: string;
+      region?: string;
+      city?: string;
+    };
+  };
 }
 
-export type AccessoryType =
-  | "glasses"
-  | "hat"
-  | "earrings"
-  | "mustache"
-  | "beard"
-  | "piercing"
-  | "scar"
-  | "tattoo"
-  | "makeup";
+export type AccessoryType = "glasses" | "mustache" | "misc";
 
 export type SkinColor =
   | "pale"
@@ -113,25 +190,28 @@ export type SkinColor =
   | "very-dark";
 
 export type EyeColor =
+  | "black"
   | "brown"
+  | "gray"
   | "blue"
   | "green"
   | "hazel"
-  | "gray"
-  | "amber"
-  | "violet";
+  | "maroon";
 
 export type HairColor =
+  | "bald"
   | "black"
-  | "brown"
   | "blonde"
-  | "red"
-  | "gray"
-  | "white"
   | "blue"
+  | "brown"
+  | "gray"
   | "green"
+  | "orange"
+  | "pink"
   | "purple"
-  | "pink";
+  | "red"
+  | "sandy"
+  | "white";
 
 export type Sex = "male" | "female" | "other";
 
@@ -140,45 +220,26 @@ export interface MockUser {
   username: string;
   platform: string;
   platform_user_id: string;
-  email: string;
   created_at: string;
   last_login: string;
   is_admin: boolean;
 }
 
 export interface MockCharacter {
-  id?: string; // alias for upload_id
   upload_id: string;
   user_id: string;
-  creator_name: string;
   created_at: string;
-  creation_time?: string; // alias for created_at
-  last_edited_at: string;
-  edit_time?: string; // alias for last_edited_at
-  location: {
-    country: string | null;
-    region: string | null | undefined;
-    city: string | null | undefined;
-  };
-  country?: string | null; // alias for location.country
+  last_edited_at: string | null;
   character_data: object;
-  edit_count: number;
+  is_edited: boolean;
   is_deleted: boolean;
   deleted_at: string | null;
   deleted_by: string | null;
-}
-
-export interface MockEditHistory {
-  id: string;
-  character_id: string;
-  user_id: string | null;
-  changes: {
-    fields_changed: string[];
-    old_values: object;
-    new_values: object;
+  location: {
+    country: string | null;
+    region: string | null;
+    city: string | null;
   };
-  edited_at: string;
-  editor_username: string | null;
 }
 
 export interface QueryValidationRequest extends Request {
@@ -192,7 +253,7 @@ export interface PlazaValidationRequest extends Request {
 export type SearchParams = (string | number)[];
 
 export interface PlatformUser {
-  id: number | string;
+  id: string;
   username: string;
   platform?: string;
   is_admin?: boolean;
@@ -262,13 +323,26 @@ export interface CreateSessionData {
   isAdmin: boolean;
 }
 
-export interface GoogleUser extends PlatformUser {
+export interface DatabaseUser {
   id: string;
+  platform: Platform;
+  platform_user_id: string;
   username: string;
-  email: string;
-  name: string;
-  picture?: string;
-  email_verified: boolean;
+  is_admin: boolean;
+  created_at: string;
+  last_login: string;
+}
+
+export interface DatabaseSession {
+  session_id: string;
+  user_id: string;
+  platform: Platform;
+  platform_user_id: string;
+  platform_session_id?: string;
+  username: string;
+  is_admin: boolean;
+  created_at: Date;
+  expires_at: Date;
 }
 
 export interface GoogleAuthResponse {
@@ -281,31 +355,14 @@ export interface GoogleAuthResponse {
 
 export interface GoogleUserInfoResponse {
   sub: string;
-  name: string;
-  given_name: string;
-  family_name: string;
-  picture: string;
   email: string;
-  email_verified: boolean;
-  locale?: string;
-}
-
-export interface ItchUser extends PlatformUser {
-  id: number;
-  username: string;
-  display_name?: string;
-  cover_url?: string;
-  url: string;
 }
 
 export interface ItchAuthResponse {
-  user: ItchUser;
-}
-
-export interface NewgroundsUser extends PlatformUser {
-  id: number;
-  name: string;
-  supporter: boolean;
+  user: {
+    id: number;
+    username: string;
+  };
 }
 
 export interface NewgroundsGatewayRequest {
@@ -324,7 +381,7 @@ export interface NewgroundsGatewayResponse {
     data?: {
       success?: boolean;
       session?: NewgroundsSession;
-      user?: NewgroundsUser;
+      user?: PlatformUser;
       [key: string]: unknown;
     };
     [key: string]: unknown;
@@ -337,7 +394,10 @@ export interface NewgroundsGatewayResponse {
 
 export interface NewgroundsSession {
   id: string;
-  user?: NewgroundsUser;
+  user?: {
+    id: number;
+    username: string;
+  };
   expired: boolean;
   remember: boolean;
   passport_url?: string;
@@ -349,82 +409,31 @@ export interface NewgroundsAuthRequest {
 
 export interface CharacterInfo {
   id: string;
-  name: string;
   created_at: string;
   last_edited_at: string;
-  edit_count: number;
+  is_edited: boolean;
 }
 
 export interface PlazaCharacterResult {
   id: string;
-  name: string;
   character_data: string | object;
-  country: string;
-  region: string;
-  city: string;
-  sex: string;
   created_at: string;
-  last_edited_at: string;
+  last_edited_at: string | null;
 }
 
-export interface AdminCharacterListResult {
+export interface AdminCharacter {
   id: string;
-  name: string;
-  country: string;
-  region: string;
-  city: string;
+  user_id: string;
+  character_data: string | object;
   created_at: string;
-  last_edited_at: string;
-  edit_count: number;
+  last_edited_at: string | null;
+  is_edited: boolean;
   is_deleted: boolean;
   deleted_at: string | null;
   deleted_by: string | null;
-  username: string;
-  platform: string;
-  platform_user_id: string;
 }
 
-export interface AdminCharacterDetailResult {
-  id: string;
-  user_id: string;
-  name: string;
-  height_cm: number;
-  weight_kg: number;
-  country: string;
-  region: string;
-  city: string;
-  character_data: string | object;
-  created_at: string;
-  last_edited_at: string;
-  edit_count: number;
-  is_deleted: boolean;
-  deleted_at: string | null;
-  deleted_by: string | null;
-  username: string;
-  platform: string;
-  platform_user_id: string;
-  email: string;
-  user_created_at: string;
-  last_login: string;
-}
-
-export interface AdminEditHistoryResult {
-  id: string;
-  character_id: string;
-  user_id: string | null;
-  changes: object;
-  edited_at: string;
-  editor_username: string | null;
-}
-
-export interface AdminCharacterSimpleResult {
-  id: string;
-  name: string;
-  user_id: string;
-  is_deleted: boolean;
-}
-
-export interface AdminUserListResult {
+export interface AdminUser {
   id: string;
   username: string;
   platform: string;
@@ -432,30 +441,14 @@ export interface AdminUserListResult {
   created_at: string;
   last_login: string;
   is_admin: boolean;
-  character_count: number;
 }
 
-export interface DatabaseUser {
-  id: string;
+export interface AdminCharacterWithUser extends AdminCharacter {
+  username: string;
   platform: string;
   platform_user_id: string;
-  username: string;
-  email: string;
-  created_at: string;
-  last_login: string;
-  is_admin: boolean;
-}
-
-export interface DatabaseSession {
-  session_id: string;
-  user_id: string;
-  platform: Platform;
-  platform_user_id: string;
-  platform_session_id?: string;
-  username: string;
-  is_admin: boolean;
-  created_at: Date;
-  expires_at: Date;
+  user_created_at?: string;
+  last_login?: string;
 }
 
 export interface ItchOAuthParams extends Record<string, string> {

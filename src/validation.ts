@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { Request, Response, NextFunction } from "express";
+import { log } from "./logger";
 
 const shapeIdSchema = (prefix: string) =>
   z
@@ -9,245 +10,329 @@ const shapeIdSchema = (prefix: string) =>
       `Invalid ${prefix} shape ID format`,
     );
 
+const assetIdSchema = z
+  .string()
+  .regex(
+    /^(A_\d{3}|B_\d{3}|C_\d{3}|EA_\d{3}|EB_\d{3}|EY_\d{3}|G_\d{3}|H_\d{3}|L_\d{3}|M_\d{3}|N_\d{3})$/,
+    "Invalid asset ID format",
+  );
+
 const offsetSchema = z
   .number()
   .min(-1)
   .max(1)
   .transform((val) => Math.round(val * 10) / 10);
 
+const rotationSchema = z.number().min(0).max(359).int();
+
+const distanceSchema = z
+  .number()
+  .min(0)
+  .max(1)
+  .transform((val) => Math.round(val * 10) / 10);
+
+const scaleSchema = z
+  .number()
+  .min(0.5)
+  .max(1.5)
+  .transform((val) => Math.round(val * 10) / 10);
+
 const eyeColorEnum = z.enum([
-  "brown",
+  "black",
   "blue",
+  "brown",
+  "gray",
   "green",
   "hazel",
-  "gray",
-  "amber",
-  "violet",
+  "maroon",
 ]);
 
-const accessorySlotSchema = z
-  .object({
-    type: z.enum([
-      "glasses",
-      "hat",
-      "earrings",
-      "mustache",
-      "beard",
-      "piercing",
-      "scar",
-      "tattoo",
-      "makeup",
-      "none",
-    ]),
-    asset_id: z
-      .string()
-      .regex(/^A_\d{3}$/)
-      .nullable(),
-    offset_y: offsetSchema.nullable(),
-  })
-  .refine(
-    (data) => {
-      if (data.type === "none") {
-        return data.asset_id === null && data.offset_y === null;
-      } else {
-        return data.asset_id !== null && data.offset_y !== null;
-      }
-    },
-    {
-      message:
-        "When type is 'none', asset_id and offset_y must be null. Otherwise, they must be provided.",
-    },
-  );
+const hairColorEnum = z.enum([
+  "bald",
+  "black",
+  "blonde",
+  "blue",
+  "brown",
+  "gray",
+  "green",
+  "orange",
+  "pink",
+  "purple",
+  "red",
+  "sandy",
+  "white",
+]);
+
+const skinColorEnum = z.enum([
+  "pale",
+  "light",
+  "medium",
+  "medium-tan",
+  "tan",
+  "dark",
+  "very-dark",
+]);
+
+const sexEnum = z.enum(["male", "female", "other"]);
+
+const accessorySlotSchema = z.discriminatedUnion("type", [
+  z.object({
+    type: z.literal("glasses"),
+    asset_id: z.string().regex(/^G_\d{3}$/, "Glasses must use G_XXX format"),
+    offset_y: offsetSchema.default(0),
+    rotation: rotationSchema.default(0),
+    distance: distanceSchema.default(0),
+  }),
+  z.object({
+    type: z.literal("mustache"),
+    asset_id: z.string().regex(/^M_\d{3}$/, "Mustache must use M_XXX format"),
+    offset_y: offsetSchema.default(0),
+    rotation: rotationSchema.default(0),
+    distance: distanceSchema.default(0),
+  }),
+  z.object({
+    type: z.literal("misc"),
+    asset_id: assetIdSchema,
+    offset_x: offsetSchema.optional(),
+    offset_y: offsetSchema.default(0),
+    scale: scaleSchema.optional(),
+    rotation: rotationSchema.default(0),
+    distance: distanceSchema.default(0),
+  }),
+]);
 
 export const characterDataSchema = z.object({
-  placeable_movable: z.object({
-    lips: z.object({
-      shape_id: shapeIdSchema("L"),
-      offset_y: offsetSchema,
-    }),
-    nose: z.object({
-      shape_id: shapeIdSchema("N"),
-      offset_y: offsetSchema,
-    }),
-    eyebrows: z.object({
-      shape_id: shapeIdSchema("EB"),
-      offset_y: offsetSchema,
-    }),
-    eyes: z.object({
-      shape_id: shapeIdSchema("E"),
-      offset_y: offsetSchema,
-      eye_color: eyeColorEnum,
-    }),
-    accessories: z.object({
-      slot_1: accessorySlotSchema,
-      slot_2: accessorySlotSchema,
-      slot_3: accessorySlotSchema,
+  metadata: z.object({
+    upload_id: z.string().uuid(),
+    user_id: z.string().uuid(),
+    created_at: z.string().datetime(),
+    last_edited_at: z.string().datetime().nullable(),
+    is_edited: z.boolean().default(false),
+    canEdit: z.boolean(),
+    is_deleted: z.boolean().default(false),
+    deleted_at: z.string().datetime().nullable(),
+    deleted_by: z.string().uuid().nullable(),
+    location: z.object({
+      country: z.string().min(1).max(100),
+      region: z.string().min(1).max(100).optional(),
+      city: z.string().min(1).max(100).optional(),
     }),
   }),
-  static: z.object({
-    hair: z.object({
-      style_id: shapeIdSchema("H"),
-      hair_color: z.enum([
-        "black",
-        "brown",
-        "blonde",
-        "red",
-        "gray",
-        "white",
-        "blue",
-        "green",
-        "purple",
-        "pink",
-      ]),
-    }),
-    head_shape: z.object({
-      shape_id: shapeIdSchema("HD"),
-      skin_color: z.enum([
-        "pale",
-        "light",
-        "medium",
-        "medium-tan",
-        "tan",
-        "dark",
-        "very-dark",
-      ]),
-    }),
-    height_cm: z.number().int().min(50).max(250),
-    weight_kg: z.number().int().min(20).max(300),
-    sex: z.enum(["male", "female", "other"]),
-    date_of_birth: z
-      .string()
-      .regex(/^\d{4}-\d{2}-\d{2}$/, "Date must be in YYYY-MM-DD format")
-      .refine((date) => {
-        const d = new Date(date);
-        return d >= new Date("1900-01-01") && d <= new Date();
-      }, "Date must be between 1900-01-01 and today")
-      .optional(),
-  }),
-});
-
-export const characterDataUpdateSchema = z.object({
-  placeable_movable: z
-    .object({
-      lips: z
-        .object({
-          shape_id: shapeIdSchema("L"),
-          offset_y: offsetSchema,
-        })
-        .optional(),
-      nose: z
-        .object({
-          shape_id: shapeIdSchema("N"),
-          offset_y: offsetSchema,
-        })
-        .optional(),
-      eyebrows: z
-        .object({
-          shape_id: shapeIdSchema("EB"),
-          offset_y: offsetSchema,
-        })
-        .optional(),
-      eyes: z
-        .object({
-          shape_id: shapeIdSchema("E"),
-          offset_y: offsetSchema,
-          eye_color: eyeColorEnum.optional(),
-        })
-        .optional(),
-      accessories: z
-        .object({
-          slot_1: accessorySlotSchema.optional(),
-          slot_2: accessorySlotSchema.optional(),
-          slot_3: accessorySlotSchema.optional(),
-        })
-        .optional(),
-    })
-    .optional(),
-  static: z
-    .object({
-      hair: z
-        .object({
-          style_id: shapeIdSchema("H"),
-          hair_color: z
-            .enum([
-              "black",
-              "brown",
-              "blonde",
-              "red",
-              "gray",
-              "white",
-              "blue",
-              "green",
-              "purple",
-              "pink",
-            ])
-            .optional(),
-        })
-        .optional(),
-      head_shape: z
-        .object({
-          shape_id: shapeIdSchema("HD"),
-          skin_color: z
-            .enum([
-              "pale",
-              "light",
-              "medium",
-              "medium-tan",
-              "tan",
-              "dark",
-              "very-dark",
-            ])
-            .optional(),
-        })
-        .optional(),
-      height_cm: z.number().int().min(50).max(250).optional(),
-      weight_kg: z.number().int().min(20).max(300).optional(),
-      sex: z.enum(["male", "female", "other"]).optional(),
+  character_data: z.object({
+    static: z.object({
+      name: z.string().min(1).max(100),
+      sex: sexEnum,
       date_of_birth: z
         .string()
         .regex(/^\d{4}-\d{2}-\d{2}$/, "Date must be in YYYY-MM-DD format")
         .refine((date) => {
           const d = new Date(date);
           return d >= new Date("1900-01-01") && d <= new Date();
-        }, "Date must be between 1900-01-01 and today")
+        }, "Date must be between 1900-01-01 and today"),
+      height_in: z.number().int().min(24).max(96), // 2-8 feet
+      weight_lb: z.number().int().min(50).max(500), // pounds
+      head_shape: z.object({
+        shape_id: shapeIdSchema("H"),
+        skin_color: skinColorEnum,
+      }),
+      hair: z.object({
+        style_id: shapeIdSchema("H"),
+        hair_color: hairColorEnum,
+      }),
+      beard: z.object({
+        shape_id: shapeIdSchema("B"),
+        facial_hair_color: hairColorEnum,
+      }),
+      mustache: z.object({
+        shape_id: shapeIdSchema("M"),
+        facial_hair_color: hairColorEnum,
+      }),
+      chin: z.object({
+        shape_id: shapeIdSchema("C"),
+      }),
+    }),
+    placeable_movable: z.object({
+      ears: z.object({
+        shape_id: shapeIdSchema("EA"),
+        offset_y: offsetSchema.default(0),
+        scale: scaleSchema.default(1.0),
+        rotation: rotationSchema.default(0),
+        distance: distanceSchema.default(0),
+      }),
+      eyes: z.object({
+        shape_id: shapeIdSchema("EY"),
+        eye_color: eyeColorEnum,
+        offset_y: offsetSchema.default(0),
+        scale: scaleSchema.default(1.0),
+        rotation: rotationSchema.default(0),
+        distance: distanceSchema.default(0),
+      }),
+      eyebrows: z.object({
+        shape_id: shapeIdSchema("EB"),
+        offset_y: offsetSchema.default(0),
+        scale: scaleSchema.default(1.0),
+        rotation: rotationSchema.default(0),
+        distance: distanceSchema.default(0),
+      }),
+      nose: z.object({
+        shape_id: shapeIdSchema("N"),
+        offset_y: offsetSchema.default(0),
+        scale: scaleSchema.default(1.0),
+      }),
+      lips: z.object({
+        shape_id: shapeIdSchema("L"),
+        offset_y: offsetSchema.default(0),
+        scale: scaleSchema.default(1.0),
+      }),
+      age_lines: z.object({
+        shape_id: shapeIdSchema("A"),
+        offset_y: offsetSchema.default(0),
+        scale: scaleSchema.default(1.0),
+        rotation: rotationSchema.default(0),
+      }),
+      accessories: z.object({
+        slot_1: accessorySlotSchema.optional(),
+        slot_2: accessorySlotSchema.optional(),
+        slot_3: accessorySlotSchema.optional(),
+      }),
+    }),
+  }),
+});
+
+export const characterDataUpdateSchema = z.object({
+  character_data: z
+    .object({
+      static: z
+        .object({
+          name: z.string().min(1).max(100).optional(),
+          sex: sexEnum.optional(),
+          date_of_birth: z
+            .string()
+            .regex(/^\d{4}-\d{2}-\d{2}$/, "Date must be in YYYY-MM-DD format")
+            .refine((date) => {
+              const d = new Date(date);
+              return d >= new Date("1900-01-01") && d <= new Date();
+            }, "Date must be between 1900-01-01 and today")
+            .optional(),
+          height_in: z.number().int().min(24).max(96).optional(),
+          weight_lb: z.number().int().min(50).max(500).optional(),
+          head_shape: z
+            .object({
+              shape_id: shapeIdSchema("H").optional(),
+              skin_color: skinColorEnum.optional(),
+            })
+            .optional(),
+          hair: z
+            .object({
+              style_id: shapeIdSchema("H").optional(),
+              hair_color: hairColorEnum.optional(),
+            })
+            .optional(),
+          beard: z
+            .object({
+              shape_id: shapeIdSchema("B").optional(),
+              facial_hair_color: hairColorEnum.optional(),
+            })
+            .optional(),
+          mustache: z
+            .object({
+              shape_id: shapeIdSchema("M").optional(),
+              facial_hair_color: hairColorEnum.optional(),
+            })
+            .optional(),
+          chin: z
+            .object({
+              shape_id: shapeIdSchema("C").optional(),
+            })
+            .optional(),
+        })
+        .optional(),
+      placeable_movable: z
+        .object({
+          ears: z
+            .object({
+              shape_id: shapeIdSchema("EA").optional(),
+              offset_y: offsetSchema.optional(),
+              scale: scaleSchema.optional(),
+              rotation: rotationSchema.optional(),
+              distance: distanceSchema.optional(),
+            })
+            .optional(),
+          eyes: z
+            .object({
+              shape_id: shapeIdSchema("EY").optional(),
+              eye_color: eyeColorEnum.optional(),
+              offset_y: offsetSchema.optional(),
+              scale: scaleSchema.optional(),
+              rotation: rotationSchema.optional(),
+              distance: distanceSchema.optional(),
+            })
+            .optional(),
+          eyebrows: z
+            .object({
+              shape_id: shapeIdSchema("EB").optional(),
+              offset_y: offsetSchema.optional(),
+              scale: scaleSchema.optional(),
+              rotation: rotationSchema.optional(),
+              distance: distanceSchema.optional(),
+            })
+            .optional(),
+          nose: z
+            .object({
+              shape_id: shapeIdSchema("N").optional(),
+              offset_y: offsetSchema.optional(),
+              scale: scaleSchema.optional(),
+            })
+            .optional(),
+          lips: z
+            .object({
+              shape_id: shapeIdSchema("L").optional(),
+              offset_y: offsetSchema.optional(),
+              scale: scaleSchema.optional(),
+            })
+            .optional(),
+          age_lines: z
+            .object({
+              shape_id: shapeIdSchema("A").optional(),
+              offset_y: offsetSchema.optional(),
+              scale: scaleSchema.optional(),
+              rotation: rotationSchema.optional(),
+            })
+            .optional(),
+          accessories: z
+            .object({
+              slot_1: accessorySlotSchema.optional(),
+              slot_2: accessorySlotSchema.optional(),
+              slot_3: accessorySlotSchema.optional(),
+            })
+            .optional(),
+        })
+        .optional(),
+    })
+    .optional(),
+  metadata: z
+    .object({
+      location: z
+        .object({
+          country: z.string().min(1).max(100).optional(),
+          region: z.string().min(1).max(100).or(z.literal("")).optional(),
+          city: z.string().min(1).max(100).or(z.literal("")).optional(),
+        })
         .optional(),
     })
     .optional(),
 });
 
 export const characterUploadSchema = z.object({
-  creator_name: z
-    .string()
-    .trim()
-    .min(1, "Creator name is required")
-    .max(100, "Creator name must be 100 characters or less"),
-
-  location: z
-    .object({
-      country: z.string().trim().max(100).optional(),
-      region: z.string().trim().max(100).optional(),
-      city: z.string().trim().max(100).optional(),
-    })
-    .optional(),
-
-  character_data: characterDataSchema,
+  character: characterDataSchema,
 });
 
-export const characterUpdateSchema = z
-  .object({
-    creator_name: z.string().trim().min(1).max(100).optional(),
-    location: z
-      .object({
-        country: z.string().trim().max(100).or(z.literal("")).optional(),
-        region: z.string().trim().max(100).or(z.literal("")).optional(),
-        city: z.string().trim().max(100).or(z.literal("")).optional(),
-      })
-      .optional(),
-    character_data: characterDataUpdateSchema.optional(),
-  })
-  .refine((data) => Object.keys(data).length > 0, {
+export const characterUpdateSchema = characterDataUpdateSchema.refine(
+  (data) => Object.keys(data).length > 0,
+  {
     message: "At least one field must be provided for update",
-  });
+  },
+);
 
 export const plazaSearchSchema = z
   .object({
@@ -315,6 +400,7 @@ export const itchTokenSchema = z.object({
 export type CharacterData = z.infer<typeof characterDataSchema>;
 export type CharacterUpload = z.infer<typeof characterUploadSchema>;
 export type CharacterUpdate = z.infer<typeof characterUpdateSchema>;
+export type AccessorySlot = z.infer<typeof accessorySlotSchema>;
 export type PlazaSearchInput = {
   country?: string;
   region?: string;
@@ -415,19 +501,20 @@ export const validatePlazaQuery = (
 };
 
 export const validateCharacterOwnership = async (
-  _userId: string,
-  _characterId: string,
+  userId: string,
+  characterId: string,
 ) => {
-  // would normally check db to make sure the user owns the character
-  // TODO: come back to this when DB is ready
-  return true;
-};
+  const { query } = await import("./database");
 
-export const validateEditPermissions = async (
-  _userId: string,
-  _characterId: string,
-) => {
-  // would normally check if user can edit (30d freeze/weekly limit)
-  // TODO: come back to this when DB is ready
-  return true;
+  try {
+    const result = await query(
+      "SELECT id FROM characters WHERE id = $1 AND user_id = $2 AND is_deleted = false",
+      [characterId, userId],
+    );
+
+    return result.rows.length > 0;
+  } catch (error) {
+    log.error("Error validating character ownership:", { error });
+    return false;
+  }
 };
