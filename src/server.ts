@@ -23,6 +23,10 @@ const PORT = process.env.PORT || 3000;
 const environment = process.env.NODE_ENV || "development";
 const scheduler = new DatabaseScheduler();
 
+if (environment === "production") {
+  app.set("trust proxy", 1);
+}
+
 app.use(helmet());
 
 app.use(
