@@ -16,7 +16,7 @@ export class DatabaseScheduler {
     }
 
     log.info("Starting DatabaseScheduler", {
-      cleanupIntervalMinutes: this.cleanupIntervalMs / 60000,
+      cleanupIntervalMinutes: this.cleanupIntervalMs / (60 * 1000),
     });
 
     this.runCleanup();
@@ -36,16 +36,22 @@ export class DatabaseScheduler {
 
   private async runCleanup(): Promise<void> {
     try {
-      const result = await query(
-        "SELECT cleanup_expired_sessions() as deleted_count",
-      );
-      const deletedCount = result.rows[0]?.deleted_count || 0;
-
-      log.info("Session cleanup completed", { deletedCount });
+      await this.runSessionCleanup();
     } catch (error) {
       log.error("Session cleanup failed", {
         error: error instanceof Error ? error.message : String(error),
       });
     }
+  }
+
+  private async runSessionCleanup(): Promise<void> {
+    const sessionResult = await query(
+      "SELECT cleanup_expired_sessions() as deleted_count",
+    );
+    const deletedSessions = sessionResult.rows[0]?.deleted_count || 0;
+
+    log.info("Session cleanup completed", {
+      deletedSessions,
+    });
   }
 }

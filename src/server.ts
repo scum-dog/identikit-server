@@ -13,6 +13,7 @@ import pingRoutes from "./routes/ping";
 import { validateConfig } from "./auth/configValidation";
 import "./database";
 import { DatabaseScheduler } from "./scheduler";
+import { initializeQueue, shutdownQueue } from "./queue";
 import { log } from "./logger";
 
 dotenv.config();
@@ -139,19 +140,23 @@ app.use((req: Request, res: Response) => {
   });
 });
 
-app.listen(PORT, () => {
+app.listen(PORT, async () => {
   log.info(`listening on port ${PORT} in ${environment}`);
   scheduler.start();
+  await initializeQueue();
+  log.info("Job queue initialized and resumed processing");
 });
 
-process.on("SIGTERM", () => {
+process.on("SIGTERM", async () => {
   log.info("SIGTERM received. Shutting down gracefully...");
   scheduler.stop();
+  await shutdownQueue();
   process.exit(0);
 });
 
-process.on("SIGINT", () => {
+process.on("SIGINT", async () => {
   log.info("SIGINT received. Shutting down gracefully...");
   scheduler.stop();
+  await shutdownQueue();
   process.exit(0);
 });

@@ -44,7 +44,7 @@ CREATE TABLE user_sessions (
   UNIQUE (user_id)
 );
 
--- indexes
+-- character indexes
 CREATE INDEX idx_characters_user_id ON characters (user_id);
 
 CREATE INDEX idx_characters_created_at ON characters (created_at);
@@ -81,6 +81,7 @@ CREATE INDEX idx_users_platform ON users (platform, platform_user_id);
 
 CREATE INDEX idx_user_sessions_expires_at ON user_sessions (expires_at);
 
+-- business logic
 CREATE OR REPLACE FUNCTION can_user_edit_character (character_uuid UUID, user_uuid UUID) returns BOOLEAN AS $$
 DECLARE
     char_created_at TIMESTAMP WITH TIME ZONE;

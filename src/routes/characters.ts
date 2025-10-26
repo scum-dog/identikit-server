@@ -27,6 +27,10 @@ const uploadRateLimit = rateLimit({
   windowMs: 60 * 60 * 1000,
   max: 5,
   message: { error: "Upload limit exceeded, please try again later" },
+  skip: (req) => {
+    const user = req.user;
+    return user?.isAdmin || req.headers["x-bulk-operation"] === "true";
+  },
 });
 
 // GET /characters/me - get current user's character

@@ -1,4 +1,4 @@
-import { query } from "./database";
+import { Pool } from "pg";
 import { log } from "./logger";
 
 export enum JobPriority {
@@ -22,51 +22,111 @@ export interface CharacterProcessingJobData {
   };
 }
 
-export interface QueueJob {
+interface QueueJob {
   id: string;
   data: CharacterProcessingJobData;
   priority: JobPriority;
-  status: "pending" | "processing" | "completed" | "failed";
-  created_at: Date;
-  processed_at?: Date;
-  error?: string;
 }
 
+const queuePool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  max: 20,
+  idleTimeoutMillis: 30 * 1000,
+  connectionTimeoutMillis: 2000,
+});
+
+const highPriorityJobs: QueueJob[] = [];
+const normalPriorityJobs: QueueJob[] = [];
+const lowPriorityJobs: QueueJob[] = [];
+
 class CharacterProcessingQueue {
-  private jobs: Map<string, QueueJob> = new Map();
-  private processing = false;
+  private workers: Promise<void>[] = [];
+  private shouldStop = false;
 
   async addJob(
     data: CharacterProcessingJobData,
     priority: JobPriority = JobPriority.NORMAL,
   ): Promise<string> {
-    const jobId = `job_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    const jobId = `job_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
+    const job: QueueJob = { id: jobId, data, priority };
 
-    const job: QueueJob = {
-      id: jobId,
-      data,
+    if (priority >= JobPriority.HIGH) {
+      highPriorityJobs.push(job);
+    } else if (priority === JobPriority.NORMAL) {
+      normalPriorityJobs.push(job);
+    } else {
+      lowPriorityJobs.push(job);
+    }
+
+    log.info("Job queued", {
+      jobId,
+      action: data.action,
       priority,
-      status: "pending",
-      created_at: new Date(),
-    };
-
-    this.jobs.set(jobId, job);
-    log.info("Job queued", { jobId, action: data.action, priority });
-
-    this.processJob(jobId);
+      queueSizes: this.getQueueSizes(),
+    });
 
     return jobId;
   }
 
-  private async processJob(jobId: string): Promise<void> {
-    const job = this.jobs.get(jobId);
-    if (!job) return;
+  async startProcessing(): Promise<void> {
+    log.info("Starting queue with 5 workers");
 
+    for (let i = 0; i < 5; i++) {
+      this.workers.push(this.runWorker(i + 1));
+    }
+  }
+
+  async shutdown(): Promise<void> {
+    this.shouldStop = true;
+    await Promise.all(this.workers);
+    await queuePool.end();
+    log.info("Queue stopped");
+  }
+
+  private getQueueSizes() {
+    return {
+      high: highPriorityJobs.length,
+      normal: normalPriorityJobs.length,
+      low: lowPriorityJobs.length,
+    };
+  }
+
+  private getNextJob(): QueueJob | null {
+    return (
+      highPriorityJobs.shift() ||
+      normalPriorityJobs.shift() ||
+      lowPriorityJobs.shift() ||
+      null
+    );
+  }
+
+  private async runWorker(workerId: number): Promise<void> {
+    log.info(`Worker ${workerId} started`);
+
+    while (!this.shouldStop) {
+      try {
+        const job = this.getNextJob();
+
+        if (job) {
+          await this.processJob(job, workerId);
+        } else {
+          await new Promise((resolve) => setTimeout(resolve, 100));
+        }
+      } catch (error) {
+        log.error(`Worker ${workerId} error:`, { error });
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+      }
+    }
+
+    log.info(`Worker ${workerId} stopped`);
+  }
+
+  private async processJob(job: QueueJob, workerId: number): Promise<void> {
     try {
-      job.status = "processing";
-      job.processed_at = new Date();
-
-      log.info("Processing job", { jobId, action: job.data.action });
+      log.info(`Worker ${workerId} processing job`, {
+        jobId: job.id,
+        action: job.data.action,
+      });
 
       switch (job.data.action) {
         case "create":
@@ -82,15 +142,14 @@ class CharacterProcessingQueue {
           throw new Error(`Unknown action: ${job.data.action}`);
       }
 
-      job.status = "completed";
-      log.info("Job completed", { jobId, action: job.data.action });
+      log.info(`Job completed`, { jobId: job.id, action: job.data.action });
     } catch (error) {
-      job.status = "failed";
-      job.error = error instanceof Error ? error.message : String(error);
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
       log.error("Job failed", {
-        jobId,
+        jobId: job.id,
         action: job.data.action,
-        error: job.error,
+        error: errorMessage,
       });
     }
   }
@@ -102,9 +161,8 @@ class CharacterProcessingQueue {
       throw new Error("Character data is required for creation");
     }
 
-    await query(
-      `INSERT INTO characters (user_id, character_data)
-       VALUES ($1, $2)`,
+    await queuePool.query(
+      `INSERT INTO characters (user_id, character_data) VALUES ($1, $2)`,
       [data.userId, JSON.stringify(data.characterData)],
     );
   }
@@ -116,7 +174,7 @@ class CharacterProcessingQueue {
       throw new Error("Character ID is required for update");
     }
 
-    const canEdit = await query<{ can_edit: boolean }>(
+    const canEdit = await queuePool.query<{ can_edit: boolean }>(
       "SELECT can_user_edit_character($1, $2) as can_edit",
       [data.characterId, data.userId],
     );
@@ -127,9 +185,8 @@ class CharacterProcessingQueue {
       );
     }
 
-    await query(
-      `UPDATE characters
-       SET character_data = $1, last_edited_at = NOW(), is_edited = true
+    await queuePool.query(
+      `UPDATE characters SET character_data = $1, last_edited_at = NOW(), is_edited = true
        WHERE id = $2 AND user_id = $3`,
       [JSON.stringify(data.characterData), data.characterId, data.userId],
     );
@@ -147,19 +204,10 @@ class CharacterProcessingQueue {
       throw new Error("Admin user ID is required for deletion");
     }
 
-    await query(
+    await queuePool.query(
       "UPDATE characters SET is_deleted = true, deleted_at = NOW(), deleted_by = $1 WHERE id = $2",
       [adminUserId, data.characterId],
     );
-  }
-
-  getJob(jobId: string): QueueJob | undefined {
-    return this.jobs.get(jobId);
-  }
-
-  getJobStatus(jobId: string): string {
-    const job = this.jobs.get(jobId);
-    return job?.status || "not_found";
   }
 }
 
@@ -172,12 +220,10 @@ export const addCharacterProcessingJob = (
   return characterQueue.addJob(data, priority);
 };
 
-export const getCharacterProcessingJob = (
-  jobId: string,
-): QueueJob | undefined => {
-  return characterQueue.getJob(jobId);
+export const initializeQueue = async (): Promise<void> => {
+  await characterQueue.startProcessing();
 };
 
-export const getCharacterProcessingJobStatus = (jobId: string): string => {
-  return characterQueue.getJobStatus(jobId);
+export const shutdownQueue = async (): Promise<void> => {
+  await characterQueue.shutdown();
 };
