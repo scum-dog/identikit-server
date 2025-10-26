@@ -1,0 +1,27 @@
+{
+  "semi": true,
+  "trailingComma": "all",
+  "singleQuote": false,
+  "printWidth": 80,
+  "tabWidth": 2,
+  "useTabs": false,
+  "plugins": ["prettier-plugin-sql"],
+  "language": "postgresql",
+  "keywordCase": "upper",
+  "identifierCase": "lower",
+  "functionCase": "lower",
+  "dataTypeCase": "upper",
+  "overrides": [
+    {
+      "files": "*.sql",
+      "options": {
+        "parser": "sql",
+        "printWidth": 120,
+        "keywordCase": "upper",
+        "identifierCase": "lower",
+        "functionCase": "lower",
+        "dataTypeCase": "upper"
+      }
+    }
+  ]
+}
