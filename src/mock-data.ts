@@ -8,7 +8,6 @@ import {
   Sex,
   MockUser,
   MockCharacter,
-  MockEditHistory,
 } from "./types";
 
 const firstNames = [
@@ -101,8 +100,8 @@ const eyeColors: EyeColor[] = [
   "green",
   "hazel",
   "gray",
-  "amber",
-  "violet",
+  "black",
+  "maroon",
 ];
 
 const hairColors: HairColor[] = [
@@ -120,14 +119,8 @@ const hairColors: HairColor[] = [
 
 const accessoryTypes: (AccessoryType | "none")[] = [
   "glasses",
-  "hat",
-  "earrings",
   "mustache",
-  "beard",
-  "piercing",
-  "scar",
-  "tattoo",
-  "makeup",
+  "misc",
   "none",
 ];
 
@@ -168,60 +161,138 @@ export function generateMockCharacterData(): CharacterData {
   const generateAccessory = () => {
     const type = randomChoice(accessoryTypes);
     if (type === "none") {
+      return undefined;
+    } else if (type === "misc") {
       return {
-        type: "none" as const,
-        asset_id: null,
-        offset_y: null,
-      };
-    } else {
-      return {
-        type: type,
+        type: "misc" as const,
         asset_id: generateAssetId(),
+        offset_x: generateOffset(),
         offset_y: generateOffset(),
+        scale: 1.0,
+        rotation: 0,
+        distance: 0.0,
+      };
+    } else if (type === "glasses") {
+      return {
+        type: "glasses" as const,
+        asset_id:
+          "G_" +
+          Math.floor(Math.random() * 900 + 100)
+            .toString()
+            .padStart(3, "0"),
+        offset_y: generateOffset(),
+        rotation: 0,
+        distance: 0.0,
+      };
+    } else if (type === "mustache") {
+      return {
+        type: "mustache" as const,
+        asset_id:
+          "M_" +
+          Math.floor(Math.random() * 900 + 100)
+            .toString()
+            .padStart(3, "0"),
+        offset_y: generateOffset(),
+        rotation: 0,
+        distance: 0.0,
       };
     }
   };
 
   return {
-    placeable_movable: {
-      lips: {
-        shape_id: generateShapeId("L"),
-        offset_y: generateOffset(),
-      },
-      nose: {
-        shape_id: generateShapeId("N"),
-        offset_y: generateOffset(),
-      },
-      eyebrows: {
-        shape_id: generateShapeId("EB"),
-        offset_y: generateOffset(),
-      },
-      eyes: {
-        shape_id: generateShapeId("E"),
-        offset_y: generateOffset(),
-        eye_color: randomChoice(eyeColors),
-      },
-      accessories: {
-        slot_1: generateAccessory(),
-        slot_2: generateAccessory(),
-        slot_3: generateAccessory(),
+    metadata: {
+      upload_id: randomUUID(),
+      user_id: randomUUID(),
+      created_at: new Date().toISOString(),
+      last_edited_at: null,
+      is_edited: false,
+      canEdit: true,
+      is_deleted: false,
+      deleted_at: null,
+      deleted_by: null,
+      location: {
+        country: randomChoice(countries),
+        region: randomChoice(
+          regions[randomChoice(countries) as keyof typeof regions] || [],
+        ),
+        city: randomChoice(
+          cities[randomChoice(Object.keys(cities)) as keyof typeof cities] ||
+            [],
+        ),
       },
     },
-    static: {
-      hair: {
-        style_id: generateShapeId("H"),
-        hair_color: randomChoice(hairColors),
+    character_data: {
+      static: {
+        name: randomChoice(firstNames),
+        sex: randomChoice(sexOptions),
+        date_of_birth: "1990-01-01",
+        height_in: randomInt(60, 80),
+        weight_lb: randomInt(120, 220),
+        head_shape: {
+          shape_id: generateShapeId("HD"),
+          skin_color: randomChoice(skinColors),
+        },
+        hair: {
+          style_id: generateShapeId("H"),
+          hair_color: randomChoice(hairColors),
+        },
+        beard: {
+          shape_id: generateShapeId("B"),
+          facial_hair_color: randomChoice(hairColors),
+        },
+        mustache: {
+          shape_id: generateShapeId("M"),
+          facial_hair_color: randomChoice(hairColors),
+        },
+        chin: {
+          shape_id: generateShapeId("C"),
+        },
       },
-      head_shape: {
-        shape_id: generateShapeId("HD"),
-        skin_color: randomChoice(skinColors),
+      placeable_movable: {
+        ears: {
+          shape_id: generateShapeId("EA"),
+          offset_y: generateOffset(),
+          scale: 1.0,
+          rotation: 0,
+          distance: 0.0,
+        },
+        eyes: {
+          shape_id: generateShapeId("EY"),
+          eye_color: randomChoice(eyeColors),
+          offset_y: generateOffset(),
+          scale: 1.0,
+          rotation: 0,
+          distance: 0.0,
+        },
+        eyebrows: {
+          shape_id: generateShapeId("EB"),
+          offset_y: generateOffset(),
+          scale: 1.0,
+          rotation: 0,
+          distance: 0.0,
+        },
+        nose: {
+          shape_id: generateShapeId("N"),
+          offset_y: generateOffset(),
+          scale: 1.0,
+        },
+        lips: {
+          shape_id: generateShapeId("L"),
+          offset_y: generateOffset(),
+          scale: 1.0,
+        },
+        age_lines: {
+          shape_id: generateShapeId("AL"),
+          offset_y: generateOffset(),
+          scale: 1.0,
+          rotation: 0,
+        },
+        accessories: {
+          slot_1: generateAccessory(),
+          slot_2: generateAccessory(),
+          slot_3: generateAccessory(),
+        },
       },
-      height_cm: randomInt(150, 200),
-      weight_kg: randomInt(50, 120),
-      sex: randomChoice(sexOptions),
-      date_of_birth: randomDate(new Date(1970, 0, 1), new Date(2005, 11, 31))
-        .toISOString()
-        .split("T")[0],
     },
   };
 }
@@ -244,16 +315,15 @@ export function generateMockCharacter(userId?: string, uploadId?: string) {
   return {
     upload_id: uploadId || randomUUID(),
     user_id: userId || randomUUID(),
-    creator_name: randomChoice(firstNames),
     created_at: creationTime.toISOString(),
     last_edited_at: editTime?.toISOString() || creationTime.toISOString(),
     location: {
       country: Math.random() > 0.1 ? country : null,
-      region: Math.random() > 0.2 ? region : null,
-      city: Math.random() > 0.3 ? city : null,
+      region: Math.random() > 0.2 ? region || null : null,
+      city: Math.random() > 0.3 ? city || null : null,
     },
     character_data: characterData,
-    edit_count: hasBeenEdited ? randomInt(1, 5) : 0,
+    is_edited: hasBeenEdited,
     is_deleted: false,
     deleted_at: null,
     deleted_by: null,
@@ -269,51 +339,16 @@ export function generateMockUser(userId?: string) {
     username: `${randomChoice(firstNames)}${randomInt(100, 999)}`,
     platform,
     platform_user_id: randomInt(10000, 999999).toString(),
-    email: `user${randomInt(100, 999)}@example.com`,
     created_at: randomDate(new Date(2022, 0, 1), new Date()).toISOString(),
     last_login: randomDate(new Date(2024, 0, 1), new Date()).toISOString(),
     is_admin: false,
   };
 }
 
-export function generateMockEditHistory(
-  characterId: string,
-  count: number = 5,
-) {
-  const history = [];
-
-  for (let i = 0; i < count; i++) {
-    const editedAt = randomDate(new Date(2023, 0, 1), new Date());
-
-    history.push({
-      id: randomUUID(),
-      character_id: characterId,
-      user_id: randomUUID(),
-      changes: {
-        fields_changed: randomChoice([
-          ["creator_name"],
-          ["character_data"],
-          ["creator_name", "character_data"],
-          ["location"],
-        ]),
-        old_values: {},
-        new_values: {},
-      },
-      edited_at: editedAt.toISOString(),
-      editor_username: `${randomChoice(firstNames)}${randomInt(100, 999)}`,
-    });
-  }
-
-  return history.sort(
-    (a, b) => new Date(b.edited_at).getTime() - new Date(a.edited_at).getTime(),
-  );
-}
-
 // persistent mock data store
 export class MockDataStore {
   private characters: Map<string, MockCharacter> = new Map();
   private users: Map<string, MockUser> = new Map();
-  private editHistories: Map<string, MockEditHistory[]> = new Map();
 
   constructor() {
     this.initializeData();
@@ -324,13 +359,6 @@ export class MockDataStore {
     for (let i = 0; i < 50; i++) {
       const character = generateMockCharacter();
       this.characters.set(character.upload_id, character);
-
-      // generate mock edit history for each character
-      const history = generateMockEditHistory(
-        character.upload_id,
-        randomInt(1, 8),
-      );
-      this.editHistories.set(character.upload_id, history);
     }
 
     // generate 30 mock users
@@ -356,13 +384,8 @@ export class MockDataStore {
     return this.users.get(id);
   }
 
-  getEditHistory(characterId: string) {
-    return this.editHistories.get(characterId) || [];
-  }
-
   addCharacter(character: MockCharacter) {
     this.characters.set(character.upload_id, character);
-    this.editHistories.set(character.upload_id, []);
   }
 
   updateCharacter(uploadId: string, updates: Partial<MockCharacter>) {
@@ -372,7 +395,7 @@ export class MockDataStore {
         ...character,
         ...updates,
         last_edited_at: new Date().toISOString(),
-        edit_count: character.edit_count + 1,
+        is_edited: true,
       };
       this.characters.set(uploadId, updatedCharacter);
       return updatedCharacter;
