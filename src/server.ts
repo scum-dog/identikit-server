@@ -59,8 +59,9 @@ app.use("/test-retry", testRetryRoutes);
 app.get("/", (req: Request, res: Response) => {
   res.json({
     endpoints: {
-      system: {
+      testing: {
         "GET /ping": "Pong (hopefully)",
+        "GET /test-retry": "Testing endpoint for various failure types",
       },
       auth: {
         "POST /auth/newgrounds/authenticate":
@@ -69,7 +70,7 @@ app.get("/", (req: Request, res: Response) => {
         "GET /auth/google/url": "Get Google OAuth URL",
         "POST /auth/verify": "Verify current session",
         "GET /auth/me": "Get current user info",
-        "POST /auth/logout": "Logout (mainly for client cleanup)",
+        "POST /auth/logout": "Logout with serverside cleanup",
       },
       characters: {
         "GET /characters/me": "Get user's character",
@@ -84,16 +85,13 @@ app.get("/", (req: Request, res: Response) => {
         "DELETE /admin/character/:id": "Delete character (admin)",
         "GET /admin/users": "List all users (admin)",
       },
-      oauth_callbacks: {
+      callbacks: {
         "GET /auth/itchio/callback": "Itch.io OAuth callback (internal use)",
         "POST /auth/itchio/callback":
           "Itch.io OAuth token handler (internal use)",
         "GET /auth/google/callback": "Google OAuth callback (internal use)",
       },
-      testing: {
-        "GET /test-retry": "Testing endpoint for various failure types",
-      },
-      mock: {
+      mocks: {
         "GET /mock/characters/me": "Mock user's character",
         "POST /mock/characters": "Mock character creation",
         "PUT /mock/characters/me": "Mock character update",
