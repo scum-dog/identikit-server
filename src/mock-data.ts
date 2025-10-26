@@ -105,16 +105,19 @@ const eyeColors: EyeColor[] = [
 ];
 
 const hairColors: HairColor[] = [
+  "bald",
   "black",
-  "brown",
   "blonde",
-  "red",
-  "gray",
-  "white",
   "blue",
+  "brown",
+  "gray",
   "green",
-  "purple",
+  "orange",
   "pink",
+  "purple",
+  "red",
+  "sandy",
+  "white",
 ];
 
 const accessoryTypes: (AccessoryType | "none")[] = [
@@ -149,7 +152,9 @@ function generateShapeId(prefix: string): string {
 }
 
 function generateAssetId(): string {
-  return `A_${randomInt(1, 999).toString().padStart(3, "0")}`;
+  const prefixes = ["A", "B", "C", "EA", "EB", "EY", "H", "L", "N"];
+  const prefix = randomChoice(prefixes);
+  return `${prefix}_${randomInt(1, 999).toString().padStart(3, "0")}`;
 }
 
 function generateOffset(): number {
@@ -169,8 +174,6 @@ export function generateMockCharacterData(): CharacterData {
         offset_x: generateOffset(),
         offset_y: generateOffset(),
         scale: 1.0,
-        rotation: 0,
-        distance: 0.0,
       };
     } else if (type === "glasses") {
       return {
@@ -181,8 +184,7 @@ export function generateMockCharacterData(): CharacterData {
             .toString()
             .padStart(3, "0"),
         offset_y: generateOffset(),
-        rotation: 0,
-        distance: 0.0,
+        scale: 1.0,
       };
     } else if (type === "mustache") {
       return {
@@ -193,8 +195,7 @@ export function generateMockCharacterData(): CharacterData {
             .toString()
             .padStart(3, "0"),
         offset_y: generateOffset(),
-        rotation: 0,
-        distance: 0.0,
+        scale: 1.0,
       };
     }
   };
@@ -229,7 +230,7 @@ export function generateMockCharacterData(): CharacterData {
         height_in: randomInt(60, 80),
         weight_lb: randomInt(120, 220),
         head_shape: {
-          shape_id: generateShapeId("HD"),
+          shape_id: generateShapeId("H"),
           skin_color: randomChoice(skinColors),
         },
         hair: {
@@ -251,10 +252,7 @@ export function generateMockCharacterData(): CharacterData {
       placeable_movable: {
         ears: {
           shape_id: generateShapeId("EA"),
-          offset_y: generateOffset(),
           scale: 1.0,
-          rotation: 0,
-          distance: 0.0,
         },
         eyes: {
           shape_id: generateShapeId("EY"),
@@ -282,10 +280,7 @@ export function generateMockCharacterData(): CharacterData {
           scale: 1.0,
         },
         age_lines: {
-          shape_id: generateShapeId("AL"),
-          offset_y: generateOffset(),
-          scale: 1.0,
-          rotation: 0,
+          shape_id: generateShapeId("A"),
         },
         accessories: {
           slot_1: generateAccessory(),
@@ -318,7 +313,7 @@ export function generateMockCharacter(userId?: string, uploadId?: string) {
     created_at: creationTime.toISOString(),
     last_edited_at: editTime?.toISOString() || creationTime.toISOString(),
     location: {
-      country: Math.random() > 0.1 ? country : null,
+      country: country,
       region: Math.random() > 0.2 ? region || null : null,
       city: Math.random() > 0.3 ? city || null : null,
     },

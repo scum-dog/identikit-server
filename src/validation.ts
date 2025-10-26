@@ -80,15 +80,13 @@ const accessorySlotSchema = z.discriminatedUnion("type", [
     type: z.literal("glasses"),
     asset_id: z.string().regex(/^G_\d{3}$/, "Glasses must use G_XXX format"),
     offset_y: offsetSchema.default(0),
-    rotation: rotationSchema.default(0),
-    distance: distanceSchema.default(0),
+    scale: scaleSchema.default(1.0),
   }),
   z.object({
     type: z.literal("mustache"),
     asset_id: z.string().regex(/^M_\d{3}$/, "Mustache must use M_XXX format"),
     offset_y: offsetSchema.default(0),
-    rotation: rotationSchema.default(0),
-    distance: distanceSchema.default(0),
+    scale: scaleSchema.default(1.0),
   }),
   z.object({
     type: z.literal("misc"),
@@ -96,8 +94,6 @@ const accessorySlotSchema = z.discriminatedUnion("type", [
     offset_x: offsetSchema.optional(),
     offset_y: offsetSchema.default(0),
     scale: scaleSchema.optional(),
-    rotation: rotationSchema.default(0),
-    distance: distanceSchema.default(0),
   }),
 ]);
 
@@ -154,10 +150,7 @@ export const characterDataSchema = z.object({
     placeable_movable: z.object({
       ears: z.object({
         shape_id: shapeIdSchema("EA"),
-        offset_y: offsetSchema.default(0),
         scale: scaleSchema.default(1.0),
-        rotation: rotationSchema.default(0),
-        distance: distanceSchema.default(0),
       }),
       eyes: z.object({
         shape_id: shapeIdSchema("EY"),
@@ -186,9 +179,6 @@ export const characterDataSchema = z.object({
       }),
       age_lines: z.object({
         shape_id: shapeIdSchema("A"),
-        offset_y: offsetSchema.default(0),
-        scale: scaleSchema.default(1.0),
-        rotation: rotationSchema.default(0),
       }),
       accessories: z.object({
         slot_1: accessorySlotSchema.optional(),
@@ -252,10 +242,7 @@ export const characterDataUpdateSchema = z.object({
           ears: z
             .object({
               shape_id: shapeIdSchema("EA").optional(),
-              offset_y: offsetSchema.optional(),
               scale: scaleSchema.optional(),
-              rotation: rotationSchema.optional(),
-              distance: distanceSchema.optional(),
             })
             .optional(),
           eyes: z
@@ -294,9 +281,6 @@ export const characterDataUpdateSchema = z.object({
           age_lines: z
             .object({
               shape_id: shapeIdSchema("A").optional(),
-              offset_y: offsetSchema.optional(),
-              scale: scaleSchema.optional(),
-              rotation: rotationSchema.optional(),
             })
             .optional(),
           accessories: z
