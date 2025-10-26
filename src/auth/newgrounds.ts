@@ -20,12 +20,6 @@ export class NewgroundsAuth {
   ): Promise<NewgroundsGatewayResponse> {
     const appId = process.env.NEWGROUNDS_APP_ID!;
 
-    log.info("Checking session with Newgrounds", {
-      sessionIdLength: sessionId?.length,
-      appIdConfigured: !!appId,
-      gatewayUrl: NEWGROUNDS_GATEWAY_URL
-    });
-
     try {
       const gatewayRequest: NewgroundsGatewayRequest = {
         app_id: appId,
@@ -36,14 +30,6 @@ export class NewgroundsAuth {
         },
       };
 
-      log.info("Sending request to Newgrounds gateway", {
-        requestStructure: {
-          app_id: appId ? "configured" : "missing",
-          session_id: sessionId ? `${sessionId.length} chars` : "missing",
-          component: gatewayRequest.execute.component
-        }
-      });
-
       const response = await axios.post(
         NEWGROUNDS_GATEWAY_URL,
         gatewayRequest,
@@ -53,13 +39,6 @@ export class NewgroundsAuth {
           },
         },
       );
-
-      log.info("Newgrounds gateway raw response", {
-        status: response.status,
-        statusText: response.statusText,
-        dataKeys: Object.keys(response.data || {}),
-        responseData: response.data
-      });
 
       return response.data as NewgroundsGatewayResponse;
     } catch (error) {
@@ -87,39 +66,14 @@ export class NewgroundsAuth {
     authRequest: NewgroundsAuthRequest,
   ): Promise<{ sessionId: string; user: PlatformUser }> {
     try {
-      log.info("Starting Newgrounds authentication", {
-        sessionIdLength: authRequest.session_id?.length,
-        sessionIdPrefix: authRequest.session_id?.substring(0, 8) + "...",
-        appId: process.env.NEWGROUNDS_APP_ID ? "configured" : "missing"
-      });
-
       const gatewayResponse = await this.checkSessionWithNewgrounds(
         authRequest.session_id,
       );
-
-      log.info("Newgrounds gateway response", {
-        success: gatewayResponse.success,
-        hasResult: !!gatewayResponse.result,
-        hasSession: !!gatewayResponse.result?.data?.session,
-        hasUser: !!gatewayResponse.result?.data?.session?.user,
-        errorCode: gatewayResponse.error?.code?.toString(),
-        errorMessage: gatewayResponse.error?.message
-      });
 
       if (
         !gatewayResponse.success ||
         !gatewayResponse.result?.data?.session?.user
       ) {
-        log.error("Newgrounds gateway validation failed", {
-          success: gatewayResponse.success,
-          hasResult: !!gatewayResponse.result,
-          hasData: !!gatewayResponse.result?.data,
-          hasSession: !!gatewayResponse.result?.data?.session,
-          hasUser: !!gatewayResponse.result?.data?.session?.user,
-          errorCode: gatewayResponse.error?.code?.toString(),
-          errorMessage: gatewayResponse.error?.message,
-          fullResponse: gatewayResponse
-        });
         throw new AuthError(
           gatewayResponse.error?.message || "Invalid Newgrounds session",
           this.platform,
@@ -129,15 +83,7 @@ export class NewgroundsAuth {
       const ngSession = gatewayResponse.result.data.session;
       const ngUser = ngSession.user!;
 
-      log.info("Newgrounds session details", {
-        sessionExpired: ngSession.expired,
-        userId: ngUser.id.toString(),
-        userName: ngUser.name,
-        remember: ngSession.remember
-      });
-
       if (ngSession.expired) {
-        log.error("Newgrounds session has expired");
         throw new AuthError("Newgrounds session has expired", this.platform);
       }
 
@@ -159,15 +105,10 @@ export class NewgroundsAuth {
 
       return { sessionId, user: newgroundsUser };
     } catch (error) {
-      log.error("Newgrounds session auth error", {
-        error,
-        errorMessage: error instanceof Error ? error.message : 'Unknown error',
-        errorName: error instanceof Error ? error.constructor.name : 'Unknown',
-        stack: error instanceof Error ? error.stack : undefined
-      });
       if (error instanceof AuthError) {
         throw error;
       }
+      log.error("Newgrounds session auth error", { error });
       throw new AuthError(
         "Failed to authenticate with Newgrounds session",
         this.platform,

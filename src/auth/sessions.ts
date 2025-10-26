@@ -14,6 +14,10 @@ export class SessionManager {
     const expiresAt = new Date();
     expiresAt.setHours(expiresAt.getHours() + this.DEFAULT_EXPIRY_HOURS);
 
+    await query(`DELETE FROM user_sessions WHERE user_id = $1`, [
+      sessionData.userId,
+    ]);
+
     await query(
       `INSERT INTO user_sessions
        (session_id, user_id, platform, platform_user_id, platform_session_id, username, is_admin, expires_at)

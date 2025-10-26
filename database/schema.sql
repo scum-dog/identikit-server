@@ -40,7 +40,8 @@ CREATE TABLE user_sessions (
   username VARCHAR(255) NOT NULL,
   is_admin BOOLEAN NOT NULL DEFAULT FALSE,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT now(),
-  expires_at TIMESTAMP WITH TIME ZONE NOT NULL
+  expires_at TIMESTAMP WITH TIME ZONE NOT NULL,
+  UNIQUE (user_id)
 );
 
 -- indexes
