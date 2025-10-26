@@ -1,6 +1,7 @@
 import { Router, Request, Response } from "express";
 import { googleAuth } from "../../auth/google";
 import { userQueries } from "../../database";
+import { log } from "../../logger";
 
 const router = Router();
 
@@ -9,7 +10,7 @@ router.get("/url", async (req: Request, res: Response) => {
     const { authUrl, state, expiresAt } = googleAuth.generateAuthUrl();
     res.json({ authUrl, state, expiresAt });
   } catch (error) {
-    console.error("Google auth URL error:", error);
+    log.error("Google auth URL error", { error });
     res.status(500).json({ error: "Failed to generate auth URL" });
   }
 });
@@ -47,7 +48,7 @@ router.get("/callback", async (req: Request, res: Response) => {
       message: "Google authentication successful",
     });
   } catch (error) {
-    console.error("Google callback error:", error);
+    log.error("Google callback error", { error });
     res.status(401).json({
       success: false,
       error: "authentication_failed",

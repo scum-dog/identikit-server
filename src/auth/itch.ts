@@ -4,14 +4,15 @@ import { AuthError } from "./base";
 import {
   OAuthProvider,
   AuthUrlResult,
-  ItchUser,
+  PlatformUser,
   ItchAuthResponse,
   ItchOAuthParams,
 } from "../types";
 import { SessionManager } from "./sessions";
 import { userQueries } from "../database";
+import { log } from "../logger";
 
-export class ItchOAuth implements OAuthProvider<ItchUser> {
+export class ItchOAuth implements OAuthProvider<PlatformUser> {
   public readonly platform = "itchio" as const;
 
   generateAuthUrl(): AuthUrlResult {
@@ -41,7 +42,7 @@ export class ItchOAuth implements OAuthProvider<ItchUser> {
     accessToken: string,
     _state?: string,
     _codeVerifier?: string,
-  ): Promise<{ sessionId: string; user: ItchUser }> {
+  ): Promise<{ sessionId: string; user: PlatformUser }> {
     if (!accessToken) {
       throw new AuthError("Access token is required", this.platform);
     }
@@ -50,8 +51,8 @@ export class ItchOAuth implements OAuthProvider<ItchUser> {
       const response = await axios.get(
         `https://itch.io/api/1/${accessToken}/me`,
       );
-      const data: ItchAuthResponse = response.data;
 
+      const data: ItchAuthResponse = response.data;
       if (!data.user) {
         throw new AuthError(
           "Failed to get user info from Itch.io",
@@ -59,13 +60,16 @@ export class ItchOAuth implements OAuthProvider<ItchUser> {
         );
       }
 
-      const itchUser = data.user;
-      const user = await this.createOrUpdateUser(itchUser);
+      const itchUser: PlatformUser = {
+        id: data.user.id.toString(),
+        username: data.user.username,
+      };
 
+      const user = await this.createOrUpdateUser(itchUser);
       const sessionId = await SessionManager.createSession({
         userId: user.id,
         platform: "itchio",
-        platformUserId: itchUser.id.toString(),
+        platformUserId: itchUser.id,
         platformSessionId: accessToken,
         username: itchUser.username,
         isAdmin: user.is_admin,
@@ -73,7 +77,7 @@ export class ItchOAuth implements OAuthProvider<ItchUser> {
 
       return { sessionId, user: itchUser };
     } catch (error) {
-      console.error("Itch.io token verification error:", error);
+      log.error("Itch.io token verification error", { error });
       if (axios.isAxiosError(error) && error.response?.status === 401) {
         throw new AuthError("Invalid or expired access token", this.platform);
       }
@@ -84,7 +88,7 @@ export class ItchOAuth implements OAuthProvider<ItchUser> {
     }
   }
 
-  async validateSession(sessionId: string): Promise<ItchUser | null> {
+  async validateSession(sessionId: string): Promise<PlatformUser | null> {
     try {
       const session = await SessionManager.validateSession(sessionId);
       if (!session || session.platform !== "itchio") {
@@ -99,44 +103,37 @@ export class ItchOAuth implements OAuthProvider<ItchUser> {
           const data: ItchAuthResponse = response.data;
 
           if (!data.user) {
-            console.log(
+            log.info(
               "Itch.io session no longer valid, invalidating local session",
             );
             return null;
           }
 
-          return data.user;
+          return {
+            id: data.user.id.toString(),
+            username: data.user.username,
+          };
         } catch {
-          console.log(
+          log.info(
             "Itch.io session no longer valid, invalidating local session",
           );
           return null;
         }
       }
 
-      console.log(
-        "No platform session ID found, cannot re-validate with Itch.io",
-      );
+      log.info("No platform session ID found, cannot re-validate with Itch.io");
       return null;
     } catch (error) {
-      console.error("Itch.io session validation error:", error);
+      log.error("Itch.io session validation error", { error });
       return null;
     }
   }
 
-  private async createOrUpdateUser(itchUser: ItchUser) {
-    let user = await userQueries.findByPlatformId(
-      "itchio",
-      itchUser.id.toString(),
-    );
+  private async createOrUpdateUser(itchUser: PlatformUser) {
+    let user = await userQueries.findByPlatformId("itchio", itchUser.id);
 
     if (!user) {
-      user = await userQueries.create(
-        "itchio",
-        itchUser.id.toString(),
-        itchUser.username,
-        undefined,
-      );
+      user = await userQueries.create("itchio", itchUser.id, itchUser.username);
     } else {
       await userQueries.updateLastLogin(user.id);
     }

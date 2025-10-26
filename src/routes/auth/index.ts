@@ -2,6 +2,8 @@ import { Router, Request, Response } from "express";
 import { authenticateUser } from "../../auth/middleware";
 import { query } from "../../database";
 import { CharacterInfo } from "../../types";
+import { log } from "../../logger";
+import { SessionManager } from "../../auth/sessions";
 
 import newgroundsRoutes from "./newgrounds";
 import itchRoutes from "./itch";
@@ -30,7 +32,7 @@ router.post("/verify", authenticateUser, (req: Request, res: Response) => {
 router.get("/me", authenticateUser, async (req: Request, res: Response) => {
   try {
     const character = await query<CharacterInfo>(
-      "SELECT id, name, created_at, last_edited_at, edit_count FROM characters WHERE user_id = $1 AND is_deleted = false",
+      "SELECT id, created_at, last_edited_at, is_edited FROM characters WHERE user_id = $1 AND is_deleted = false",
       [req.user!.id],
     );
 
@@ -45,17 +47,32 @@ router.get("/me", authenticateUser, async (req: Request, res: Response) => {
       hasCharacter: character.rows.length > 0,
     });
   } catch (error) {
-    console.error("Get user info error:", error);
+    log.error("Get user info error", { error });
     res.status(500).json({ error: "Failed to get user information" });
   }
 });
 
-// POST /auth/logout - logout (mainly for client-side cleanup)
-router.post("/logout", (req: Request, res: Response) => {
-  res.json({
-    success: true,
-    message: "Logout successful. Clear your session token.",
-  });
-});
+// POST /auth/logout - logout with serverside cleanup
+router.post(
+  "/logout",
+  authenticateUser,
+  async (req: Request, res: Response) => {
+    try {
+      const authHeader = req.headers.authorization;
+      if (authHeader?.startsWith("Bearer ")) {
+        const sessionId = authHeader.substring(7);
+        await SessionManager.deleteSession(sessionId);
+      }
+
+      res.json({
+        success: true,
+        message: "Logout successful. Session cleared from server.",
+      });
+    } catch (error) {
+      log.error("Logout error", { error });
+      res.status(500).json({ error: "Logout failed" });
+    }
+  },
+);
 
 export default router;

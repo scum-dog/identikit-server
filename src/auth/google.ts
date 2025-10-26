@@ -4,15 +4,16 @@ import { AuthError } from "./base";
 import {
   OAuthProvider,
   AuthUrlResult,
-  GoogleUser,
+  PlatformUser,
   GoogleAuthResponse,
   GoogleUserInfoResponse,
   GoogleOAuthParams,
 } from "../types";
 import { SessionManager } from "./sessions";
 import { userQueries } from "../database";
+import { log } from "../logger";
 
-export class GoogleAuth implements OAuthProvider<GoogleUser> {
+export class GoogleAuth implements OAuthProvider<PlatformUser> {
   public readonly platform = "google" as const;
   private readonly clientId = process.env.GOOGLE_CLIENT_ID;
   private readonly clientSecret = process.env.GOOGLE_CLIENT_SECRET;
@@ -44,7 +45,7 @@ export class GoogleAuth implements OAuthProvider<GoogleUser> {
     code: string,
     _state?: string,
     _codeVerifier?: string,
-  ): Promise<{ sessionId: string; user: GoogleUser }> {
+  ): Promise<{ sessionId: string; user: PlatformUser }> {
     try {
       const tokens = await this.exchangeCodeForTokens(code);
       const googleUser = await this.fetchUserProfile(tokens.access_token);
@@ -61,7 +62,7 @@ export class GoogleAuth implements OAuthProvider<GoogleUser> {
 
       return { sessionId, user: googleUser };
     } catch (error) {
-      console.error("Google authentication error:", error);
+      log.error("Google authentication error", { error });
       throw new AuthError(
         `Google authentication failed: ${error instanceof Error ? error.message : "Unknown error"}`,
         this.platform,
@@ -116,7 +117,7 @@ export class GoogleAuth implements OAuthProvider<GoogleUser> {
     return response.data;
   }
 
-  private async fetchUserProfile(accessToken: string): Promise<GoogleUser> {
+  private async fetchUserProfile(accessToken: string): Promise<PlatformUser> {
     const response = await axios.get<GoogleUserInfoResponse>(
       "https://www.googleapis.com/oauth2/v2/userinfo",
       {
@@ -131,14 +132,10 @@ export class GoogleAuth implements OAuthProvider<GoogleUser> {
     return {
       id: data.sub,
       username: data.email.split("@")[0],
-      email: data.email,
-      name: data.name,
-      picture: data.picture,
-      email_verified: data.email_verified,
     };
   }
 
-  private async createOrUpdateUser(googleUser: GoogleUser) {
+  private async createOrUpdateUser(googleUser: PlatformUser) {
     let user = await userQueries.findByPlatformId("google", googleUser.id);
 
     if (!user) {
@@ -146,7 +143,6 @@ export class GoogleAuth implements OAuthProvider<GoogleUser> {
         "google",
         googleUser.id,
         googleUser.username,
-        googleUser.email,
       );
     } else {
       await userQueries.updateLastLogin(user.id);
@@ -155,7 +151,7 @@ export class GoogleAuth implements OAuthProvider<GoogleUser> {
     return user;
   }
 
-  async validateSession(sessionId: string): Promise<GoogleUser | null> {
+  async validateSession(sessionId: string): Promise<PlatformUser | null> {
     try {
       const session = await SessionManager.validateSession(sessionId);
       if (!session || session.platform !== "google") {
@@ -172,19 +168,17 @@ export class GoogleAuth implements OAuthProvider<GoogleUser> {
 
           return googleUser;
         } catch {
-          console.log(
+          log.info(
             "Google session no longer valid, invalidating local session",
           );
           return null;
         }
       }
 
-      console.log(
-        "No platform session ID found, cannot re-validate with Google",
-      );
+      log.info("No platform session ID found, cannot re-validate with Google");
       return null;
     } catch (error) {
-      console.error("Google session validation error:", error);
+      log.error("Google session validation error", { error });
       return null;
     }
   }

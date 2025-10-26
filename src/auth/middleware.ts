@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import { SessionManager } from "./sessions";
 import { Platform } from "../types";
+import { log } from "../logger";
 
 export const authenticateUser = async (
   req: Request,
@@ -31,7 +32,7 @@ export const authenticateUser = async (
 
     next();
   } catch (error) {
-    console.error("Auth error:", error);
+    log.error("Auth error:", { error });
     return res.status(401).json({ error: "Authentication failed" });
   }
 };
@@ -72,7 +73,7 @@ export const optionalAuth = async (
       };
     }
   } catch (error) {
-    console.debug("Optional auth failed:", error);
+    log.debug("Optional auth failed:", { error });
   }
 
   next();

@@ -2,6 +2,7 @@ import { Router, Request, Response } from "express";
 import { newgroundsAuth } from "../../auth/newgrounds";
 import { NewgroundsAuthRequest } from "../../types";
 import { newgroundsAuthSchema } from "../../validation";
+import { log } from "../../logger";
 
 const router = Router();
 
@@ -33,12 +34,11 @@ router.post("/authenticate", async (req: Request, res: Response) => {
         id: ngUser.id,
         username: ngUser.username,
         platform: "newgrounds",
-        supporter: ngUser.supporter,
       },
       message: "Newgrounds authentication successful",
     });
   } catch (error) {
-    console.error("Newgrounds authentication error:", error);
+    log.error("Newgrounds authentication error", { error });
     res.status(401).json({
       success: false,
       error: "authentication_failed",

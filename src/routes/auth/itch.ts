@@ -2,6 +2,7 @@ import { Router, Request, Response } from "express";
 import crypto from "crypto";
 import { itchAuth } from "../../auth/itch";
 import { userQueries } from "../../database";
+import { log } from "../../logger";
 
 const router = Router();
 
@@ -16,7 +17,7 @@ router.get("/url", (req: Request, res: Response) => {
       expiresAt,
     });
   } catch (error) {
-    console.error("Get itch.io auth URL error:", error);
+    log.error("Get itch.io auth URL error", { error });
     res.status(500).json({ error: "Failed to generate authentication URL" });
   }
 });
@@ -53,7 +54,7 @@ router.get("/callback", (req: Request, res: Response) => {
                 document.getElementById('status').innerHTML += '<br><br>You may now close this window and return to IDENTI-NET.';
               }
             } else {
-              document.getElementById('status').innerHTML = 'Authentication failed: ' + data.message;
+              document.getElementById('status').innerHTML = \`Authentication failed: \${data.message}\`;
             }
           })
           .catch(() => {
@@ -93,10 +94,7 @@ router.post("/callback", async (req: Request, res: Response) => {
       state as string,
     );
 
-    const user = await userQueries.findByPlatformId(
-      "itchio",
-      itchUser.id.toString(),
-    );
+    const user = await userQueries.findByPlatformId("itchio", itchUser.id);
 
     if (!user) {
       throw new Error("User not found after OAuth flow");
@@ -114,7 +112,7 @@ router.post("/callback", async (req: Request, res: Response) => {
       message: "Itch.io authentication successful",
     });
   } catch (error) {
-    console.error("Itch.io callback error:", error);
+    log.error("Itch.io callback error", { error });
     res.status(401).json({
       success: false,
       error: "authentication_failed",
