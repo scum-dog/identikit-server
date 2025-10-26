@@ -130,7 +130,7 @@ export class GoogleAuth implements OAuthProvider<PlatformUser> {
     const data = response.data;
 
     return {
-      id: data.sub,
+      id: data.id,
       username: data.email.split("@")[0],
     };
   }

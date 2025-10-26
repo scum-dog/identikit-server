@@ -354,7 +354,7 @@ export interface GoogleAuthResponse {
 }
 
 export interface GoogleUserInfoResponse {
-  sub: string;
+  id: string;
   email: string;
 }
 
