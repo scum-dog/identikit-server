@@ -89,7 +89,7 @@ export class NewgroundsAuth {
 
       const newgroundsUser: PlatformUser = {
         id: ngUser.id.toString(),
-        username: ngUser.username,
+        username: ngUser.name,
       };
 
       const user = await this.createOrUpdateUser(newgroundsUser);
@@ -150,7 +150,7 @@ export class NewgroundsAuth {
 
         return {
           id: ngUser.id.toString(),
-          username: ngUser.username,
+          username: ngUser.name,
         };
       }
 

@@ -396,7 +396,7 @@ export interface NewgroundsSession {
   id: string;
   user?: {
     id: number;
-    username: string;
+    name: string;
   };
   expired: boolean;
   remember: boolean;
