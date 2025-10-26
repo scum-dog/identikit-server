@@ -7,7 +7,12 @@ import {
   characterUpdateSchema,
 } from "../validation";
 import { randomUUID } from "crypto";
-import { MockCharacterRouteUpdates, PlazaQueryRequest } from "../types";
+import {
+  MockCharacterRouteUpdates,
+  PlazaQueryRequest,
+  MockCharacter,
+} from "../types";
+import { log } from "../logger";
 
 const router = Router();
 
@@ -17,6 +22,30 @@ const MOCK_USER = {
   username: "TestUser123",
   platform: "newgrounds",
   isAdmin: false,
+};
+
+const mockCanUserEditCharacter = (character: MockCharacter): boolean => {
+  const creationDate = new Date(character.created_at);
+  const lastEditDate = character.last_edited_at
+    ? new Date(character.last_edited_at)
+    : creationDate;
+  const now = new Date();
+
+  const daysSinceCreation =
+    (now.getTime() - creationDate.getTime()) / (1000 * 3600 * 24);
+
+  const daysSinceLastEdit =
+    (now.getTime() - lastEditDate.getTime()) / (1000 * 3600 * 24);
+
+  if (daysSinceCreation < 30) {
+    return false;
+  }
+
+  if (daysSinceLastEdit < 7) {
+    return false;
+  }
+
+  return true;
 };
 
 // GET /mock/characters/me - get mock user's character
@@ -33,13 +62,16 @@ router.get("/me", (req: Request, res: Response) => {
     }
 
     const creationDate = new Date(character.created_at);
+
     const lastEditDate = character.last_edited_at
       ? new Date(character.last_edited_at)
       : creationDate;
+
     const now = new Date();
 
     const daysSinceCreation =
       (now.getTime() - creationDate.getTime()) / (1000 * 3600 * 24);
+
     const daysSinceLastEdit =
       (now.getTime() - lastEditDate.getTime()) / (1000 * 3600 * 24);
 
@@ -50,7 +82,7 @@ router.get("/me", (req: Request, res: Response) => {
       canEdit,
     });
   } catch (error) {
-    console.error("Mock get character error:", error);
+    log.error("Mock get character error", { error });
     res.status(500).json({ error: "Failed to retrieve character" });
   }
 });
@@ -77,7 +109,6 @@ router.post(
       const newCharacter = {
         upload_id: randomUUID(),
         user_id: MOCK_USER.id,
-        creator_name: req.body.creator_name,
         created_at: new Date().toISOString(),
         last_edited_at: new Date().toISOString(),
         location: req.body.location || {
@@ -89,7 +120,7 @@ router.post(
         date_of_birth: req.body.date_of_birth
           ? new Date(req.body.date_of_birth).toISOString().split("T")[0]
           : null,
-        edit_count: 0,
+        is_edited: false,
         is_deleted: false,
         deleted_at: null,
         deleted_by: null,
@@ -102,7 +133,7 @@ router.post(
         character: newCharacter,
       });
     } catch (error) {
-      console.error("Mock create character error:", error);
+      log.error("Mock create character error", { error });
       res.status(500).json({ error: "Failed to create character" });
     }
   },
@@ -123,32 +154,16 @@ router.put(
         return res.status(404).json({ error: "No character found to update" });
       }
 
-      const creationDate = new Date(character.created_at);
-      const lastEditDate = character.last_edited_at
-        ? new Date(character.last_edited_at)
-        : creationDate;
-      const now = new Date();
+      const canEdit = mockCanUserEditCharacter(character);
 
-      const daysSinceCreation =
-        (now.getTime() - creationDate.getTime()) / (1000 * 3600 * 24);
-      const daysSinceLastEdit =
-        (now.getTime() - lastEditDate.getTime()) / (1000 * 3600 * 24);
-
-      if (daysSinceCreation < 30) {
+      if (!canEdit) {
         return res.status(403).json({
           error:
-            "Cannot edit character: Edits are frozen for 30 days after creation",
-        });
-      }
-
-      if (daysSinceLastEdit < 7) {
-        return res.status(403).json({
-          error: "Cannot edit character: Must wait 7 days between edits",
+            "Cannot edit character: either in freeze period or weekly limit exceeded",
         });
       }
 
       const updates: MockCharacterRouteUpdates = {};
-      if (req.body.creator_name) updates.creator_name = req.body.creator_name;
       if (req.body.location) {
         updates.location = {
           country:
@@ -175,7 +190,7 @@ router.put(
 
       const updatedCharacter = mockDataStore.updateCharacter(
         character.upload_id,
-        updates,
+        updates as Partial<MockCharacter>,
       );
 
       res.json({
@@ -183,7 +198,7 @@ router.put(
         character: updatedCharacter,
       });
     } catch (error) {
-      console.error("Mock update character error:", error);
+      log.error("Mock update character error", { error });
       res.status(500).json({ error: "Failed to update character" });
     }
   },
@@ -226,7 +241,6 @@ router.get("/plaza", validatePlazaQuery, (req: Request, res: Response) => {
 
     const plazaCharacters = characters.map((char) => ({
       upload_id: char.upload_id,
-      creator_name: char.creator_name,
       creation_time: char.created_at,
       edit_time:
         char.last_edited_at !== char.created_at ? char.last_edited_at : null,
@@ -240,7 +254,7 @@ router.get("/plaza", validatePlazaQuery, (req: Request, res: Response) => {
       filters: { country, region },
     });
   } catch (error) {
-    console.error("Mock plaza fetch error:", error);
+    log.error("Mock plaza fetch error", { error });
     res.status(500).json({ error: "Failed to fetch plaza characters" });
   }
 });
@@ -257,7 +271,6 @@ router.get("/:id", (req: Request, res: Response) => {
 
     const publicCharacter = {
       upload_id: character.upload_id,
-      creator_name: character.creator_name,
       creation_time: character.created_at,
       edit_time:
         character.last_edited_at !== character.created_at
@@ -271,7 +284,7 @@ router.get("/:id", (req: Request, res: Response) => {
       character: publicCharacter,
     });
   } catch (error) {
-    console.error("Mock get character by ID error:", error);
+    log.error("Mock get character by ID error", { error });
     res.status(500).json({ error: "Failed to retrieve character" });
   }
 });

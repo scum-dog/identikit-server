@@ -3,6 +3,7 @@ import { mockDataStore } from "../mock-data";
 import { validateRequest } from "../validation";
 import { z } from "zod";
 import { randomUUID } from "crypto";
+import { log } from "../logger";
 
 const router = Router();
 
@@ -39,11 +40,10 @@ router.get("/characters", (req: Request, res: Response) => {
       const user = mockDataStore.getUser(char.user_id);
       return {
         upload_id: char.upload_id,
-        creator_name: char.creator_name,
         location: char.location,
         creation_time: char.created_at,
         edit_time: char.last_edited_at,
-        edit_count: char.edit_count,
+        is_edited: char.is_edited,
         is_deleted: char.is_deleted,
         deleted_at: char.deleted_at,
         deleted_by: char.deleted_by,
@@ -63,7 +63,7 @@ router.get("/characters", (req: Request, res: Response) => {
       },
     });
   } catch (error) {
-    console.error("Mock admin get characters error:", error);
+    log.error("Mock admin get characters error", { error });
     res.status(500).json({ error: "Failed to fetch characters" });
   }
 });
@@ -79,24 +79,21 @@ router.get("/character/:id", (req: Request, res: Response) => {
     }
 
     const user = mockDataStore.getUser(character.user_id);
-    const editHistory = mockDataStore.getEditHistory(character.upload_id);
 
     const characterWithDetails = {
       ...character,
       username: user?.username || "Unknown",
       platform: user?.platform || "unknown",
       platform_user_id: user?.platform_user_id || "unknown",
-      email: user?.email || null,
       user_created_at: user?.created_at || null,
       last_login: user?.last_login || null,
     };
 
     res.json({
       character: characterWithDetails,
-      editHistory,
     });
   } catch (error) {
-    console.error("Mock admin get character details error:", error);
+    log.error("Mock admin get character details error", { error });
     res.status(500).json({ error: "Failed to fetch character details" });
   }
 });
@@ -136,15 +133,14 @@ router.delete(
 
       res.json({
         success: true,
-        message: `Character "${character.creator_name}" has been deleted`,
+        message: `Character has been deleted`,
         deletedCharacter: {
           upload_id: character.upload_id,
-          creator_name: character.creator_name,
         },
         reason,
       });
     } catch (error) {
-      console.error("Mock admin delete character error:", error);
+      log.error("Mock admin delete character error", { error });
       res.status(500).json({ error: "Failed to delete character" });
     }
   },
@@ -158,7 +154,6 @@ router.get("/users", (req: Request, res: Response) => {
     const offset = (page - 1) * limit;
 
     const users = mockDataStore.getUsers();
-    const characters = mockDataStore.getCharacters();
 
     users.sort(
       (a, b) =>
@@ -168,11 +163,7 @@ router.get("/users", (req: Request, res: Response) => {
     const total = users.length;
     const paginatedUsers = users.slice(offset, offset + limit);
 
-    const usersWithCharacterCount = paginatedUsers.map((user) => {
-      const characterCount = characters.filter(
-        (char) => char.user_id === user.id && !char.is_deleted,
-      ).length;
-
+    const usersWithData = paginatedUsers.map((user) => {
       return {
         id: user.id,
         username: user.username,
@@ -181,12 +172,11 @@ router.get("/users", (req: Request, res: Response) => {
         created_at: user.created_at,
         last_login: user.last_login,
         is_admin: user.is_admin,
-        character_count: characterCount,
       };
     });
 
     res.json({
-      users: usersWithCharacterCount,
+      users: usersWithData,
       pagination: {
         page,
         limit,
@@ -195,7 +185,7 @@ router.get("/users", (req: Request, res: Response) => {
       },
     });
   } catch (error) {
-    console.error("Mock admin get users error:", error);
+    log.error("Mock admin get users error", { error });
     res.status(500).json({ error: "Failed to fetch users" });
   }
 });

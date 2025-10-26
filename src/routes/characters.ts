@@ -8,12 +8,12 @@ import {
 } from "../validation";
 import { authenticateUser } from "../auth/middleware";
 import rateLimit from "express-rate-limit";
+import { addCharacterProcessingJob, JobPriority } from "../queue";
+import { log } from "../logger";
 import {
-  CharacterRouteUpdates,
   PlazaQueryRequest,
   PlazaCharacterData,
   DatabaseQueryResult,
-  CanEditResult,
 } from "../types";
 
 const router = Router();
@@ -40,31 +40,31 @@ router.get("/me", authenticateUser, async (req: Request, res: Response) => {
         .json({ error: "No character found for this user" });
     }
 
+    const parsedCharacterData =
+      typeof character.character_data === "string"
+        ? JSON.parse(character.character_data)
+        : character.character_data;
+
     res.json({
       character: {
         upload_id: character.id,
         user_id: character.user_id,
-        creator_name: character.name,
         created_at: character.created_at,
         last_edited_at: character.last_edited_at,
-        location: {
-          country: character.country,
-          region: character.region,
-          city: character.city,
-        },
-        character_data:
-          typeof character.character_data === "string"
-            ? JSON.parse(character.character_data)
-            : character.character_data,
-        edit_count: character.edit_count,
+        location: parsedCharacterData.metadata?.location || {},
+        character_data: parsedCharacterData,
+        is_edited: character.is_edited,
         is_deleted: character.is_deleted,
         deleted_at: character.deleted_at,
         deleted_by: character.deleted_by,
       },
-      canEdit: await canUserEditCharacter(character.id, req.user!.id),
+      canEdit: await query<{ can_user_edit_character: boolean }>(
+        "SELECT can_user_edit_character($1, $2) as can_user_edit_character",
+        [character.id, req.user!.id],
+      ).then((result) => result.rows[0]?.can_user_edit_character || false),
     });
   } catch (error) {
-    console.error("Get character error:", error);
+    log.error("Get character error:", { error });
     res.status(500).json({ error: "Failed to retrieve character" });
   }
 });
@@ -87,48 +87,27 @@ router.post(
           .json({ error: "User already has a character. Use PUT to update." });
       }
 
-      const characterData = {
-        name: req.body.creator_name,
-        characterJson: req.body.character_data,
-        country: req.body.location?.country,
-        region: req.body.location?.region,
-        city: req.body.location?.city,
-        dateOfBirth: req.body.date_of_birth,
-        heightCm: req.body.character_data.static.height_cm,
-        weightKg: req.body.character_data.static.weight_kg,
-        sex: req.body.character_data.static.sex,
-      };
-
-      const newCharacter = await characterQueries.create(
-        req.user!.id,
-        characterData,
+      const job = await addCharacterProcessingJob(
+        {
+          userId: req.user!.id,
+          action: "create",
+          characterData: req.body.character,
+          metadata: {
+            userAgent: req.get("User-Agent"),
+            ipAddress: req.ip,
+            timestamp: new Date(),
+          },
+        },
+        JobPriority.NORMAL,
       );
 
-      res.status(201).json({
-        message: "Character created successfully",
-        character: {
-          upload_id: newCharacter.id,
-          user_id: newCharacter.user_id,
-          creator_name: newCharacter.name,
-          creation_time: newCharacter.created_at,
-          edit_time: null,
-          location: {
-            country: newCharacter.country,
-            region: newCharacter.region,
-            city: newCharacter.city,
-          },
-          character_data:
-            typeof newCharacter.character_data === "string"
-              ? JSON.parse(newCharacter.character_data)
-              : newCharacter.character_data,
-          edit_count: newCharacter.edit_count,
-          is_deleted: newCharacter.is_deleted,
-          deleted_at: newCharacter.deleted_at,
-          deleted_by: newCharacter.deleted_by,
-        },
+      res.status(202).json({
+        message: "Character creation queued successfully",
+        jobId: job,
+        status: "processing",
       });
     } catch (error) {
-      console.error("Create character error:", error);
+      log.error("Create character error:", { error });
       res.status(500).json({ error: "Failed to create character" });
     }
   },
@@ -148,61 +127,28 @@ router.put(
         return res.status(404).json({ error: "No character found to update" });
       }
 
-      const updates: CharacterRouteUpdates = {};
-
-      if (req.body.creator_name) updates.name = req.body.creator_name;
-      if (req.body.location) {
-        if (req.body.location.country !== undefined)
-          updates.country = req.body.location.country;
-        if (req.body.location.region !== undefined)
-          updates.region = req.body.location.region;
-        if (req.body.location.city !== undefined)
-          updates.city = req.body.location.city;
-      }
-      if (req.body.character_data) {
-        updates.characterJson = req.body.character_data;
-        if (req.body.character_data.static?.height_cm) {
-          updates.heightCm = req.body.character_data.static.height_cm;
-        }
-        if (req.body.character_data.static?.weight_kg) {
-          updates.weightKg = req.body.character_data.static.weight_kg;
-        }
-        if (req.body.character_data.static?.sex) {
-          updates.sex = req.body.character_data.static.sex;
-        }
-      }
-
-      const updatedCharacter = await characterQueries.update(
-        character.id,
-        req.user!.id,
-        updates,
+      const job = await addCharacterProcessingJob(
+        {
+          userId: req.user!.id,
+          characterId: character.id,
+          action: "update",
+          characterData: req.body.character_data || req.body,
+          metadata: {
+            userAgent: req.get("User-Agent"),
+            ipAddress: req.ip,
+            timestamp: new Date(),
+          },
+        },
+        JobPriority.HIGH,
       );
 
-      res.json({
-        message: "Character updated successfully",
-        character: {
-          upload_id: updatedCharacter.id,
-          user_id: updatedCharacter.user_id,
-          creator_name: updatedCharacter.name,
-          created_at: updatedCharacter.created_at,
-          last_edited_at: updatedCharacter.last_edited_at,
-          location: {
-            country: updatedCharacter.country,
-            region: updatedCharacter.region,
-            city: updatedCharacter.city,
-          },
-          character_data:
-            typeof updatedCharacter.character_data === "string"
-              ? JSON.parse(updatedCharacter.character_data)
-              : updatedCharacter.character_data,
-          edit_count: updatedCharacter.edit_count,
-          is_deleted: updatedCharacter.is_deleted,
-          deleted_at: updatedCharacter.deleted_at,
-          deleted_by: updatedCharacter.deleted_by,
-        },
+      res.status(202).json({
+        message: "Character update queued successfully",
+        jobId: job,
+        status: "processing",
       });
     } catch (error) {
-      console.error("Update character error:", error);
+      log.error("Update character error:", { error });
 
       if (
         error instanceof Error &&
@@ -239,26 +185,23 @@ router.get(
         );
       }
 
-      const formattedCharacters = characters.map(
-        (char: PlazaCharacterData) => ({
+      const formattedCharacters = characters.map((char: PlazaCharacterData) => {
+        const parsedCharacterData =
+          typeof char.character_data === "string"
+            ? JSON.parse(char.character_data)
+            : char.character_data;
+
+        return {
           upload_id: char.id,
-          creator_name: char.name,
           creation_time: char.created_at,
           edit_time:
             char.last_edited_at !== char.created_at
               ? char.last_edited_at
               : null,
-          location: {
-            country: char.country,
-            region: char.region,
-            city: char.city,
-          },
-          character_data:
-            typeof char.character_data === "string"
-              ? JSON.parse(char.character_data)
-              : char.character_data,
-        }),
-      );
+          location: parsedCharacterData.metadata?.location || {},
+          character_data: parsedCharacterData,
+        };
+      });
 
       res.json({
         characters: formattedCharacters,
@@ -266,7 +209,7 @@ router.get(
         filters: { country, region },
       });
     } catch (error) {
-      console.error("Plaza fetch error:", error);
+      log.error("Plaza fetch error:", { error });
       res.status(500).json({ error: "Failed to fetch plaza characters" });
     }
   },
@@ -278,7 +221,7 @@ router.get("/:id", async (req: Request, res: Response) => {
     const { id } = req.params;
 
     const result = (await query(
-      "SELECT id, name, character_data, country, region, city, sex, created_at, last_edited_at FROM characters WHERE id = $1 AND is_deleted = false",
+      "SELECT id, character_data, created_at, last_edited_at FROM characters WHERE id = $1 AND is_deleted = false",
       [id],
     )) as DatabaseQueryResult<PlazaCharacterData>;
 
@@ -287,48 +230,27 @@ router.get("/:id", async (req: Request, res: Response) => {
     }
 
     const character = result.rows[0];
+    const parsedCharacterData =
+      typeof character.character_data === "string"
+        ? JSON.parse(character.character_data)
+        : character.character_data;
 
     res.json({
       character: {
         upload_id: character.id,
-        creator_name: character.name,
         creation_time: character.created_at,
         edit_time:
           character.last_edited_at !== character.created_at
             ? character.last_edited_at
             : null,
-        location: {
-          country: character.country,
-          region: character.region,
-          city: character.city,
-        },
-        character_data:
-          typeof character.character_data === "string"
-            ? JSON.parse(character.character_data)
-            : character.character_data,
+        location: parsedCharacterData.metadata?.location || {},
+        character_data: parsedCharacterData,
       },
     });
   } catch (error) {
-    console.error("Get character by ID error:", error);
+    log.error("Get character by ID error:", { error });
     res.status(500).json({ error: "Failed to retrieve character" });
   }
 });
-
-// helper func to check if user can edit character
-async function canUserEditCharacter(
-  characterId: string,
-  userId: string,
-): Promise<boolean> {
-  try {
-    const result = (await query(
-      "SELECT can_user_edit_character($1, $2) as can_edit",
-      [characterId, userId],
-    )) as DatabaseQueryResult<CanEditResult>;
-    return result.rows[0].can_edit;
-  } catch (error) {
-    console.error("Check edit permissions error:", error);
-    return false;
-  }
-}
 
 export default router;

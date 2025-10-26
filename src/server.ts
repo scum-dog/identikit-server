@@ -6,13 +6,14 @@ import rateLimit from "express-rate-limit";
 import authRoutes from "./routes/auth";
 import characterRoutes from "./routes/characters";
 import adminRoutes from "./routes/admin";
-import mockAuthRoutes from "./routes/mock-auth";
 import mockCharacterRoutes from "./routes/mock-characters";
 import mockAdminRoutes from "./routes/mock-admin";
 import testRetryRoutes from "./routes/test-retry";
 import pingRoutes from "./routes/ping";
 import { validateConfig } from "./auth/configValidation";
 import "./database";
+import { DatabaseScheduler } from "./scheduler";
+import { log } from "./logger";
 
 dotenv.config();
 validateConfig();
@@ -20,6 +21,7 @@ validateConfig();
 const app = express();
 const PORT = process.env.PORT || 3000;
 const environment = process.env.NODE_ENV || "development";
+const scheduler = new DatabaseScheduler();
 
 app.use(helmet());
 
@@ -50,7 +52,6 @@ app.use("/auth", authRoutes);
 app.use("/characters", characterRoutes);
 app.use("/admin", adminRoutes);
 
-app.use("/mock/auth", mockAuthRoutes);
 app.use("/mock/characters", mockCharacterRoutes);
 app.use("/mock/admin", mockAdminRoutes);
 app.use("/test-retry", testRetryRoutes);
@@ -93,7 +94,6 @@ app.get("/", (req: Request, res: Response) => {
         "GET /test-retry": "Testing endpoint for various failure types",
       },
       mock: {
-        "GET /mock/auth/me": "Mock user info",
         "GET /mock/characters/me": "Mock user's character",
         "POST /mock/characters": "Mock character creation",
         "PUT /mock/characters/me": "Mock character update",
@@ -109,7 +109,10 @@ app.get("/", (req: Request, res: Response) => {
 });
 
 app.use((error: Error, req: Request, res: Response, next: NextFunction) => {
-  console.error("Global error handler:", error);
+  log.error("Global error handler:", {
+    error: error.message,
+    stack: error.stack,
+  });
 
   if (res.headersSent) {
     return next(error);
@@ -131,5 +134,18 @@ app.use((req: Request, res: Response) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`listening on port ${PORT} in ${environment}`);
+  log.info(`listening on port ${PORT} in ${environment}`);
+  scheduler.start();
+});
+
+process.on("SIGTERM", () => {
+  log.info("SIGTERM received. Shutting down gracefully...");
+  scheduler.stop();
+  process.exit(0);
+});
+
+process.on("SIGINT", () => {
+  log.info("SIGINT received. Shutting down gracefully...");
+  scheduler.stop();
+  process.exit(0);
 });

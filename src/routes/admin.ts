@@ -1,16 +1,12 @@
 import { Router, Request, Response } from "express";
-import { characterQueries, query } from "../database";
+import { query } from "../database";
 import { validateRequest } from "../validation";
 import { z } from "zod";
 import { authenticateUser, requireAdmin } from "../auth/middleware";
 import rateLimit from "express-rate-limit";
-import {
-  AdminCharacterListResult,
-  AdminCharacterDetailResult,
-  AdminEditHistoryResult,
-  AdminCharacterSimpleResult,
-  AdminUserListResult,
-} from "../types";
+import { addCharacterProcessingJob, JobPriority } from "../queue";
+import { AdminCharacterWithUser, AdminUser } from "../types";
+import { log } from "../logger";
 
 const router = Router();
 const adminRateLimit = rateLimit({
@@ -35,11 +31,10 @@ router.get("/characters", async (req: Request, res: Response) => {
     const whereClause = showDeleted ? "" : "WHERE is_deleted = false";
     const orderBy = "ORDER BY created_at DESC";
 
-    const result = await query<AdminCharacterListResult>(
+    const result = await query<AdminCharacterWithUser>(
       `
       SELECT
-        c.id, c.name, c.country, c.region, c.city,
-        c.created_at, c.last_edited_at, c.edit_count,
+        c.id, c.user_id, c.character_data, c.created_at, c.last_edited_at, c.is_edited,
         c.is_deleted, c.deleted_at, c.deleted_by,
         u.username, u.platform, u.platform_user_id
       FROM characters c
@@ -67,7 +62,7 @@ router.get("/characters", async (req: Request, res: Response) => {
       },
     });
   } catch (error) {
-    console.error("Admin get characters error:", error);
+    log.error("Admin get characters error", { error });
     res.status(500).json({ error: "Failed to fetch characters" });
   }
 });
@@ -77,11 +72,11 @@ router.get("/character/:id", async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
 
-    const result = await query<AdminCharacterDetailResult>(
+    const result = await query<AdminCharacterWithUser>(
       `
       SELECT
         c.*,
-        u.username, u.platform, u.platform_user_id, u.email,
+        u.username, u.platform, u.platform_user_id,
         u.created_at as user_created_at, u.last_login
       FROM characters c
       JOIN users u ON c.user_id = u.id
@@ -96,20 +91,6 @@ router.get("/character/:id", async (req: Request, res: Response) => {
 
     const character = result.rows[0];
 
-    const editHistory = await query<AdminEditHistoryResult>(
-      `
-      SELECT
-        ce.*,
-        u.username as editor_username
-      FROM character_edits ce
-      LEFT JOIN users u ON ce.user_id = u.id
-      WHERE ce.character_id = $1
-      ORDER BY ce.edited_at DESC
-      LIMIT 20
-    `,
-      [id],
-    );
-
     res.json({
       character: {
         ...character,
@@ -118,10 +99,9 @@ router.get("/character/:id", async (req: Request, res: Response) => {
             ? JSON.parse(character.character_data)
             : character.character_data,
       },
-      editHistory: editHistory.rows,
     });
   } catch (error) {
-    console.error("Admin get character details error:", error);
+    log.error("Admin get character details error", { error });
     res.status(500).json({ error: "Failed to fetch character details" });
   }
 });
@@ -143,10 +123,11 @@ router.delete(
       const { id } = req.params;
       const { reason } = req.body;
 
-      const charResult = await query<AdminCharacterSimpleResult>(
-        "SELECT id, name, user_id, is_deleted FROM characters WHERE id = $1",
-        [id],
-      );
+      const charResult = await query<{
+        id: string;
+        user_id: string;
+        is_deleted: boolean;
+      }>("SELECT id, user_id, is_deleted FROM characters WHERE id = $1", [id]);
 
       if (charResult.rows.length === 0) {
         return res.status(404).json({ error: "Character not found" });
@@ -158,19 +139,34 @@ router.delete(
         return res.status(409).json({ error: "Character is already deleted" });
       }
 
-      await characterQueries.adminDelete(id, req.user!.id);
+      const job = await addCharacterProcessingJob(
+        {
+          userId: character.user_id,
+          characterId: id,
+          action: "delete",
+          metadata: {
+            adminUserId: req.user!.id,
+            reason,
+            userAgent: req.get("User-Agent"),
+            ipAddress: req.ip,
+            timestamp: new Date(),
+          },
+        },
+        JobPriority.CRITICAL,
+      );
 
       res.json({
         success: true,
-        message: `Character "${character.name}" has been deleted`,
+        message: `Character deletion queued successfully`,
+        jobId: job,
+        status: "processing",
         deletedCharacter: {
           id: character.id,
-          name: character.name,
         },
         reason,
       });
     } catch (error) {
-      console.error("Admin delete character error:", error);
+      log.error("Admin delete character error", { error });
       res.status(500).json({ error: "Failed to delete character" });
     }
   },
@@ -183,15 +179,12 @@ router.get("/users", async (req: Request, res: Response) => {
     const limit = Math.min(parseInt(req.query.limit as string) || 50, 100);
     const offset = (page - 1) * limit;
 
-    const result = await query<AdminUserListResult>(
+    const result = await query<AdminUser>(
       `
       SELECT
         u.id, u.username, u.platform, u.platform_user_id,
-        u.created_at, u.last_login, u.is_admin,
-        COUNT(c.id) as character_count
+        u.created_at, u.last_login, u.is_admin
       FROM users u
-      LEFT JOIN characters c ON u.id = c.user_id AND c.is_deleted = false
-      GROUP BY u.id
       ORDER BY u.created_at DESC
       LIMIT $1 OFFSET $2
     `,
@@ -212,7 +205,7 @@ router.get("/users", async (req: Request, res: Response) => {
       },
     });
   } catch (error) {
-    console.error("Admin get users error:", error);
+    log.error("Admin get users error", { error });
     res.status(500).json({ error: "Failed to fetch users" });
   }
 });
