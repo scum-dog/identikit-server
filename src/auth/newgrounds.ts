@@ -102,7 +102,7 @@ export class NewgroundsAuth {
         hasResult: !!gatewayResponse.result,
         hasSession: !!gatewayResponse.result?.data?.session,
         hasUser: !!gatewayResponse.result?.data?.session?.user,
-        errorCode: gatewayResponse.error?.code,
+        errorCode: gatewayResponse.error?.code?.toString(),
         errorMessage: gatewayResponse.error?.message
       });
 
@@ -116,7 +116,7 @@ export class NewgroundsAuth {
           hasData: !!gatewayResponse.result?.data,
           hasSession: !!gatewayResponse.result?.data?.session,
           hasUser: !!gatewayResponse.result?.data?.session?.user,
-          errorCode: gatewayResponse.error?.code,
+          errorCode: gatewayResponse.error?.code?.toString(),
           errorMessage: gatewayResponse.error?.message,
           fullResponse: gatewayResponse
         });
@@ -131,7 +131,7 @@ export class NewgroundsAuth {
 
       log.info("Newgrounds session details", {
         sessionExpired: ngSession.expired,
-        userId: ngUser.id,
+        userId: ngUser.id.toString(),
         userName: ngUser.name,
         remember: ngSession.remember
       });
