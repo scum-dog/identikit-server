@@ -57,6 +57,10 @@ app.use("/mock/admin", mockAdminRoutes);
 app.use("/test-retry", testRetryRoutes);
 
 app.get("/", (req: Request, res: Response) => {
+  if (environment === "production") {
+    return res.redirect("https://scum.dog/404");
+  }
+
   res.json({
     endpoints: {
       testing: {
