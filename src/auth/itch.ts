@@ -13,7 +13,7 @@ import { userQueries } from "../database";
 import { log } from "../logger";
 
 export class ItchOAuth implements OAuthProvider<PlatformUser> {
-  public readonly platform = "itchio" as const;
+  public readonly platform = "itch" as const;
 
   generateAuthUrl(): AuthUrlResult {
     const clientId = process.env.ITCH_IO_CLIENT_ID!;
@@ -68,7 +68,7 @@ export class ItchOAuth implements OAuthProvider<PlatformUser> {
       const user = await this.createOrUpdateUser(itchUser);
       const sessionId = await SessionManager.createSession({
         userId: user.id,
-        platform: "itchio",
+        platform: "itch",
         platformUserId: itchUser.id,
         platformSessionId: accessToken,
         username: itchUser.username,
@@ -91,7 +91,7 @@ export class ItchOAuth implements OAuthProvider<PlatformUser> {
   async validateSession(sessionId: string): Promise<PlatformUser | null> {
     try {
       const session = await SessionManager.validateSession(sessionId);
-      if (!session || session.platform !== "itchio") {
+      if (!session || session.platform !== "itch") {
         return null;
       }
 
@@ -130,10 +130,10 @@ export class ItchOAuth implements OAuthProvider<PlatformUser> {
   }
 
   private async createOrUpdateUser(itchUser: PlatformUser) {
-    let user = await userQueries.findByPlatformId("itchio", itchUser.id);
+    let user = await userQueries.findByPlatformId("itch", itchUser.id);
 
     if (!user) {
-      user = await userQueries.create("itchio", itchUser.id, itchUser.username);
+      user = await userQueries.create("itch", itchUser.id, itchUser.username);
     } else {
       await userQueries.updateLastLogin(user.id);
     }

@@ -94,7 +94,7 @@ router.post("/callback", async (req: Request, res: Response) => {
       state as string,
     );
 
-    const user = await userQueries.findByPlatformId("itchio", itchUser.id);
+    const user = await userQueries.findByPlatformId("itch", itchUser.id);
 
     if (!user) {
       throw new Error("User not found after OAuth flow");

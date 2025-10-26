@@ -289,7 +289,7 @@ export interface CallbackValidation {
   error?: string;
 }
 
-export type Platform = "newgrounds" | "itchio" | "google";
+export type Platform = "newgrounds" | "itch" | "google";
 
 export interface OAuthProvider<T extends PlatformUser> {
   platform: Platform;
