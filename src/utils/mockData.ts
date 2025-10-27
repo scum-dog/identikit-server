@@ -152,7 +152,7 @@ function generateShapeId(prefix: string): string {
 }
 
 function generateAssetId(): string {
-  const prefixes = ["A", "B", "C", "EA", "EB", "EY", "H", "L", "N"];
+  const prefixes = ["A", "B", "EB", "EY", "G", "H", "HS", "L", "N"];
   const prefix = randomChoice(prefixes);
   return `${prefix}_${randomInt(1, 999).toString().padStart(3, "0")}`;
 }
@@ -211,16 +211,23 @@ export function generateMockCharacterData(): CharacterData {
       is_deleted: false,
       deleted_at: null,
       deleted_by: null,
-      location: {
-        country: randomChoice(countries),
-        region: randomChoice(
-          regions[randomChoice(countries) as keyof typeof regions] || [],
-        ),
-        city: randomChoice(
-          cities[randomChoice(Object.keys(cities)) as keyof typeof cities] ||
-            [],
-        ),
-      },
+      location: (() => {
+        const country = randomChoice(countries);
+        const regionList = regions[country as keyof typeof regions] || [];
+        const region =
+          regionList.length > 0 ? randomChoice(regionList) : undefined;
+        const cityList =
+          region && cities[region as keyof typeof cities]
+            ? cities[region as keyof typeof cities]
+            : [];
+        const city = cityList.length > 0 ? randomChoice(cityList) : undefined;
+
+        return {
+          country,
+          region,
+          city,
+        };
+      })(),
     },
     character_data: {
       static: {
