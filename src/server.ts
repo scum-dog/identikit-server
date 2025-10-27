@@ -10,11 +10,11 @@ import mockCharacterRoutes from "./routes/mock-characters";
 import mockAdminRoutes from "./routes/mock-admin";
 import testRetryRoutes from "./routes/test-retry";
 import pingRoutes from "./routes/ping";
-import { validateConfig } from "./auth/configValidation";
+import { validateConfig } from "./utils/configValidation";
 import "./database";
 import { DatabaseScheduler } from "./scheduler";
 import { initializeQueue, shutdownQueue } from "./queue";
-import { log } from "./logger";
+import { log } from "./utils/logger";
 
 dotenv.config();
 validateConfig();

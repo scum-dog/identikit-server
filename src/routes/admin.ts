@@ -1,13 +1,13 @@
 import { Router, Request, Response } from "express";
 import { query } from "../database";
-import { validateRequest } from "../validation";
+import { validateRequest } from "../utils/validation";
 import { z } from "zod";
 import { authenticateUser, requireAdmin } from "../auth/middleware";
 import rateLimit from "express-rate-limit";
 import { addCharacterProcessingJob } from "../queue";
 import { JobPriority } from "../types";
 import { AdminCharacterWithUser, AdminUser } from "../types";
-import { log } from "../logger";
+import { log } from "../utils/logger";
 
 const router = Router();
 const adminRateLimit = rateLimit({

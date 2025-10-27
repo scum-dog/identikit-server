@@ -1,6 +1,6 @@
 import axios from "axios";
 import crypto from "crypto";
-import { AuthError } from "./base";
+import { AuthError } from "../utils/authHelpers";
 import {
   OAuthProvider,
   AuthUrlResult,
@@ -11,7 +11,8 @@ import {
 } from "../types";
 import { SessionManager } from "./sessions";
 import { userQueries } from "../database";
-import { log } from "../logger";
+import { log } from "../utils/logger";
+import { handleConstraints } from "../utils/errorHandler";
 
 export class GoogleAuth implements OAuthProvider<PlatformUser> {
   public readonly platform = "google" as const;
@@ -139,10 +140,8 @@ export class GoogleAuth implements OAuthProvider<PlatformUser> {
     let user = await userQueries.findByPlatformId("google", googleUser.id);
 
     if (!user) {
-      user = await userQueries.create(
-        "google",
-        googleUser.id,
-        googleUser.username,
+      user = await handleConstraints(() =>
+        userQueries.create("google", googleUser.id, googleUser.username),
       );
     } else {
       await userQueries.updateLastLogin(user.id);

@@ -1,6 +1,6 @@
 import axios from "axios";
 import crypto from "crypto";
-import { AuthError } from "./base";
+import { AuthError } from "../utils/authHelpers";
 import {
   OAuthProvider,
   AuthUrlResult,
@@ -10,7 +10,8 @@ import {
 } from "../types";
 import { SessionManager } from "./sessions";
 import { userQueries } from "../database";
-import { log } from "../logger";
+import { log } from "../utils/logger";
+import { handleConstraints } from "../utils/errorHandler";
 
 export class ItchOAuth implements OAuthProvider<PlatformUser> {
   public readonly platform = "itch" as const;
@@ -133,7 +134,9 @@ export class ItchOAuth implements OAuthProvider<PlatformUser> {
     let user = await userQueries.findByPlatformId("itch", itchUser.id);
 
     if (!user) {
-      user = await userQueries.create("itch", itchUser.id, itchUser.username);
+      user = await handleConstraints(() =>
+        userQueries.create("itch", itchUser.id, itchUser.username),
+      );
     } else {
       await userQueries.updateLastLogin(user.id);
     }

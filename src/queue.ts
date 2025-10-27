@@ -1,5 +1,5 @@
 import { Pool } from "pg";
-import { log } from "./logger";
+import { log } from "./utils/logger";
 import { JobPriority, CharacterProcessingJobData, QueueJob } from "./types";
 
 const queuePool = new Pool({

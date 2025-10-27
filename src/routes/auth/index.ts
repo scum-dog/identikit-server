@@ -2,7 +2,7 @@ import { Router, Request, Response } from "express";
 import { authenticateUser } from "../../auth/middleware";
 import { query } from "../../database";
 import { CharacterInfo } from "../../types";
-import { log } from "../../logger";
+import { log } from "../../utils/logger";
 import { SessionManager } from "../../auth/sessions";
 
 import newgroundsRoutes from "./newgrounds";

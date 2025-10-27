@@ -1,5 +1,5 @@
 import { query } from "./database";
-import { log } from "./logger";
+import { log } from "./utils/logger";
 
 export class DatabaseScheduler {
   private intervalId: ReturnType<typeof setInterval> | null = null;

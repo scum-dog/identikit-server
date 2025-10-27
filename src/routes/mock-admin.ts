@@ -1,9 +1,9 @@
 import { Router, Request, Response } from "express";
-import { mockDataStore } from "../mock-data";
-import { validateRequest } from "../validation";
+import { mockDataStore } from "../utils/mockData";
+import { validateRequest } from "../utils/validation";
 import { z } from "zod";
 import { randomUUID } from "crypto";
-import { log } from "../logger";
+import { log } from "../utils/logger";
 
 const router = Router();
 

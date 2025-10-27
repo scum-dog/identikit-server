@@ -8,7 +8,7 @@ import {
   Sex,
   MockUser,
   MockCharacter,
-} from "./types";
+} from "../types";
 
 const firstNames = [
   "John",

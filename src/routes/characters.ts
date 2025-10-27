@@ -5,12 +5,12 @@ import {
   validatePlazaQuery,
   characterUploadSchema,
   characterUpdateSchema,
-} from "../validation";
+} from "../utils/validation";
 import { authenticateUser } from "../auth/middleware";
 import rateLimit from "express-rate-limit";
 import { addCharacterProcessingJob } from "../queue";
 import { JobPriority } from "../types";
-import { log } from "../logger";
+import { log } from "../utils/logger";
 import {
   PlazaQueryRequest,
   PlazaCharacterData,

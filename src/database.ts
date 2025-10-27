@@ -8,7 +8,7 @@ import {
   DatabaseUser,
   PlazaCharacterResult,
 } from "./types";
-import { log } from "./logger";
+import { log } from "./utils/logger";
 
 dotenv.config();
 

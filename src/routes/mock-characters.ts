@@ -1,18 +1,18 @@
 import { Router, Request, Response } from "express";
-import { mockDataStore, generateMockCharacter } from "../mock-data";
+import { mockDataStore, generateMockCharacter } from "../utils/mockData";
 import {
   validateRequest,
   validatePlazaQuery,
   characterUploadSchema,
   characterUpdateSchema,
-} from "../validation";
+} from "../utils/validation";
 import { randomUUID } from "crypto";
 import {
   MockCharacterRouteUpdates,
   PlazaQueryRequest,
   MockCharacter,
 } from "../types";
-import { log } from "../logger";
+import { log } from "../utils/logger";
 
 const router = Router();
 

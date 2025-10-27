@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import { SessionManager } from "./sessions";
 import { Platform } from "../types";
-import { log } from "../logger";
+import { log } from "../utils/logger";
 
 export const authenticateUser = async (
   req: Request,

@@ -2,7 +2,12 @@ import { Router, Request, Response } from "express";
 import crypto from "crypto";
 import { itchAuth } from "../../auth/itch";
 import { userQueries } from "../../database";
-import { log } from "../../logger";
+import { log } from "../../utils/logger";
+import {
+  getConstraintError,
+  ERROR_CODES,
+  errorResponse,
+} from "../../utils/errorHandler";
 
 const router = Router();
 
@@ -18,7 +23,14 @@ router.get("/url", (req: Request, res: Response) => {
     });
   } catch (error) {
     log.error("Get itch.io auth URL error", { error });
-    res.status(500).json({ error: "Failed to generate authentication URL" });
+    res
+      .status(500)
+      .json(
+        errorResponse(
+          ERROR_CODES.PLATFORM_ERROR,
+          "Failed to generate Itch.io authentication URL",
+        ),
+      );
   }
 });
 
@@ -54,14 +66,24 @@ router.get("/callback", (req: Request, res: Response) => {
                 document.getElementById('status').innerHTML += '<br><br>You may now close this window and return to IDENTI-NET.';
               }
             } else {
-              document.getElementById('status').innerHTML = \`Authentication failed: \${data.message}\`;
+              let errorMessage = data.message || 'Unknown error';
+              if (data.error === 'account_exists') {
+                errorMessage = 'An account with this Itch.io profile already exists. Try logging in instead.';
+              } else if (data.error === 'username_taken') {
+                errorMessage = 'This username is already taken. Your Itch.io account cannot be linked.';
+              } else if (data.error === 'invalid_token') {
+                errorMessage = 'Authentication session expired. Please close this window and try again.';
+              } else if (data.error === 'network_error') {
+                errorMessage = 'Connection failed. Please check your internet and try again.';
+              }
+              document.getElementById('status').innerHTML = \`Authentication failed: \${errorMessage}\`;
             }
           })
           .catch(() => {
-            document.getElementById('status').innerHTML = 'Authentication failed: Network error';
+            document.getElementById('status').innerHTML = 'Authentication failed: Unable to connect to server. Please check your internet connection and try again.';
           });
       } else {
-        document.getElementById('status').innerHTML = 'Authentication failed: No access token found';
+        document.getElementById('status').innerHTML = 'Authentication failed: Itch.io did not provide an access token. Please try the authentication process again.';
       }
     </script>
   </body>
@@ -82,11 +104,14 @@ router.post("/callback", async (req: Request, res: Response) => {
     const { access_token, state } = req.body;
 
     if (!access_token) {
-      return res.status(400).json({
-        success: false,
-        error: "missing_parameters",
-        message: "Missing access_token parameter",
-      });
+      return res
+        .status(400)
+        .json(
+          errorResponse(
+            ERROR_CODES.MISSING_PARAMETERS,
+            "Missing access token from Itch.io authentication",
+          ),
+        );
     }
 
     const { sessionId, user: itchUser } = await itchAuth.authenticateWithCode(
@@ -97,7 +122,14 @@ router.post("/callback", async (req: Request, res: Response) => {
     const user = await userQueries.findByPlatformId("itch", itchUser.id);
 
     if (!user) {
-      throw new Error("User not found after OAuth flow");
+      return res
+        .status(500)
+        .json(
+          errorResponse(
+            ERROR_CODES.USER_NOT_FOUND,
+            "User account was not properly created during Itch.io authentication",
+          ),
+        );
     }
 
     res.json({
@@ -113,11 +145,60 @@ router.post("/callback", async (req: Request, res: Response) => {
     });
   } catch (error) {
     log.error("Itch.io callback error", { error });
-    res.status(401).json({
-      success: false,
-      error: "authentication_failed",
-      message: "Itch.io authentication failed",
-    });
+
+    const constraintError = getConstraintError(error);
+    if (constraintError) {
+      return res
+        .status(400)
+        .json(errorResponse(constraintError.error, constraintError.message));
+    }
+
+    if (error instanceof Error) {
+      if (error.message.includes("Invalid or expired access token")) {
+        return res
+          .status(401)
+          .json(
+            errorResponse(
+              ERROR_CODES.EXPIRED_TOKEN,
+              "Your Itch.io access token has expired. Please try signing in again.",
+            ),
+          );
+      }
+
+      if (error.message.includes("Failed to get user info")) {
+        return res
+          .status(503)
+          .json(
+            errorResponse(
+              ERROR_CODES.PLATFORM_ERROR,
+              "Unable to retrieve your Itch.io profile information. Please try again later.",
+            ),
+          );
+      }
+
+      if (
+        error.message.includes("network") ||
+        error.message.includes("timeout")
+      ) {
+        return res
+          .status(503)
+          .json(
+            errorResponse(
+              ERROR_CODES.NETWORK_ERROR,
+              "Unable to connect to Itch.io servers. Please try again later.",
+            ),
+          );
+      }
+    }
+
+    res
+      .status(500)
+      .json(
+        errorResponse(
+          ERROR_CODES.PLATFORM_ERROR,
+          "Itch.io authentication failed due to an unexpected error",
+        ),
+      );
   }
 });
 

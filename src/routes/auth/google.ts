@@ -1,7 +1,12 @@
 import { Router, Request, Response } from "express";
 import { googleAuth } from "../../auth/google";
 import { userQueries } from "../../database";
-import { log } from "../../logger";
+import { log } from "../../utils/logger";
+import {
+  getConstraintError,
+  ERROR_CODES,
+  errorResponse,
+} from "../../utils/errorHandler";
 
 const router = Router();
 
@@ -11,7 +16,14 @@ router.get("/url", async (req: Request, res: Response) => {
     res.json({ authUrl, state, expiresAt });
   } catch (error) {
     log.error("Google auth URL error", { error });
-    res.status(500).json({ error: "Failed to generate auth URL" });
+    res
+      .status(500)
+      .json(
+        errorResponse(
+          ERROR_CODES.PLATFORM_ERROR,
+          "Failed to generate Google authentication URL",
+        ),
+      );
   }
 });
 
@@ -21,11 +33,14 @@ router.get("/callback", async (req: Request, res: Response) => {
     const { code, state } = req.query;
 
     if (!code || !state) {
-      return res.status(400).json({
-        success: false,
-        error: "missing_parameters",
-        message: "Missing code or state parameter",
-      });
+      return res
+        .status(400)
+        .json(
+          errorResponse(
+            ERROR_CODES.MISSING_PARAMETERS,
+            "Missing required authentication parameters (code or state)",
+          ),
+        );
     }
 
     const { sessionId, user: googleUser } =
@@ -33,7 +48,14 @@ router.get("/callback", async (req: Request, res: Response) => {
     const user = await userQueries.findByPlatformId("google", googleUser.id);
 
     if (!user) {
-      throw new Error("User not found after OAuth flow");
+      return res
+        .status(500)
+        .json(
+          errorResponse(
+            ERROR_CODES.USER_NOT_FOUND,
+            "User account was not properly created during authentication",
+          ),
+        );
     }
 
     res.json({
@@ -49,11 +71,52 @@ router.get("/callback", async (req: Request, res: Response) => {
     });
   } catch (error) {
     log.error("Google callback error", { error });
-    res.status(401).json({
-      success: false,
-      error: "authentication_failed",
-      message: "Google authentication failed",
-    });
+
+    const constraintError = getConstraintError(error);
+    if (constraintError) {
+      return res
+        .status(400)
+        .json(errorResponse(constraintError.error, constraintError.message));
+    }
+
+    if (error instanceof Error) {
+      if (
+        error.message.includes("invalid_grant") ||
+        error.message.includes("authorization code")
+      ) {
+        return res
+          .status(400)
+          .json(
+            errorResponse(
+              ERROR_CODES.INVALID_TOKEN,
+              "Invalid or expired Google authorization code. Please try signing in again.",
+            ),
+          );
+      }
+
+      if (
+        error.message.includes("network") ||
+        error.message.includes("timeout")
+      ) {
+        return res
+          .status(503)
+          .json(
+            errorResponse(
+              ERROR_CODES.NETWORK_ERROR,
+              "Unable to connect to Google's servers. Please try again later.",
+            ),
+          );
+      }
+    }
+
+    res
+      .status(500)
+      .json(
+        errorResponse(
+          ERROR_CODES.PLATFORM_ERROR,
+          "Google authentication failed due to an unexpected error",
+        ),
+      );
   }
 });
 

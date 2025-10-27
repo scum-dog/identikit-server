@@ -488,7 +488,7 @@ export const validateCharacterOwnership = async (
   userId: string,
   characterId: string,
 ) => {
-  const { query } = await import("./database");
+  const { query } = await import("../database");
 
   try {
     const result = await query(

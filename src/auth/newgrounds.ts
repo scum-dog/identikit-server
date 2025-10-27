@@ -1,5 +1,5 @@
 import axios from "axios";
-import { AuthError } from "./base";
+import { AuthError } from "../utils/authHelpers";
 import {
   PlatformUser,
   NewgroundsGatewayRequest,
@@ -8,7 +8,8 @@ import {
 } from "../types";
 import { SessionManager } from "./sessions";
 import { userQueries } from "../database";
-import { log } from "../logger";
+import { log } from "../utils/logger";
+import { handleConstraints } from "../utils/errorHandler";
 
 const NEWGROUNDS_GATEWAY_URL = "https://newgrounds.io/gateway_v3.php";
 
@@ -171,10 +172,12 @@ export class NewgroundsAuth {
     );
 
     if (!user) {
-      user = await userQueries.create(
-        "newgrounds",
-        newgroundsUser.id,
-        newgroundsUser.username,
+      user = await handleConstraints(() =>
+        userQueries.create(
+          "newgrounds",
+          newgroundsUser.id,
+          newgroundsUser.username,
+        ),
       );
     } else {
       await userQueries.updateLastLogin(user.id);
