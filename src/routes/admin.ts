@@ -4,7 +4,8 @@ import { validateRequest } from "../validation";
 import { z } from "zod";
 import { authenticateUser, requireAdmin } from "../auth/middleware";
 import rateLimit from "express-rate-limit";
-import { addCharacterProcessingJob, JobPriority } from "../queue";
+import { addCharacterProcessingJob } from "../queue";
+import { JobPriority } from "../types";
 import { AdminCharacterWithUser, AdminUser } from "../types";
 import { log } from "../logger";
 

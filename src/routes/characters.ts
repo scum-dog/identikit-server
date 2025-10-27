@@ -8,7 +8,8 @@ import {
 } from "../validation";
 import { authenticateUser } from "../auth/middleware";
 import rateLimit from "express-rate-limit";
-import { addCharacterProcessingJob, JobPriority } from "../queue";
+import { addCharacterProcessingJob } from "../queue";
+import { JobPriority } from "../types";
 import { log } from "../logger";
 import {
   PlazaQueryRequest,

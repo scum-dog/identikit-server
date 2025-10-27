@@ -1,32 +1,6 @@
 import { Pool } from "pg";
 import { log } from "./logger";
-
-export enum JobPriority {
-  LOW = 1,
-  NORMAL = 2,
-  HIGH = 3,
-  CRITICAL = 4,
-}
-
-export interface CharacterProcessingJobData {
-  userId: string;
-  characterId?: string;
-  action: "create" | "update" | "delete";
-  characterData?: object;
-  metadata?: {
-    adminUserId?: string;
-    reason?: string;
-    userAgent?: string;
-    ipAddress?: string;
-    timestamp?: Date;
-  };
-}
-
-interface QueueJob {
-  id: string;
-  data: CharacterProcessingJobData;
-  priority: JobPriority;
-}
+import { JobPriority, CharacterProcessingJobData, QueueJob } from "./types";
 
 const queuePool = new Pool({
   connectionString: process.env.DATABASE_URL,

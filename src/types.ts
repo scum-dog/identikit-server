@@ -467,6 +467,33 @@ export interface GoogleOAuthParams extends Record<string, string> {
   state: string;
 }
 
+export enum JobPriority {
+  LOW = 1,
+  NORMAL = 2,
+  HIGH = 3,
+  CRITICAL = 4,
+}
+
+export interface CharacterProcessingJobData {
+  userId: string;
+  characterId?: string;
+  action: "create" | "update" | "delete";
+  characterData?: object;
+  metadata?: {
+    adminUserId?: string;
+    reason?: string;
+    userAgent?: string;
+    ipAddress?: string;
+    timestamp?: Date;
+  };
+}
+
+export interface QueueJob {
+  id: string;
+  data: CharacterProcessingJobData;
+  priority: JobPriority;
+}
+
 declare global {
   namespace Express {
     interface Request {
