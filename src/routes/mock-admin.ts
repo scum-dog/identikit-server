@@ -2,16 +2,16 @@ import { Router, Request, Response } from "express";
 import { mockDataStore } from "../utils/mockData";
 import { validateRequest } from "../utils/validation";
 import { z } from "zod";
-import { randomUUID } from "crypto";
 import { log } from "../utils/logger";
+import { mockRouteAdmin } from "../utils/testMockData";
 
 const router = Router();
 
 const MOCK_ADMIN = {
-  id: randomUUID(),
-  username: "AdminUser",
-  platform: "newgrounds",
-  isAdmin: true,
+  id: mockRouteAdmin.id,
+  username: mockRouteAdmin.username,
+  platform: mockRouteAdmin.platform,
+  isAdmin: mockRouteAdmin.is_admin,
 };
 
 // GET /mock/admin/characters - get mock characters for moderation

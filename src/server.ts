@@ -16,7 +16,7 @@ import { DatabaseScheduler } from "./scheduler";
 import { initializeQueue, shutdownQueue } from "./queue";
 import { log } from "./utils/logger";
 
-dotenv.config();
+dotenv.config({ quiet: true });
 validateConfig();
 
 const app = express();

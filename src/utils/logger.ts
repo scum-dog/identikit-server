@@ -13,7 +13,6 @@ const logger = winston.createLogger({
   format: winston.format.combine(
     winston.format.errors({ stack: true }),
     winston.format.timestamp({ format: "YYYY-MM-DD HH:mm:ss" }),
-    winston.format.colorize({ level: true }),
     winston.format.printf(({ timestamp, level, message, stack, ...meta }) => {
       let logMessage = `${timestamp} [${level}]: ${message}`;
 

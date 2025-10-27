@@ -10,7 +10,7 @@ import {
 } from "./types";
 import { log } from "./utils/logger";
 
-dotenv.config();
+dotenv.config({ quiet: true });
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
@@ -23,7 +23,6 @@ const pool = new Pool({
   connectionTimeoutMillis: 2000,
 });
 
-// test db connection
 pool.on("connect", () => {
   log.info("Connected to PostgreSQL database");
 });
@@ -82,7 +81,6 @@ export const userQueries = {
   },
 };
 
-// character-related database operations
 export const characterQueries = {
   findByUserId: async (userId: string) => {
     const result = await query<DatabaseCharacter>(
@@ -92,7 +90,6 @@ export const characterQueries = {
     return result.rows[0];
   },
 
-  // create new character
   create: async (userId: string, characterData: CharacterCreateData) => {
     const { characterJson } = characterData;
 
@@ -106,7 +103,6 @@ export const characterQueries = {
     return result.rows[0];
   },
 
-  // update character (with validation)
   update: async (
     characterId: string,
     userId: string,
@@ -139,7 +135,6 @@ export const characterQueries = {
     return result.rows[0];
   },
 
-  // get random characters for plaza
   getRandomCharacters: async (limit: number = 100) => {
     const result = await query<PlazaCharacterResult>(
       "SELECT * FROM get_random_characters($1)",
@@ -148,7 +143,6 @@ export const characterQueries = {
     return result.rows;
   },
 
-  // search characters by location
   searchByLocation: async (
     country?: string,
     region?: string,

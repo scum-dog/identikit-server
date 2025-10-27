@@ -13,39 +13,19 @@ import {
   MockCharacter,
 } from "../types";
 import { log } from "../utils/logger";
+import { mockRouteUser, canUserEditCharacter } from "../utils/testMockData";
 
 const router = Router();
 
-// create mock user
 const MOCK_USER = {
-  id: randomUUID(),
-  username: "TestUser123",
-  platform: "newgrounds",
-  isAdmin: false,
+  id: mockRouteUser.id,
+  username: mockRouteUser.username,
+  platform: mockRouteUser.platform,
+  isAdmin: mockRouteUser.is_admin,
 };
 
 const mockCanUserEditCharacter = (character: MockCharacter): boolean => {
-  const creationDate = new Date(character.created_at);
-  const lastEditDate = character.last_edited_at
-    ? new Date(character.last_edited_at)
-    : creationDate;
-  const now = new Date();
-
-  const daysSinceCreation =
-    (now.getTime() - creationDate.getTime()) / (1000 * 3600 * 24);
-
-  const daysSinceLastEdit =
-    (now.getTime() - lastEditDate.getTime()) / (1000 * 3600 * 24);
-
-  if (daysSinceCreation < 30) {
-    return false;
-  }
-
-  if (daysSinceLastEdit < 7) {
-    return false;
-  }
-
-  return true;
+  return canUserEditCharacter(character.created_at, character.last_edited_at);
 };
 
 // GET /mock/characters/me - get mock user's character
@@ -61,21 +41,7 @@ router.get("/me", (req: Request, res: Response) => {
       mockDataStore.addCharacter(character);
     }
 
-    const creationDate = new Date(character.created_at);
-
-    const lastEditDate = character.last_edited_at
-      ? new Date(character.last_edited_at)
-      : creationDate;
-
-    const now = new Date();
-
-    const daysSinceCreation =
-      (now.getTime() - creationDate.getTime()) / (1000 * 3600 * 24);
-
-    const daysSinceLastEdit =
-      (now.getTime() - lastEditDate.getTime()) / (1000 * 3600 * 24);
-
-    const canEdit = daysSinceCreation >= 30 && daysSinceLastEdit >= 7;
+    const canEdit = mockCanUserEditCharacter(character);
 
     res.json({
       character,
