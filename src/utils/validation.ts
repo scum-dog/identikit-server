@@ -13,7 +13,7 @@ const shapeIdSchema = (prefix: string) =>
 const assetIdSchema = z
   .string()
   .regex(
-    /^(A_\d{3}|B_\d{3}|C_\d{3}|EA_\d{3}|EB_\d{3}|EY_\d{3}|G_\d{3}|H_\d{3}|L_\d{3}|M_\d{3}|N_\d{3})$/,
+    /^(A_\d{3}|B_\d{3}|EB_\d{3}|EY_\d{3}|G_\d{3}|H_\d{3}|HS_\d{3}|L_\d{3}|N_\d{3})$/,
     "Invalid asset ID format",
   );
 
@@ -128,7 +128,7 @@ export const characterDataSchema = z.object({
       height_in: z.number().int().min(24).max(96), // 2-8 feet
       weight_lb: z.number().int().min(50).max(500), // pounds
       head_shape: z.object({
-        shape_id: shapeIdSchema("H"),
+        shape_id: shapeIdSchema("HS"),
         skin_color: skinColorEnum,
       }),
       hair: z.object({
@@ -139,19 +139,8 @@ export const characterDataSchema = z.object({
         shape_id: shapeIdSchema("B"),
         facial_hair_color: hairColorEnum,
       }),
-      mustache: z.object({
-        shape_id: shapeIdSchema("M"),
-        facial_hair_color: hairColorEnum,
-      }),
-      chin: z.object({
-        shape_id: shapeIdSchema("C"),
-      }),
     }),
     placeable_movable: z.object({
-      ears: z.object({
-        shape_id: shapeIdSchema("EA"),
-        scale: scaleSchema.default(1.0),
-      }),
       eyes: z.object({
         shape_id: shapeIdSchema("EY"),
         eye_color: eyeColorEnum,
@@ -208,7 +197,7 @@ export const characterDataUpdateSchema = z.object({
           weight_lb: z.number().int().min(50).max(500).optional(),
           head_shape: z
             .object({
-              shape_id: shapeIdSchema("H").optional(),
+              shape_id: shapeIdSchema("HS").optional(),
               skin_color: skinColorEnum.optional(),
             })
             .optional(),
@@ -224,27 +213,10 @@ export const characterDataUpdateSchema = z.object({
               facial_hair_color: hairColorEnum.optional(),
             })
             .optional(),
-          mustache: z
-            .object({
-              shape_id: shapeIdSchema("M").optional(),
-              facial_hair_color: hairColorEnum.optional(),
-            })
-            .optional(),
-          chin: z
-            .object({
-              shape_id: shapeIdSchema("C").optional(),
-            })
-            .optional(),
         })
         .optional(),
       placeable_movable: z
         .object({
-          ears: z
-            .object({
-              shape_id: shapeIdSchema("EA").optional(),
-              scale: scaleSchema.optional(),
-            })
-            .optional(),
           eyes: z
             .object({
               shape_id: shapeIdSchema("EY").optional(),

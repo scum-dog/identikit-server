@@ -230,7 +230,7 @@ export function generateMockCharacterData(): CharacterData {
         height_in: randomInt(60, 80),
         weight_lb: randomInt(120, 220),
         head_shape: {
-          shape_id: generateShapeId("H"),
+          shape_id: generateShapeId("HS"),
           skin_color: randomChoice(skinColors),
         },
         hair: {
@@ -241,19 +241,8 @@ export function generateMockCharacterData(): CharacterData {
           shape_id: generateShapeId("B"),
           facial_hair_color: randomChoice(hairColors),
         },
-        mustache: {
-          shape_id: generateShapeId("M"),
-          facial_hair_color: randomChoice(hairColors),
-        },
-        chin: {
-          shape_id: generateShapeId("C"),
-        },
       },
       placeable_movable: {
-        ears: {
-          shape_id: generateShapeId("EA"),
-          scale: 1.0,
-        },
         eyes: {
           shape_id: generateShapeId("EY"),
           eye_color: randomChoice(eyeColors),

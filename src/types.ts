@@ -63,9 +63,6 @@ export interface CharacterStatic {
     shape_id: string;
     facial_hair_color: HairColor;
   };
-  chin: {
-    shape_id: string;
-  };
 }
 
 export interface CharacterPlaceableMovable {

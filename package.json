@@ -49,6 +49,7 @@
     "globals": "^16.4.0",
     "jest": "^30.2.0",
     "nodemon": "^3.1.10",
+    "pg-mem": "^3.0.5",
     "prettier": "^3.6.2",
     "prettier-plugin-sql": "^0.19.2",
     "supertest": "^7.1.4",

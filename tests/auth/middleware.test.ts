@@ -1,4 +1,10 @@
-import { requireAdmin, requirePlatform } from "../../src/auth/middleware";
+import {
+  requireAdmin,
+  requirePlatform,
+  authenticateUser,
+  optionalAuth,
+} from "../../src/auth/middleware";
+import { SessionManager } from "../../src/auth/sessions";
 import {
   createMockRequest,
   createMockResponse,
@@ -6,9 +12,14 @@ import {
   resetMocks,
 } from "../helpers/testUtils";
 
+jest.mock("../../src/auth/sessions");
+
+const mockSessionManager = SessionManager as jest.Mocked<typeof SessionManager>;
+
 describe("Auth Middleware (Logic Tests)", () => {
   beforeEach(() => {
     resetMocks();
+    jest.clearAllMocks();
   });
 
   describe("requireAdmin", () => {
@@ -188,6 +199,374 @@ describe("Auth Middleware (Logic Tests)", () => {
       requireAdmin(req as any, res as any, mockNext);
       expect(mockNext).toHaveBeenCalled();
       expect(res.status).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("authenticateUser integration", () => {
+    it("should authenticate user with valid session", async () => {
+      const mockSession = {
+        id: "session-123",
+        userId: "user-456",
+        username: "testuser",
+        platform: "newgrounds" as const,
+        platformUserId: "ng_user",
+        isAdmin: false,
+        createdAt: new Date(),
+        expiresAt: new Date(),
+      };
+
+      mockSessionManager.validateSession.mockResolvedValueOnce(mockSession);
+
+      const req = createMockRequest({
+        headers: {
+          authorization: "Bearer session-123",
+        },
+      });
+      const res = createMockResponse();
+
+      await authenticateUser(req as any, res as any, mockNext);
+
+      expect(mockSessionManager.validateSession).toHaveBeenCalledWith(
+        "session-123",
+      );
+      expect(req.user).toEqual({
+        id: "user-456",
+        username: "testuser",
+        platform: "newgrounds",
+        platformUserId: "ng_user",
+        isAdmin: false,
+      });
+      expect(mockNext).toHaveBeenCalled();
+      expect(res.status).not.toHaveBeenCalled();
+    });
+
+    it("should reject requests without authorization header", async () => {
+      const req = createMockRequest();
+      const res = createMockResponse();
+
+      await authenticateUser(req as any, res as any, mockNext);
+
+      expect(mockSessionManager.validateSession).not.toHaveBeenCalled();
+      expect(res.status).toHaveBeenCalledWith(401);
+      expect(res.json).toHaveBeenCalledWith({
+        error: "Authentication required",
+      });
+      expect(mockNext).not.toHaveBeenCalled();
+    });
+
+    it("should reject requests with malformed authorization header", async () => {
+      const req = createMockRequest({
+        headers: {
+          authorization: "InvalidFormat session-123",
+        },
+      });
+      const res = createMockResponse();
+
+      await authenticateUser(req as any, res as any, mockNext);
+
+      expect(mockSessionManager.validateSession).not.toHaveBeenCalled();
+      expect(res.status).toHaveBeenCalledWith(401);
+      expect(res.json).toHaveBeenCalledWith({
+        error: "Authentication required",
+      });
+      expect(mockNext).not.toHaveBeenCalled();
+    });
+
+    it("should reject requests with invalid session", async () => {
+      mockSessionManager.validateSession.mockResolvedValueOnce(null);
+
+      const req = createMockRequest({
+        headers: {
+          authorization: "Bearer invalid-session",
+        },
+      });
+      const res = createMockResponse();
+
+      await authenticateUser(req as any, res as any, mockNext);
+
+      expect(mockSessionManager.validateSession).toHaveBeenCalledWith(
+        "invalid-session",
+      );
+      expect(res.status).toHaveBeenCalledWith(401);
+      expect(res.json).toHaveBeenCalledWith({
+        error: "Invalid or expired session",
+      });
+      expect(mockNext).not.toHaveBeenCalled();
+    });
+
+    it("should handle authentication errors gracefully", async () => {
+      mockSessionManager.validateSession.mockRejectedValueOnce(
+        new Error("Database error"),
+      );
+
+      const req = createMockRequest({
+        headers: {
+          authorization: "Bearer session-123",
+        },
+      });
+      const res = createMockResponse();
+
+      await authenticateUser(req as any, res as any, mockNext);
+
+      expect(res.status).toHaveBeenCalledWith(401);
+      expect(res.json).toHaveBeenCalledWith({ error: "Authentication failed" });
+      expect(mockNext).not.toHaveBeenCalled();
+    });
+
+    it("should authenticate admin users correctly", async () => {
+      const adminSession = {
+        id: "admin-session",
+        userId: "admin-456",
+        username: "adminuser",
+        platform: "newgrounds" as const,
+        platformUserId: "ng_admin",
+        isAdmin: true,
+        createdAt: new Date(),
+        expiresAt: new Date(),
+      };
+
+      mockSessionManager.validateSession.mockResolvedValueOnce(adminSession);
+
+      const req = createMockRequest({
+        headers: {
+          authorization: "Bearer admin-session",
+        },
+      });
+      const res = createMockResponse();
+
+      await authenticateUser(req as any, res as any, mockNext);
+
+      expect(req.user?.isAdmin).toBe(true);
+      expect(mockNext).toHaveBeenCalled();
+    });
+  });
+
+  describe("optionalAuth integration", () => {
+    it("should continue without user if no authorization header", async () => {
+      const req = createMockRequest();
+      const res = createMockResponse();
+
+      await optionalAuth(req as any, res as any, mockNext);
+
+      expect(mockSessionManager.validateSession).not.toHaveBeenCalled();
+      expect(req.user).toBeUndefined();
+      expect(mockNext).toHaveBeenCalled();
+      expect(res.status).not.toHaveBeenCalled();
+    });
+
+    it("should continue without user if malformed authorization header", async () => {
+      const req = createMockRequest({
+        headers: {
+          authorization: "InvalidFormat session-123",
+        },
+      });
+      const res = createMockResponse();
+
+      await optionalAuth(req as any, res as any, mockNext);
+
+      expect(mockSessionManager.validateSession).not.toHaveBeenCalled();
+      expect(req.user).toBeUndefined();
+      expect(mockNext).toHaveBeenCalled();
+    });
+
+    it("should set user if valid session provided", async () => {
+      const mockSession = {
+        id: "session-123",
+        userId: "user-456",
+        username: "testuser",
+        platform: "newgrounds" as const,
+        platformUserId: "ng_user",
+        isAdmin: false,
+        createdAt: new Date(),
+        expiresAt: new Date(),
+      };
+
+      mockSessionManager.validateSession.mockResolvedValueOnce(mockSession);
+
+      const req = createMockRequest({
+        headers: {
+          authorization: "Bearer session-123",
+        },
+      });
+      const res = createMockResponse();
+
+      await optionalAuth(req as any, res as any, mockNext);
+
+      expect(mockSessionManager.validateSession).toHaveBeenCalledWith(
+        "session-123",
+      );
+      expect(req.user).toEqual({
+        id: "user-456",
+        username: "testuser",
+        platform: "newgrounds",
+        platformUserId: "ng_user",
+        isAdmin: false,
+      });
+      expect(mockNext).toHaveBeenCalled();
+    });
+
+    it("should continue without user if session validation fails", async () => {
+      mockSessionManager.validateSession.mockResolvedValueOnce(null);
+
+      const req = createMockRequest({
+        headers: {
+          authorization: "Bearer invalid-session",
+        },
+      });
+      const res = createMockResponse();
+
+      await optionalAuth(req as any, res as any, mockNext);
+
+      expect(req.user).toBeUndefined();
+      expect(mockNext).toHaveBeenCalled();
+    });
+
+    it("should continue without user on authentication errors", async () => {
+      mockSessionManager.validateSession.mockRejectedValueOnce(
+        new Error("Database error"),
+      );
+
+      const req = createMockRequest({
+        headers: {
+          authorization: "Bearer session-123",
+        },
+      });
+      const res = createMockResponse();
+
+      await optionalAuth(req as any, res as any, mockNext);
+
+      expect(req.user).toBeUndefined();
+      expect(mockNext).toHaveBeenCalled();
+    });
+  });
+
+  describe("authentication flow integration", () => {
+    it("should complete full authentication flow for admin endpoint", async () => {
+      const adminSession = {
+        id: "admin-session",
+        userId: "admin-456",
+        username: "adminuser",
+        platform: "newgrounds" as const,
+        platformUserId: "ng_admin",
+        isAdmin: true,
+        createdAt: new Date(),
+        expiresAt: new Date(),
+      };
+
+      mockSessionManager.validateSession.mockResolvedValueOnce(adminSession);
+
+      const req = createMockRequest({
+        headers: {
+          authorization: "Bearer admin-session",
+        },
+      });
+      const res = createMockResponse();
+
+      await authenticateUser(req as any, res as any, mockNext);
+      expect(mockNext).toHaveBeenCalled();
+      mockNext.mockClear();
+
+      requireAdmin(req as any, res as any, mockNext);
+      expect(mockNext).toHaveBeenCalled();
+      expect(res.status).not.toHaveBeenCalled();
+    });
+
+    it("should reject non-admin user trying to access admin endpoint", async () => {
+      const userSession = {
+        id: "user-session",
+        userId: "user-456",
+        username: "regularuser",
+        platform: "newgrounds" as const,
+        platformUserId: "ng_user",
+        isAdmin: false,
+        createdAt: new Date(),
+        expiresAt: new Date(),
+      };
+
+      mockSessionManager.validateSession.mockResolvedValueOnce(userSession);
+
+      const req = createMockRequest({
+        headers: {
+          authorization: "Bearer user-session",
+        },
+      });
+      const res = createMockResponse();
+
+      await authenticateUser(req as any, res as any, mockNext);
+      expect(mockNext).toHaveBeenCalled();
+      mockNext.mockClear();
+
+      requireAdmin(req as any, res as any, mockNext);
+      expect(res.status).toHaveBeenCalledWith(403);
+      expect(res.json).toHaveBeenCalledWith({ error: "Admin access required" });
+      expect(mockNext).not.toHaveBeenCalled();
+    });
+
+    it("should complete platform-specific authentication flow", async () => {
+      const itchSession = {
+        id: "itch-session",
+        userId: "itch-user-456",
+        username: "itchuser",
+        platform: "itch" as const,
+        platformUserId: "itch_user",
+        isAdmin: false,
+        createdAt: new Date(),
+        expiresAt: new Date(),
+      };
+
+      mockSessionManager.validateSession.mockResolvedValueOnce(itchSession);
+
+      const req = createMockRequest({
+        headers: {
+          authorization: "Bearer itch-session",
+        },
+      });
+      const res = createMockResponse();
+
+      await authenticateUser(req as any, res as any, mockNext);
+      expect(mockNext).toHaveBeenCalled();
+      mockNext.mockClear();
+
+      const itchMiddleware = requirePlatform("itch");
+      itchMiddleware(req as any, res as any, mockNext);
+      expect(mockNext).toHaveBeenCalled();
+      expect(res.status).not.toHaveBeenCalled();
+    });
+
+    it("should reject wrong platform user", async () => {
+      const newgroundsSession = {
+        id: "ng-session",
+        userId: "ng-user-456",
+        username: "nguser",
+        platform: "newgrounds" as const,
+        platformUserId: "ng_user",
+        isAdmin: false,
+        createdAt: new Date(),
+        expiresAt: new Date(),
+      };
+
+      mockSessionManager.validateSession.mockResolvedValueOnce(
+        newgroundsSession,
+      );
+
+      const req = createMockRequest({
+        headers: {
+          authorization: "Bearer ng-session",
+        },
+      });
+      const res = createMockResponse();
+
+      await authenticateUser(req as any, res as any, mockNext);
+      expect(mockNext).toHaveBeenCalled();
+      mockNext.mockClear();
+
+      const googleMiddleware = requirePlatform("google");
+      googleMiddleware(req as any, res as any, mockNext);
+      expect(res.status).toHaveBeenCalledWith(403);
+      expect(res.json).toHaveBeenCalledWith({
+        error: "This endpoint requires google authentication",
+      });
+      expect(mockNext).not.toHaveBeenCalled();
     });
   });
 });
