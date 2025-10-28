@@ -152,7 +152,7 @@ function generateShapeId(prefix: string): string {
 }
 
 function generateAssetId(): string {
-  const prefixes = ["A", "B", "EB", "EY", "G", "H", "HS", "L", "N"];
+  const prefixes = ["A", "B", "EB", "EY", "G", "H", "HS", "L", "M", "MI", "N"];
   const prefix = randomChoice(prefixes);
   return `${prefix}_${randomInt(1, 999).toString().padStart(3, "0")}`;
 }

@@ -13,7 +13,7 @@ const shapeIdSchema = (prefix: string) =>
 const assetIdSchema = z
   .string()
   .regex(
-    /^(A_\d{3}|B_\d{3}|EB_\d{3}|EY_\d{3}|G_\d{3}|H_\d{3}|HS_\d{3}|L_\d{3}|N_\d{3})$/,
+    /^(A_\d{3}|B_\d{3}|EB_\d{3}|EY_\d{3}|G_\d{3}|H_\d{3}|HS_\d{3}|L_\d{3}|M_\d{3}|MI_\d{3}|N_\d{3})$/,
     "Invalid asset ID format",
   );
 
