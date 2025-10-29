@@ -24,7 +24,7 @@ describe("Validation Middleware (Logic Tests)", () => {
     it("should validate and transform valid request body", () => {
       const validCharacterData = generateMockCharacterData();
       const req = createMockRequest({
-        body: { character: validCharacterData },
+        body: validCharacterData,
       });
       const res = createMockResponse();
 
@@ -32,7 +32,7 @@ describe("Validation Middleware (Logic Tests)", () => {
 
       expect(mockNext).toHaveBeenCalled();
       expect(res.status).not.toHaveBeenCalled();
-      expect(req.body.character).toBeDefined();
+      expect(req.body.character_data).toBeDefined();
     });
 
     it("should reject invalid request body", () => {
@@ -78,21 +78,19 @@ describe("Validation Middleware (Logic Tests)", () => {
     it("should provide detailed validation error messages", () => {
       const req = createMockRequest({
         body: {
-          character: {
-            metadata: {
-              upload_id: "invalid-uuid",
-              user_id: "invalid-uuid",
-              created_at: "invalid-date",
-              location: {
-                country: "", // should fail
-              },
+          metadata: {
+            upload_id: "invalid-uuid",
+            user_id: "invalid-uuid",
+            created_at: "invalid-date",
+            location: {
+              country: "", // should fail
             },
-            character_data: {
-              static: {
-                name: "", // should fail
-                sex: "invalid",
-                height_in: 0, // too small
-              },
+          },
+          character_data: {
+            static: {
+              name: "", // should fail
+              sex: "invalid",
+              height_in: 0, // too small
             },
           },
         },

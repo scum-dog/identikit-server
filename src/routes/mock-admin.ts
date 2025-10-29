@@ -40,7 +40,11 @@ router.get("/characters", (req: Request, res: Response) => {
       const user = mockDataStore.getUser(char.user_id);
       return {
         upload_id: char.upload_id,
-        location: char.location,
+        location: {
+          country: char.country,
+          region: char.region || null,
+          city: char.city || null,
+        },
         creation_time: char.created_at,
         edit_time: char.last_edited_at,
         is_edited: char.is_edited,

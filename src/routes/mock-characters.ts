@@ -11,6 +11,7 @@ import {
   MockCharacterRouteUpdates,
   PlazaQueryRequest,
   MockCharacter,
+  CharacterDataStructure,
 } from "../types";
 import { log } from "../utils/logger";
 import { mockRouteUser, canUserEditCharacter } from "../utils/testMockData";
@@ -29,7 +30,7 @@ const mockCanUserEditCharacter = (character: MockCharacter): boolean => {
 };
 
 // GET /mock/characters/me - get mock user's character
-router.get("/me", (req: Request, res: Response) => {
+router.get("/me", (_req: Request, res: Response) => {
   try {
     const characters = mockDataStore.getCharacters();
     let character = characters.find(
@@ -44,8 +45,23 @@ router.get("/me", (req: Request, res: Response) => {
     const canEdit = mockCanUserEditCharacter(character);
 
     res.json({
-      character,
-      canEdit,
+      character_data: character.character_data,
+      metadata: {
+        upload_id: character.upload_id,
+        user_id: character.user_id,
+        created_at: character.created_at,
+        last_edited_at: character.last_edited_at,
+        is_edited: character.is_edited,
+        canEdit: canEdit,
+        is_deleted: character.is_deleted,
+        deleted_at: character.deleted_at,
+        deleted_by: character.deleted_by,
+        location: {
+          country: character.country,
+          region: character.region,
+          city: character.city,
+        },
+      },
     });
   } catch (error) {
     log.error("Mock get character error", { error });
@@ -70,33 +86,43 @@ router.post(
         });
       }
 
-      const characterData = req.body.character_data;
+      const { character_data, metadata } = req.body;
 
       const newCharacter = {
-        upload_id: randomUUID(),
+        upload_id: metadata.upload_id,
         user_id: MOCK_USER.id,
-        created_at: new Date().toISOString(),
-        last_edited_at: new Date().toISOString(),
-        location: req.body.location || {
-          country: null,
-          region: null,
-          city: null,
-        },
-        character_data: characterData,
-        date_of_birth: req.body.date_of_birth
-          ? new Date(req.body.date_of_birth).toISOString().split("T")[0]
-          : null,
-        is_edited: false,
-        is_deleted: false,
-        deleted_at: null,
-        deleted_by: null,
+        created_at: metadata.created_at,
+        last_edited_at: metadata.last_edited_at,
+        character_data: character_data,
+        country: metadata.location.country,
+        region: metadata.location.region,
+        city: metadata.location.city,
+        is_edited: metadata.is_edited,
+        is_deleted: metadata.is_deleted,
+        deleted_at: metadata.deleted_at,
+        deleted_by: metadata.deleted_by,
       };
 
       mockDataStore.addCharacter(newCharacter);
 
       res.status(201).json({
         message: "Character created successfully",
-        character: newCharacter,
+        character_data: newCharacter.character_data,
+        metadata: {
+          upload_id: newCharacter.upload_id,
+          user_id: newCharacter.user_id,
+          created_at: newCharacter.created_at,
+          last_edited_at: newCharacter.last_edited_at,
+          is_edited: newCharacter.is_edited,
+          is_deleted: newCharacter.is_deleted,
+          deleted_at: newCharacter.deleted_at,
+          deleted_by: newCharacter.deleted_by,
+          location: {
+            country: newCharacter.country,
+            region: newCharacter.region,
+            city: newCharacter.city,
+          },
+        },
       });
     } catch (error) {
       log.error("Mock create character error", { error });
@@ -130,26 +156,19 @@ router.put(
       }
 
       const updates: MockCharacterRouteUpdates = {};
-      if (req.body.location) {
-        updates.location = {
-          country:
-            req.body.location.country !== undefined
-              ? req.body.location.country
-              : character.location.country,
-          region:
-            req.body.location.region !== undefined
-              ? req.body.location.region
-              : character.location.region,
-          city:
-            req.body.location.city !== undefined
-              ? req.body.location.city
-              : character.location.city,
-        };
-      }
+
       if (req.body.character_data) {
+        const currentCharacterData =
+          character.character_data as CharacterDataStructure;
         const updatedCharacterData = {
-          ...character.character_data,
-          ...req.body.character_data,
+          static: {
+            ...currentCharacterData.static,
+            ...(req.body.character_data.static || {}),
+          },
+          placeable_movable: {
+            ...currentCharacterData.placeable_movable,
+            ...(req.body.character_data.placeable_movable || {}),
+          },
         };
         updates.character_data = updatedCharacterData;
       }
@@ -159,9 +178,29 @@ router.put(
         updates as Partial<MockCharacter>,
       );
 
+      if (!updatedCharacter) {
+        return res.status(500).json({ error: "Failed to update character" });
+      }
+
       res.json({
         message: "Character updated successfully",
-        character: updatedCharacter,
+        character_data: updatedCharacter.character_data,
+        metadata: {
+          upload_id: updatedCharacter.upload_id,
+          user_id: updatedCharacter.user_id,
+          created_at: updatedCharacter.created_at,
+          last_edited_at: updatedCharacter.last_edited_at,
+          is_edited: updatedCharacter.is_edited,
+          canEdit: mockCanUserEditCharacter(updatedCharacter),
+          is_deleted: updatedCharacter.is_deleted,
+          deleted_at: updatedCharacter.deleted_at,
+          deleted_by: updatedCharacter.deleted_by,
+          location: {
+            country: updatedCharacter.country,
+            region: updatedCharacter.region,
+            city: updatedCharacter.city,
+          },
+        },
       });
     } catch (error) {
       log.error("Mock update character error", { error });
@@ -183,36 +222,40 @@ router.get("/plaza", validatePlazaQuery, (req: Request, res: Response) => {
       .filter((char) => !char.is_deleted);
 
     if (country) {
-      characters = characters.filter(
-        (char) =>
-          char.location?.country &&
-          char.location.country
-            .toLowerCase()
-            .includes((country as string).toLowerCase()),
-      );
+      characters = characters.filter((char) => {
+        return (
+          char.country &&
+          char.country.toLowerCase().includes((country as string).toLowerCase())
+        );
+      });
     }
 
     if (region) {
-      characters = characters.filter(
-        (char) =>
-          char.location?.region &&
-          char.location.region
-            .toLowerCase()
-            .includes((region as string).toLowerCase()),
-      );
+      characters = characters.filter((char) => {
+        return (
+          char.region &&
+          char.region.toLowerCase().includes((region as string).toLowerCase())
+        );
+      });
     }
 
     characters = characters.sort(() => Math.random() - 0.5);
     characters = characters.slice(0, Number(limit));
 
-    const plazaCharacters = characters.map((char) => ({
-      upload_id: char.upload_id,
-      creation_time: char.created_at,
-      edit_time:
-        char.last_edited_at !== char.created_at ? char.last_edited_at : null,
-      location: char.location,
-      character_data: char.character_data,
-    }));
+    const plazaCharacters = characters.map((char) => {
+      return {
+        upload_id: char.upload_id,
+        creation_time: char.created_at,
+        edit_time:
+          char.last_edited_at !== char.created_at ? char.last_edited_at : null,
+        location: {
+          country: char.country,
+          region: char.region || null,
+          city: char.city || null,
+        },
+        character_data: char.character_data,
+      };
+    });
 
     res.json({
       characters: plazaCharacters,
@@ -242,7 +285,11 @@ router.get("/:id", (req: Request, res: Response) => {
         character.last_edited_at !== character.created_at
           ? character.last_edited_at
           : null,
-      location: character.location,
+      location: {
+        country: character.country,
+        region: character.region || null,
+        city: character.city || null,
+      },
       character_data: character.character_data,
     };
 

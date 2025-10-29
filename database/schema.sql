@@ -72,9 +72,7 @@ WHERE
   character_data -> 'metadata' -> 'location' ->> 'region' IS NOT NULL;
 
 CREATE INDEX idx_characters_sex ON characters USING gin (
-  (
-    character_data -> 'character_data' -> 'static' ->> 'sex'
-  ) gin_trgm_ops
+  (character_data -> 'static' ->> 'sex') gin_trgm_ops
 );
 
 CREATE INDEX idx_users_platform ON users (platform, platform_user_id);

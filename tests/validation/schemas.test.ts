@@ -1,5 +1,6 @@
 import {
   characterDataSchema,
+  fullCharacterSchema,
   characterUpdateSchema,
   plazaSearchSchema,
   adminActionSchema,
@@ -14,7 +15,7 @@ describe("Validation Schemas", () => {
   describe("characterDataSchema", () => {
     it("should validate valid character data", () => {
       const validData = generateMockCharacterData();
-      const result = characterDataSchema.safeParse(validData);
+      const result = fullCharacterSchema.safeParse(validData);
 
       expect(result.success).toBe(true);
       if (result.success) {
@@ -25,7 +26,7 @@ describe("Validation Schemas", () => {
     });
 
     it("should reject invalid UUIDs", () => {
-      const result = characterDataSchema.safeParse(invalidCharacterData);
+      const result = fullCharacterSchema.safeParse(invalidCharacterData);
 
       expect(result.success).toBe(false);
       if (!result.success) {
@@ -39,7 +40,7 @@ describe("Validation Schemas", () => {
       const data = generateMockCharacterData();
       data.character_data.static.name = "";
 
-      const result = characterDataSchema.safeParse(data);
+      const result = fullCharacterSchema.safeParse(data);
 
       expect(result.success).toBe(false);
       if (!result.success) {
@@ -52,9 +53,9 @@ describe("Validation Schemas", () => {
 
     it("should reject invalid shape ID formats", () => {
       const data = generateMockCharacterData();
-      data.character_data.static.head_shape.shape_id = "INVALID_FORMAT";
+      data.character_data.static.head.shape_id = "INVALID_FORMAT";
 
-      const result = characterDataSchema.safeParse(data);
+      const result = fullCharacterSchema.safeParse(data);
 
       expect(result.success).toBe(false);
       if (!result.success) {
@@ -69,7 +70,7 @@ describe("Validation Schemas", () => {
       const data = generateMockCharacterData();
       data.character_data.static.height_in = 10;
 
-      const result = characterDataSchema.safeParse(data);
+      const result = fullCharacterSchema.safeParse(data);
 
       expect(result.success).toBe(false);
       if (!result.success) {
@@ -84,7 +85,7 @@ describe("Validation Schemas", () => {
       const data = generateMockCharacterData();
       data.character_data.static.weight_lb = 1000;
 
-      const result = characterDataSchema.safeParse(data);
+      const result = fullCharacterSchema.safeParse(data);
 
       expect(result.success).toBe(false);
       if (!result.success) {
@@ -99,7 +100,7 @@ describe("Validation Schemas", () => {
       const data = generateMockCharacterData();
       data.character_data.placeable_movable.eyes.offset_y = 0.12345;
 
-      const result = characterDataSchema.safeParse(data);
+      const result = fullCharacterSchema.safeParse(data);
 
       expect(result.success).toBe(true);
       if (result.success) {
@@ -113,7 +114,7 @@ describe("Validation Schemas", () => {
       const data = generateMockCharacterData();
       data.character_data.placeable_movable.eyes.scale = 1.23456;
 
-      const result = characterDataSchema.safeParse(data);
+      const result = fullCharacterSchema.safeParse(data);
 
       expect(result.success).toBe(true);
       if (result.success) {
@@ -125,6 +126,9 @@ describe("Validation Schemas", () => {
 
     it("should validate accessory slots", () => {
       const data = generateMockCharacterData();
+
+      data.character_data.placeable_movable.accessories = {};
+
       data.character_data.placeable_movable.accessories.slot_1 = {
         type: "glasses",
         asset_id: "G_123",
@@ -132,7 +136,7 @@ describe("Validation Schemas", () => {
         scale: 1.0,
       };
 
-      const result = characterDataSchema.safeParse(data);
+      const result = fullCharacterSchema.safeParse(data);
 
       expect(result.success).toBe(true);
       if (result.success) {
@@ -152,7 +156,7 @@ describe("Validation Schemas", () => {
         scale: 1.0,
       };
 
-      const result = characterDataSchema.safeParse(data);
+      const result = fullCharacterSchema.safeParse(data);
 
       expect(result.success).toBe(false);
       if (!result.success) {

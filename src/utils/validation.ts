@@ -10,13 +10,6 @@ const shapeIdSchema = (prefix: string) =>
       `Invalid ${prefix} shape ID format`,
     );
 
-const assetIdSchema = z
-  .string()
-  .regex(
-    /^(A_\d{3}|B_\d{3}|EB_\d{3}|EY_\d{3}|G_\d{3}|H_\d{3}|HS_\d{3}|L_\d{3}|M_\d{3}|MI_\d{3}|N_\d{3})$/,
-    "Invalid asset ID format",
-  );
-
 const offsetSchema = z
   .number()
   .min(-1)
@@ -37,7 +30,7 @@ const scaleSchema = z
   .max(1.5)
   .transform((val) => Math.round(val * 10) / 10);
 
-const eyeColorEnum = z.enum([
+export const eyeColorEnum = z.enum([
   "black",
   "blue",
   "brown",
@@ -47,7 +40,7 @@ const eyeColorEnum = z.enum([
   "maroon",
 ]);
 
-const hairColorEnum = z.enum([
+export const hairColorEnum = z.enum([
   "bald",
   "black",
   "blonde",
@@ -63,7 +56,7 @@ const hairColorEnum = z.enum([
   "white",
 ]);
 
-const skinColorEnum = z.enum([
+export const skinColorEnum = z.enum([
   "pale",
   "light",
   "medium",
@@ -73,7 +66,7 @@ const skinColorEnum = z.enum([
   "very-dark",
 ]);
 
-const sexEnum = z.enum(["male", "female", "other"]);
+export const sexEnum = z.enum(["male", "female", "other"]);
 
 const accessorySlotSchema = z.discriminatedUnion("type", [
   z.object({
@@ -90,7 +83,9 @@ const accessorySlotSchema = z.discriminatedUnion("type", [
   }),
   z.object({
     type: z.literal("misc"),
-    asset_id: assetIdSchema,
+    asset_id: z
+      .string()
+      .regex(/^MI_\d{3}$/, "Misc accessories must use MI_XXX format"),
     offset_x: offsetSchema.optional(),
     offset_y: offsetSchema.default(0),
     scale: scaleSchema.optional(),
@@ -98,84 +93,113 @@ const accessorySlotSchema = z.discriminatedUnion("type", [
 ]);
 
 export const characterDataSchema = z.object({
-  metadata: z.object({
-    upload_id: z.string().uuid(),
-    user_id: z.string().uuid(),
-    created_at: z.string().datetime(),
-    last_edited_at: z.string().datetime().nullable(),
-    is_edited: z.boolean().default(false),
-    canEdit: z.boolean(),
-    is_deleted: z.boolean().default(false),
-    deleted_at: z.string().datetime().nullable(),
-    deleted_by: z.string().uuid().nullable(),
-    location: z.object({
-      country: z.string().min(1).max(100),
-      region: z.string().min(1).max(100).optional(),
-      city: z.string().min(1).max(100).optional(),
+  static: z.object({
+    name: z.string().min(1).max(100),
+    sex: sexEnum,
+    date_of_birth: z
+      .string()
+      .regex(/^\d{4}-\d{2}-\d{2}$/, "Date must be in YYYY-MM-DD format")
+      .refine((date) => {
+        const d = new Date(date);
+        return d >= new Date("1900-01-01") && d <= new Date();
+      }, "Date must be between 1900-01-01 and today"),
+    height_in: z.number().int().min(24).max(96), // 2-8 feet
+    weight_lb: z.number().int().min(50).max(500), // pounds
+    head: z.object({
+      shape_id: shapeIdSchema("HE"),
+      skin_color: skinColorEnum,
+    }),
+    hair: z.object({
+      style_id: shapeIdSchema("H"),
+      hair_color: hairColorEnum,
+    }),
+    beard: z.object({
+      shape_id: shapeIdSchema("B"),
+      facial_hair_color: hairColorEnum,
     }),
   }),
-  character_data: z.object({
-    static: z.object({
-      name: z.string().min(1).max(100),
-      sex: sexEnum,
-      date_of_birth: z
-        .string()
-        .regex(/^\d{4}-\d{2}-\d{2}$/, "Date must be in YYYY-MM-DD format")
-        .refine((date) => {
-          const d = new Date(date);
-          return d >= new Date("1900-01-01") && d <= new Date();
-        }, "Date must be between 1900-01-01 and today"),
-      height_in: z.number().int().min(24).max(96), // 2-8 feet
-      weight_lb: z.number().int().min(50).max(500), // pounds
-      head_shape: z.object({
-        shape_id: shapeIdSchema("HS"),
-        skin_color: skinColorEnum,
-      }),
-      hair: z.object({
-        style_id: shapeIdSchema("H"),
-        hair_color: hairColorEnum,
-      }),
-      beard: z.object({
-        shape_id: shapeIdSchema("B"),
-        facial_hair_color: hairColorEnum,
-      }),
+  placeable_movable: z.object({
+    eyes: z.object({
+      shape_id: shapeIdSchema("EY"),
+      eye_color: eyeColorEnum,
+      offset_y: offsetSchema.default(0),
+      scale: scaleSchema.default(1.0),
+      rotation: rotationSchema.default(0),
+      distance: distanceSchema.default(0),
     }),
-    placeable_movable: z.object({
-      eyes: z.object({
-        shape_id: shapeIdSchema("EY"),
-        eye_color: eyeColorEnum,
-        offset_y: offsetSchema.default(0),
-        scale: scaleSchema.default(1.0),
-        rotation: rotationSchema.default(0),
-        distance: distanceSchema.default(0),
-      }),
-      eyebrows: z.object({
-        shape_id: shapeIdSchema("EB"),
-        offset_y: offsetSchema.default(0),
-        scale: scaleSchema.default(1.0),
-        rotation: rotationSchema.default(0),
-        distance: distanceSchema.default(0),
-      }),
-      nose: z.object({
-        shape_id: shapeIdSchema("N"),
-        offset_y: offsetSchema.default(0),
-        scale: scaleSchema.default(1.0),
-      }),
-      lips: z.object({
-        shape_id: shapeIdSchema("L"),
-        offset_y: offsetSchema.default(0),
-        scale: scaleSchema.default(1.0),
-      }),
-      age_lines: z.object({
-        shape_id: shapeIdSchema("A"),
-      }),
-      accessories: z.object({
+    eyebrows: z.object({
+      shape_id: shapeIdSchema("EB"),
+      offset_y: offsetSchema.default(0),
+      scale: scaleSchema.default(1.0),
+      rotation: rotationSchema.default(0),
+      distance: distanceSchema.default(0),
+    }),
+    nose: z.object({
+      shape_id: shapeIdSchema("N"),
+      offset_y: offsetSchema.default(0),
+      scale: scaleSchema.default(1.0),
+    }),
+    lips: z.object({
+      shape_id: shapeIdSchema("L"),
+      offset_y: offsetSchema.default(0),
+      scale: scaleSchema.default(1.0),
+    }),
+    age_lines: z.object({
+      shape_id: shapeIdSchema("A"),
+    }),
+    accessories: z
+      .object({
         slot_1: accessorySlotSchema.optional(),
         slot_2: accessorySlotSchema.optional(),
         slot_3: accessorySlotSchema.optional(),
-      }),
-    }),
+      })
+      .refine(
+        (accessories) => {
+          const types = new Set<string>();
+
+          const slots = [
+            accessories.slot_1,
+            accessories.slot_2,
+            accessories.slot_3,
+          ];
+
+          for (const slot of slots) {
+            if (slot && types.has(slot.type)) {
+              return false;
+            }
+            if (slot) {
+              types.add(slot.type);
+            }
+          }
+          return true;
+        },
+        {
+          message: "Cannot have duplicate accessory types in different slots",
+        },
+      ),
   }),
+});
+
+export const characterMetadataSchema = z.object({
+  upload_id: z.string().uuid(),
+  user_id: z.string().uuid(),
+  created_at: z.string().datetime(),
+  last_edited_at: z.string().datetime().nullable(),
+  is_edited: z.boolean().default(false),
+  canEdit: z.boolean(),
+  is_deleted: z.boolean().default(false),
+  deleted_at: z.string().datetime().nullable(),
+  deleted_by: z.string().uuid().nullable(),
+  location: z.object({
+    country: z.string().min(1).max(100),
+    region: z.string().min(1).max(100).optional(),
+    city: z.string().min(1).max(100).optional(),
+  }),
+});
+
+export const fullCharacterSchema = z.object({
+  character_data: characterDataSchema,
+  metadata: characterMetadataSchema,
 });
 
 export const characterDataUpdateSchema = z.object({
@@ -195,9 +219,9 @@ export const characterDataUpdateSchema = z.object({
             .optional(),
           height_in: z.number().int().min(24).max(96).optional(),
           weight_lb: z.number().int().min(50).max(500).optional(),
-          head_shape: z
+          head: z
             .object({
-              shape_id: shapeIdSchema("HS").optional(),
+              shape_id: shapeIdSchema("HE").optional(),
               skin_color: skinColorEnum.optional(),
             })
             .optional(),
@@ -261,6 +285,32 @@ export const characterDataUpdateSchema = z.object({
               slot_2: accessorySlotSchema.optional(),
               slot_3: accessorySlotSchema.optional(),
             })
+            .refine(
+              (accessories) => {
+                if (!accessories) return true;
+                const types = new Set<string>();
+
+                const slots = [
+                  accessories.slot_1,
+                  accessories.slot_2,
+                  accessories.slot_3,
+                ];
+
+                for (const slot of slots) {
+                  if (slot && types.has(slot.type)) {
+                    return false;
+                  }
+                  if (slot) {
+                    types.add(slot.type);
+                  }
+                }
+                return true;
+              },
+              {
+                message:
+                  "Cannot have duplicate accessory types in different slots",
+              },
+            )
             .optional(),
         })
         .optional(),
@@ -279,9 +329,7 @@ export const characterDataUpdateSchema = z.object({
     .optional(),
 });
 
-export const characterUploadSchema = z.object({
-  character: characterDataSchema,
-});
+export const characterUploadSchema = fullCharacterSchema;
 
 export const characterUpdateSchema = characterDataUpdateSchema.refine(
   (data) => Object.keys(data).length > 0,
@@ -354,6 +402,8 @@ export const itchTokenSchema = z.object({
 });
 
 export type CharacterData = z.infer<typeof characterDataSchema>;
+export type CharacterMetadata = z.infer<typeof characterMetadataSchema>;
+export type FullCharacter = z.infer<typeof fullCharacterSchema>;
 export type CharacterUpload = z.infer<typeof characterUploadSchema>;
 export type CharacterUpdate = z.infer<typeof characterUpdateSchema>;
 export type AccessorySlot = z.infer<typeof accessorySlotSchema>;

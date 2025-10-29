@@ -60,7 +60,7 @@ export const invalidCharacterData = {
       date_of_birth: "invalid-date",
       height_in: 0,
       weight_lb: 1000,
-      head_shape: {
+      head: {
         shape_id: "INVALID_FORMAT",
         skin_color: "invalid" as any,
       },

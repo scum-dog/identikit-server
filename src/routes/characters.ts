@@ -14,6 +14,7 @@ import { log } from "../utils/logger";
 import {
   PlazaQueryRequest,
   PlazaCharacterData,
+  PlazaCharacterResult,
   DatabaseQueryResult,
 } from "../types";
 
@@ -190,23 +191,25 @@ router.get(
         );
       }
 
-      const formattedCharacters = characters.map((char: PlazaCharacterData) => {
-        const parsedCharacterData =
-          typeof char.character_data === "string"
-            ? JSON.parse(char.character_data)
-            : char.character_data;
+      const formattedCharacters = characters.map(
+        (char: PlazaCharacterResult) => {
+          const parsedCharacterData =
+            typeof char.character_data === "string"
+              ? JSON.parse(char.character_data)
+              : char.character_data;
 
-        return {
-          upload_id: char.id,
-          creation_time: char.created_at,
-          edit_time:
-            char.last_edited_at !== char.created_at
-              ? char.last_edited_at
-              : null,
-          location: parsedCharacterData.metadata?.location || {},
-          character_data: parsedCharacterData,
-        };
-      });
+          return {
+            upload_id: char.id,
+            creation_time: char.created_at,
+            edit_time:
+              char.last_edited_at !== char.created_at
+                ? char.last_edited_at
+                : null,
+            location: parsedCharacterData.metadata?.location || {},
+            character_data: parsedCharacterData,
+          };
+        },
+      );
 
       res.json({
         characters: formattedCharacters,

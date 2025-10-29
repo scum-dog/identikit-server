@@ -91,14 +91,15 @@ export const characterQueries = {
   },
 
   create: async (userId: string, characterData: CharacterCreateData) => {
-    const { characterJson } = characterData;
+    const { character_data, characterJson } = characterData;
+    const fullCharacterData = character_data || characterJson;
 
     const result = await query<DatabaseCharacter>(
       `INSERT INTO characters
        (user_id, character_data)
        VALUES ($1, $2)
        RETURNING *`,
-      [userId, JSON.stringify(characterJson)],
+      [userId, JSON.stringify(fullCharacterData)],
     );
     return result.rows[0];
   },
@@ -154,13 +155,13 @@ export const characterQueries = {
 
     if (country) {
       paramCount++;
-      whereClause += ` AND character_data->'metadata'->'location'->>'country' ILIKE $${paramCount}`;
+      whereClause += ` AND character_data -> 'metadata' -> 'location' ->> 'country' ILIKE $${paramCount}`;
       params.push(`%${country}%`);
     }
 
     if (region) {
       paramCount++;
-      whereClause += ` AND character_data->'metadata'->'location'->>'region' ILIKE $${paramCount}`;
+      whereClause += ` AND character_data -> 'metadata' -> 'location' ->> 'region' ILIKE $${paramCount}`;
       params.push(`%${region}%`);
     }
 

@@ -19,7 +19,10 @@ export interface CharacterUpdateData {
 export interface DatabaseCharacter {
   id: string;
   user_id: string;
-  character_data: string | object;
+  character_data: string | CharacterDataStructure;
+  country: string;
+  region?: string;
+  city?: string;
   created_at: string;
   last_edited_at: string | null;
   is_edited: boolean;
@@ -51,7 +54,7 @@ export interface CharacterStatic {
   date_of_birth: string;
   height_in: number;
   weight_lb: number;
-  head_shape: {
+  head: {
     shape_id: string;
     skin_color: SkinColor;
   };
@@ -59,7 +62,7 @@ export interface CharacterStatic {
     style_id: string;
     hair_color: HairColor;
   };
-  facial_hair: {
+  beard: {
     shape_id: string;
     facial_hair_color: HairColor;
   };
@@ -93,9 +96,6 @@ export interface CharacterPlaceableMovable {
   };
   age_lines: {
     shape_id: string;
-    offset_y: number;
-    scale: number;
-    rotation: number;
   };
   accessories: {
     slot_1?: AccessorySlot;
@@ -110,8 +110,8 @@ export interface CharacterDataStructure {
 }
 
 export interface FullCharacterData {
-  metadata: CharacterMetadata;
   character_data: CharacterDataStructure;
+  metadata: CharacterMetadata;
 }
 
 export type AccessorySlot =
@@ -119,15 +119,13 @@ export type AccessorySlot =
       type: "glasses";
       asset_id: string;
       offset_y: number;
-      rotation: number;
-      distance: number;
+      scale: number;
     }
   | {
       type: "mustache";
       asset_id: string;
       offset_y: number;
-      rotation: number;
-      distance: number;
+      scale: number;
     }
   | {
       type: "misc";
@@ -135,8 +133,6 @@ export type AccessorySlot =
       offset_x?: number;
       offset_y: number;
       scale?: number;
-      rotation: number;
-      distance: number;
     };
 
 export interface CharacterRouteUpdates {
@@ -156,16 +152,11 @@ export interface PlazaCharacterData {
   id: string;
   created_at: string;
   last_edited_at: string | null;
-  character_data: string | object;
+  character_data: string | CharacterDataStructure;
 }
 
 export interface MockCharacterRouteUpdates {
   character_data?: object;
-  location?: {
-    country?: string | null;
-    region?: string | null;
-    city?: string | null;
-  };
   metadata?: {
     location?: {
       country?: string;
@@ -227,16 +218,14 @@ export interface MockCharacter {
   user_id: string;
   created_at: string;
   last_edited_at: string | null;
-  character_data: object;
+  character_data: CharacterDataStructure;
+  country: string;
+  region?: string;
+  city?: string;
   is_edited: boolean;
   is_deleted: boolean;
   deleted_at: string | null;
   deleted_by: string | null;
-  location: {
-    country: string | null;
-    region: string | null;
-    city: string | null;
-  };
 }
 
 export interface QueryValidationRequest extends Request {
@@ -421,7 +410,7 @@ export interface PlazaCharacterResult {
 export interface AdminCharacter {
   id: string;
   user_id: string;
-  character_data: string | object;
+  character_data: string | CharacterDataStructure;
   created_at: string;
   last_edited_at: string | null;
   is_edited: boolean;
