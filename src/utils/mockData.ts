@@ -274,7 +274,7 @@ export function generateMockCharacterData(): FullCharacter {
       created_at: new Date().toISOString(),
       last_edited_at: null,
       is_edited: false,
-      canEdit: true,
+      can_edit: true,
       is_deleted: false,
       deleted_at: null,
       deleted_by: null,

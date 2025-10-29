@@ -86,9 +86,9 @@ const accessorySlotSchema = z.discriminatedUnion("type", [
     asset_id: z
       .string()
       .regex(/^MI_\d{3}$/, "Misc accessories must use MI_XXX format"),
-    offset_x: offsetSchema.optional(),
+    offset_x: offsetSchema.default(0),
     offset_y: offsetSchema.default(0),
-    scale: scaleSchema.optional(),
+    scale: scaleSchema.default(1.0),
   }),
 ]);
 
@@ -186,7 +186,7 @@ export const characterMetadataSchema = z.object({
   created_at: z.string().datetime(),
   last_edited_at: z.string().datetime().nullable(),
   is_edited: z.boolean().default(false),
-  canEdit: z.boolean(),
+  can_edit: z.boolean(),
   is_deleted: z.boolean().default(false),
   deleted_at: z.string().datetime().nullable(),
   deleted_by: z.string().uuid().nullable(),

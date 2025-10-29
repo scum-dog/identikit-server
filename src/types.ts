@@ -37,7 +37,7 @@ export interface CharacterMetadata {
   created_at: string;
   last_edited_at: string | null;
   is_edited: boolean;
-  canEdit: boolean;
+  can_edit: boolean;
   is_deleted: boolean;
   deleted_at: string | null;
   deleted_by: string | null;
