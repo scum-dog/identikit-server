@@ -64,7 +64,7 @@ router.get("/me", authenticateUser, async (req: Request, res: Response) => {
         deleted_at: character.deleted_at,
         deleted_by: character.deleted_by,
       },
-      canEdit: await query<{ can_user_edit_character: boolean }>(
+      can_edit: await query<{ can_user_edit_character: boolean }>(
         "SELECT can_user_edit_character($1, $2) as can_user_edit_character",
         [character.id, req.user!.id],
       ).then((result) => result.rows[0]?.can_user_edit_character || false),
