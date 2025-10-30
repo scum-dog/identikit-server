@@ -83,21 +83,21 @@ describe("Value Consistency Tests", () => {
 
       const glassesAccessory = {
         type: "glasses" as const,
-        asset_id: "G_123",
+        asset_id: 123,
         offset_y: 0,
         scale: 1.0,
       };
 
       const mustacheAccessory = {
         type: "mustache" as const,
-        asset_id: "M_123",
+        asset_id: 123,
         offset_y: 0,
         scale: 1.0,
       };
 
       const miscAccessory = {
         type: "misc" as const,
-        asset_id: "MI_123",
+        asset_id: 123,
         offset_x: 0,
         offset_y: 0,
         scale: 1.0,
@@ -130,21 +130,21 @@ describe("Value Consistency Tests", () => {
           },
           static: {
             head: {
-              shape_id: "HE_001",
+              shape_id: 1,
               skin_color: "medium" as const,
             },
             hair: {
-              style_id: "H_001",
+              style_id: 1,
               hair_color: "brown" as const,
             },
             beard: {
-              shape_id: "B_001",
+              shape_id: 1,
               facial_hair_color: "brown" as const,
             },
           },
           placeable_movable: {
             eyes: {
-              shape_id: "EY_001",
+              shape_id: 1,
               eye_color: "brown" as const,
               offset_y: 0,
               scale: 1.0,
@@ -152,24 +152,24 @@ describe("Value Consistency Tests", () => {
               distance: 0,
             },
             eyebrows: {
-              shape_id: "EB_001",
+              shape_id: 1,
               offset_y: 0,
               scale: 1.0,
               rotation: 0,
               distance: 0,
             },
             nose: {
-              shape_id: "N_001",
+              shape_id: 1,
               offset_y: 0,
               scale: 1.0,
             },
             lips: {
-              shape_id: "L_001",
+              shape_id: 1,
               offset_y: 0,
               scale: 1.0,
             },
             age_lines: {
-              shape_id: "A_001",
+              shape_id: 1,
             },
             accessories: {
               slot_1: glassesAccessory,
@@ -190,57 +190,6 @@ describe("Value Consistency Tests", () => {
         expect(accessories.slot_2?.type).toBe("mustache");
         expect(accessories.slot_3?.type).toBe("misc");
       }
-    });
-  });
-
-  describe("Asset ID Format Consistency", () => {
-    it("should have consistent asset ID formats across validation patterns", () => {
-      const assetPatterns = {
-        head: /^HE_\d{3}$/,
-        hair: /^H_\d{3}$/,
-        beard: /^B_\d{3}$/,
-        eyes: /^EY_\d{3}$/,
-        eyebrows: /^EB_\d{3}$/,
-        nose: /^N_\d{3}$/,
-        lips: /^L_\d{3}$/,
-        age_lines: /^A_\d{3}$/,
-        glasses: /^G_\d{3}$/,
-        mustache: /^M_\d{3}$/,
-        misc: /^MI_\d{3}$/,
-      };
-
-      Object.entries(assetPatterns).forEach(([type, pattern]) => {
-        const validId =
-          type === "misc"
-            ? "MI_123"
-            : type === "head"
-              ? "HE_123"
-              : type === "eyebrows"
-                ? "EB_123"
-                : type === "age_lines"
-                  ? "A_123"
-                  : type === "hair"
-                    ? "H_123"
-                    : type === "beard"
-                      ? "B_123"
-                      : type === "eyes"
-                        ? "EY_123"
-                        : type === "nose"
-                          ? "N_123"
-                          : type === "lips"
-                            ? "L_123"
-                            : type === "glasses"
-                              ? "G_123"
-                              : type === "mustache"
-                                ? "M_123"
-                                : `${type.toUpperCase()}_123`;
-
-        expect(validId).toMatch(pattern);
-
-        expect("INVALID_123").not.toMatch(pattern);
-        expect(`${type}_12`).not.toMatch(pattern);
-        expect(`${type}_1234`).not.toMatch(pattern);
-      });
     });
   });
 
@@ -272,13 +221,13 @@ describe("Value Consistency Tests", () => {
               weight_lb: 150,
             },
             static: {
-              head: { shape_id: "HE_001", skin_color: "medium" as const },
-              hair: { style_id: "H_001", hair_color: "brown" as const },
-              beard: { shape_id: "B_001", facial_hair_color: "brown" as const },
+              head: { shape_id: 1, skin_color: "medium" as const },
+              hair: { style_id: 1, hair_color: "brown" as const },
+              beard: { shape_id: 1, facial_hair_color: "brown" as const },
             },
             placeable_movable: {
               eyes: {
-                shape_id: "EY_001",
+                shape_id: 1,
                 eye_color: "brown" as const,
                 offset_y: 0,
                 scale: 1.0,
@@ -286,15 +235,15 @@ describe("Value Consistency Tests", () => {
                 distance: 0,
               },
               eyebrows: {
-                shape_id: "EB_001",
+                shape_id: 1,
                 offset_y: 0,
                 scale: 1.0,
                 rotation: 0,
                 distance: 0,
               },
-              nose: { shape_id: "N_001", offset_y: 0, scale: 1.0 },
-              lips: { shape_id: "L_001", offset_y: 0, scale: 1.0 },
-              age_lines: { shape_id: "A_001" },
+              nose: { shape_id: 1, offset_y: 0, scale: 1.0 },
+              lips: { shape_id: 1, offset_y: 0, scale: 1.0 },
+              age_lines: { shape_id: 1 },
               accessories: {
                 slot_1: undefined,
                 slot_2: undefined,
@@ -341,13 +290,13 @@ describe("Value Consistency Tests", () => {
               weight_lb: weight,
             },
             static: {
-              head: { shape_id: "HE_001", skin_color: "medium" as const },
-              hair: { style_id: "H_001", hair_color: "brown" as const },
-              beard: { shape_id: "B_001", facial_hair_color: "brown" as const },
+              head: { shape_id: 1, skin_color: "medium" as const },
+              hair: { style_id: 1, hair_color: "brown" as const },
+              beard: { shape_id: 1, facial_hair_color: "brown" as const },
             },
             placeable_movable: {
               eyes: {
-                shape_id: "EY_001",
+                shape_id: 1,
                 eye_color: "brown" as const,
                 offset_y: 0,
                 scale: 1.0,
@@ -355,15 +304,15 @@ describe("Value Consistency Tests", () => {
                 distance: 0,
               },
               eyebrows: {
-                shape_id: "EB_001",
+                shape_id: 1,
                 offset_y: 0,
                 scale: 1.0,
                 rotation: 0,
                 distance: 0,
               },
-              nose: { shape_id: "N_001", offset_y: 0, scale: 1.0 },
-              lips: { shape_id: "L_001", offset_y: 0, scale: 1.0 },
-              age_lines: { shape_id: "A_001" },
+              nose: { shape_id: 1, offset_y: 0, scale: 1.0 },
+              lips: { shape_id: 1, offset_y: 0, scale: 1.0 },
+              age_lines: { shape_id: 1 },
               accessories: {
                 slot_1: undefined,
                 slot_2: undefined,
@@ -410,13 +359,13 @@ describe("Value Consistency Tests", () => {
               weight_lb: 150,
             },
             static: {
-              head: { shape_id: "HE_001", skin_color: "medium" as const },
-              hair: { style_id: "H_001", hair_color: "brown" as const },
-              beard: { shape_id: "B_001", facial_hair_color: "brown" as const },
+              head: { shape_id: 1, skin_color: "medium" as const },
+              hair: { style_id: 1, hair_color: "brown" as const },
+              beard: { shape_id: 1, facial_hair_color: "brown" as const },
             },
             placeable_movable: {
               eyes: {
-                shape_id: "EY_001",
+                shape_id: 1,
                 eye_color: "brown" as const,
                 offset_y: offset,
                 scale: 1.0,
@@ -424,15 +373,15 @@ describe("Value Consistency Tests", () => {
                 distance: 0,
               },
               eyebrows: {
-                shape_id: "EB_001",
+                shape_id: 1,
                 offset_y: 0,
                 scale: 1.0,
                 rotation: 0,
                 distance: 0,
               },
-              nose: { shape_id: "N_001", offset_y: 0, scale: 1.0 },
-              lips: { shape_id: "L_001", offset_y: 0, scale: 1.0 },
-              age_lines: { shape_id: "A_001" },
+              nose: { shape_id: 1, offset_y: 0, scale: 1.0 },
+              lips: { shape_id: 1, offset_y: 0, scale: 1.0 },
+              age_lines: { shape_id: 1 },
               accessories: {
                 slot_1: undefined,
                 slot_2: undefined,
@@ -480,13 +429,13 @@ describe("Value Consistency Tests", () => {
               weight_lb: 150,
             },
             static: {
-              head: { shape_id: "HE_001", skin_color: "medium" as const },
-              hair: { style_id: "H_001", hair_color: "brown" as const },
-              beard: { shape_id: "B_001", facial_hair_color: "brown" as const },
+              head: { shape_id: 1, skin_color: "medium" as const },
+              hair: { style_id: 1, hair_color: "brown" as const },
+              beard: { shape_id: 1, facial_hair_color: "brown" as const },
             },
             placeable_movable: {
               eyes: {
-                shape_id: "EY_001",
+                shape_id: 1,
                 eye_color: "brown" as const,
                 offset_y: 0,
                 scale: scale,
@@ -494,15 +443,15 @@ describe("Value Consistency Tests", () => {
                 distance: 0,
               },
               eyebrows: {
-                shape_id: "EB_001",
+                shape_id: 1,
                 offset_y: 0,
                 scale: 1.0,
                 rotation: 0,
                 distance: 0,
               },
-              nose: { shape_id: "N_001", offset_y: 0, scale: 1.0 },
-              lips: { shape_id: "L_001", offset_y: 0, scale: 1.0 },
-              age_lines: { shape_id: "A_001" },
+              nose: { shape_id: 1, offset_y: 0, scale: 1.0 },
+              lips: { shape_id: 1, offset_y: 0, scale: 1.0 },
+              age_lines: { shape_id: 1 },
               accessories: {
                 slot_1: undefined,
                 slot_2: undefined,

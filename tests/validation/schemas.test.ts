@@ -51,9 +51,9 @@ describe("Validation Schemas", () => {
       }
     });
 
-    it("should reject invalid shape ID formats", () => {
+    it("should reject invalid shape ID values", () => {
       const data = generateMockCharacterData();
-      data.character_data.static.head.shape_id = "INVALID_FORMAT";
+      data.character_data.static.head.shape_id = 0; // below minimum
 
       const result = fullCharacterSchema.safeParse(data);
 
@@ -131,7 +131,7 @@ describe("Validation Schemas", () => {
 
       data.character_data.placeable_movable.accessories.slot_1 = {
         type: "glasses",
-        asset_id: "G_123",
+        asset_id: 123,
         offset_y: 0.5,
         scale: 1.0,
       };
@@ -151,7 +151,7 @@ describe("Validation Schemas", () => {
       const data = generateMockCharacterData();
       data.character_data.placeable_movable.accessories.slot_1 = {
         type: "glasses",
-        asset_id: "INVALID_ID",
+        asset_id: 0, // below minimum
         offset_y: 0,
         scale: 1.0,
       };

@@ -148,8 +148,8 @@ function randomDate(start: Date, end: Date): Date {
   );
 }
 
-function generateShapeId(prefix: string): string {
-  return `${prefix}_${randomInt(1, 999).toString().padStart(3, "0")}`;
+function generateShapeId(): number {
+  return randomInt(1, 999);
 }
 
 function generateOffset(): number {
@@ -175,21 +175,21 @@ function generateAccessoriesWithoutDuplicates() {
         if (type === "glasses") {
           accessories[slot] = {
             type: "glasses" as const,
-            asset_id: generateShapeId("G"),
+            asset_id: generateShapeId(),
             offset_y: generateOffset(),
             scale: parseFloat(randomFloat(0.5, 1.5).toFixed(1)),
           };
         } else if (type === "mustache") {
           accessories[slot] = {
             type: "mustache" as const,
-            asset_id: generateShapeId("M"),
+            asset_id: generateShapeId(),
             offset_y: generateOffset(),
             scale: parseFloat(randomFloat(0.5, 1.5).toFixed(1)),
           };
         } else if (type === "misc") {
           accessories[slot] = {
             type: "misc" as const,
-            asset_id: generateShapeId("MI"),
+            asset_id: generateShapeId(),
             offset_x: generateOffset(),
             offset_y: generateOffset(),
             scale: parseFloat(randomFloat(0.5, 1.5).toFixed(1)),
@@ -229,17 +229,17 @@ export function generateMockCharacterData(): FullCharacter {
       },
       static: {
         head: {
-          shape_id: generateShapeId("HE"),
+          shape_id: generateShapeId(),
           skin_color: randomChoice(skinColors),
         },
         hair: {
-          style_id: generateShapeId("H"),
+          style_id: generateShapeId(),
           hair_color: randomChoice(hairColors),
         },
         ...(shouldHaveBeard
           ? {
               beard: {
-                shape_id: generateShapeId("B"),
+                shape_id: generateShapeId(),
                 facial_hair_color: randomChoice(hairColors),
               },
             }
@@ -247,7 +247,7 @@ export function generateMockCharacterData(): FullCharacter {
       },
       placeable_movable: {
         eyes: {
-          shape_id: generateShapeId("EY"),
+          shape_id: generateShapeId(),
           eye_color: randomChoice(eyeColors),
           offset_y: generateOffset(),
           scale: parseFloat(randomFloat(0.5, 1.5).toFixed(1)),
@@ -255,24 +255,24 @@ export function generateMockCharacterData(): FullCharacter {
           distance: parseFloat(randomFloat(0, 1).toFixed(1)),
         },
         eyebrows: {
-          shape_id: generateShapeId("EB"),
+          shape_id: generateShapeId(),
           offset_y: generateOffset(),
           scale: parseFloat(randomFloat(0.5, 1.5).toFixed(1)),
           rotation: randomInt(0, 359),
           distance: parseFloat(randomFloat(0, 1).toFixed(1)),
         },
         nose: {
-          shape_id: generateShapeId("N"),
+          shape_id: generateShapeId(),
           offset_y: generateOffset(),
           scale: parseFloat(randomFloat(0.5, 1.5).toFixed(1)),
         },
         lips: {
-          shape_id: generateShapeId("L"),
+          shape_id: generateShapeId(),
           offset_y: generateOffset(),
           scale: parseFloat(randomFloat(0.5, 1.5).toFixed(1)),
         },
         ...(Math.random() < 0.7
-          ? { age_lines: { shape_id: generateShapeId("A") } }
+          ? { age_lines: { shape_id: generateShapeId() } }
           : {}),
         accessories: generateAccessoriesWithoutDuplicates(),
       },

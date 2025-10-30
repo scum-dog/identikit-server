@@ -2,13 +2,7 @@ import { z } from "zod";
 import { Request, Response, NextFunction } from "express";
 import { log } from "./logger";
 
-const shapeIdSchema = (prefix: string) =>
-  z
-    .string()
-    .regex(
-      new RegExp(`^${prefix}_\\d{3}$`),
-      `Invalid ${prefix} shape ID format`,
-    );
+const shapeIdSchema = () => z.number().int().min(1).max(999);
 
 const offsetSchema = z
   .number()
@@ -71,21 +65,19 @@ export const sexEnum = z.enum(["male", "female", "other"]);
 const accessorySlotSchema = z.discriminatedUnion("type", [
   z.object({
     type: z.literal("glasses"),
-    asset_id: z.string().regex(/^G_\d{3}$/, "Glasses must use G_XXX format"),
+    asset_id: z.number().int().min(1).max(999),
     offset_y: offsetSchema.default(0),
     scale: scaleSchema.default(1.0),
   }),
   z.object({
     type: z.literal("mustache"),
-    asset_id: z.string().regex(/^M_\d{3}$/, "Mustache must use M_XXX format"),
+    asset_id: z.number().int().min(1).max(999),
     offset_y: offsetSchema.default(0),
     scale: scaleSchema.default(1.0),
   }),
   z.object({
     type: z.literal("misc"),
-    asset_id: z
-      .string()
-      .regex(/^MI_\d{3}$/, "Misc accessories must use MI_XXX format"),
+    asset_id: z.number().int().min(1).max(999),
     offset_x: offsetSchema.default(0),
     offset_y: offsetSchema.default(0),
     scale: scaleSchema.default(1.0),
@@ -111,16 +103,16 @@ export const characterDataSchema = z.object({
   static: z
     .object({
       head: z.object({
-        shape_id: shapeIdSchema("HE"),
+        shape_id: shapeIdSchema(),
         skin_color: skinColorEnum,
       }),
       hair: z.object({
-        style_id: shapeIdSchema("H"),
+        style_id: shapeIdSchema(),
         hair_color: hairColorEnum,
       }),
       beard: z
         .object({
-          shape_id: shapeIdSchema("B"),
+          shape_id: shapeIdSchema(),
           facial_hair_color: hairColorEnum,
         })
         .optional(),
@@ -128,7 +120,7 @@ export const characterDataSchema = z.object({
     .strict(),
   placeable_movable: z.object({
     eyes: z.object({
-      shape_id: shapeIdSchema("EY"),
+      shape_id: shapeIdSchema(),
       eye_color: eyeColorEnum,
       offset_y: offsetSchema.default(0),
       scale: scaleSchema.default(1.0),
@@ -136,25 +128,25 @@ export const characterDataSchema = z.object({
       distance: distanceSchema.default(0),
     }),
     eyebrows: z.object({
-      shape_id: shapeIdSchema("EB"),
+      shape_id: shapeIdSchema(),
       offset_y: offsetSchema.default(0),
       scale: scaleSchema.default(1.0),
       rotation: rotationSchema.default(0),
       distance: distanceSchema.default(0),
     }),
     nose: z.object({
-      shape_id: shapeIdSchema("N"),
+      shape_id: shapeIdSchema(),
       offset_y: offsetSchema.default(0),
       scale: scaleSchema.default(1.0),
     }),
     lips: z.object({
-      shape_id: shapeIdSchema("L"),
+      shape_id: shapeIdSchema(),
       offset_y: offsetSchema.default(0),
       scale: scaleSchema.default(1.0),
     }),
     age_lines: z
       .object({
-        shape_id: shapeIdSchema("A"),
+        shape_id: shapeIdSchema(),
       })
       .optional(),
     accessories: z
@@ -235,19 +227,19 @@ export const characterDataUpdateSchema = z.object({
         .object({
           head: z
             .object({
-              shape_id: shapeIdSchema("HE").optional(),
+              shape_id: shapeIdSchema().optional(),
               skin_color: skinColorEnum.optional(),
             })
             .optional(),
           hair: z
             .object({
-              style_id: shapeIdSchema("H").optional(),
+              style_id: shapeIdSchema().optional(),
               hair_color: hairColorEnum.optional(),
             })
             .optional(),
           beard: z
             .object({
-              shape_id: shapeIdSchema("B"),
+              shape_id: shapeIdSchema(),
               facial_hair_color: hairColorEnum,
             })
             .optional(),
@@ -257,7 +249,7 @@ export const characterDataUpdateSchema = z.object({
         .object({
           eyes: z
             .object({
-              shape_id: shapeIdSchema("EY").optional(),
+              shape_id: shapeIdSchema().optional(),
               eye_color: eyeColorEnum.optional(),
               offset_y: offsetSchema.optional(),
               scale: scaleSchema.optional(),
@@ -267,7 +259,7 @@ export const characterDataUpdateSchema = z.object({
             .optional(),
           eyebrows: z
             .object({
-              shape_id: shapeIdSchema("EB").optional(),
+              shape_id: shapeIdSchema().optional(),
               offset_y: offsetSchema.optional(),
               scale: scaleSchema.optional(),
               rotation: rotationSchema.optional(),
@@ -276,21 +268,21 @@ export const characterDataUpdateSchema = z.object({
             .optional(),
           nose: z
             .object({
-              shape_id: shapeIdSchema("N").optional(),
+              shape_id: shapeIdSchema().optional(),
               offset_y: offsetSchema.optional(),
               scale: scaleSchema.optional(),
             })
             .optional(),
           lips: z
             .object({
-              shape_id: shapeIdSchema("L").optional(),
+              shape_id: shapeIdSchema().optional(),
               offset_y: offsetSchema.optional(),
               scale: scaleSchema.optional(),
             })
             .optional(),
           age_lines: z
             .object({
-              shape_id: shapeIdSchema("A"),
+              shape_id: shapeIdSchema(),
             })
             .optional(),
           accessories: z
