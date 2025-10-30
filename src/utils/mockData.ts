@@ -213,11 +213,14 @@ export function generateMockCharacterData(): FullCharacter {
       : [];
   const city = cityList.length > 0 ? randomChoice(cityList) : undefined;
 
+  const sex = randomChoice(sexOptions);
+  const shouldHaveBeard = sex !== "female" && Math.random() < 0.6;
+
   return {
     character_data: {
       static: {
         name: randomChoice(firstNames),
-        sex: randomChoice(sexOptions),
+        sex: sex,
         date_of_birth: randomDate(new Date(1950, 0, 1), new Date(2005, 11, 31))
           .toISOString()
           .split("T")[0],
@@ -231,10 +234,14 @@ export function generateMockCharacterData(): FullCharacter {
           style_id: generateShapeId("H"),
           hair_color: randomChoice(hairColors),
         },
-        beard: {
-          shape_id: generateShapeId("B"),
-          facial_hair_color: randomChoice(hairColors),
-        },
+        ...(shouldHaveBeard
+          ? {
+              beard: {
+                shape_id: generateShapeId("B"),
+                facial_hair_color: randomChoice(hairColors),
+              },
+            }
+          : {}),
       },
       placeable_movable: {
         eyes: {

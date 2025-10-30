@@ -394,10 +394,14 @@ describe("Type-Schema Alignment Tests", () => {
 
       if (result.success) {
         expect(result.data.character_data.static.beard).toBeDefined();
-        expect(result.data.character_data.static.beard.shape_id).toBe("B_001");
-        expect(result.data.character_data.static.beard.facial_hair_color).toBe(
-          "brown",
-        );
+        if (result.data.character_data.static.beard) {
+          expect(result.data.character_data.static.beard.shape_id).toBe(
+            "B_001",
+          );
+          expect(
+            result.data.character_data.static.beard.facial_hair_color,
+          ).toBe("brown");
+        }
       }
     });
 
@@ -432,9 +436,13 @@ describe("Type-Schema Alignment Tests", () => {
               style_id: "H_001",
               hair_color: "brown",
             },
-            facial_hair: {
+            beard: {
               shape_id: "B_001",
               facial_hair_color: "brown",
+            },
+            facial_hair: {
+              shape_id: "B_002",
+              facial_hair_color: "black",
             },
           },
           placeable_movable: {
@@ -480,7 +488,13 @@ describe("Type-Schema Alignment Tests", () => {
 
       if (!result.success) {
         const errors = result.error.errors;
-        expect(errors.some((e) => e.path.includes("beard"))).toBe(true);
+        expect(
+          errors.some(
+            (e) =>
+              e.path.includes("facial_hair") ||
+              e.message.includes("facial_hair"),
+          ),
+        ).toBe(true);
       }
     });
   });

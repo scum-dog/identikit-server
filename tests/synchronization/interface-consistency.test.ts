@@ -134,7 +134,6 @@ describe("Interface Consistency Tests", () => {
         expect(mockCharacter.character_data.placeable_movable).toBeDefined();
 
         expect(mockCharacter.character_data.static.name).toBeDefined();
-        expect(mockCharacter.character_data.static.beard).toBeDefined();
         if (mockCharacter.character_data.placeable_movable.age_lines) {
           expect(
             mockCharacter.character_data.placeable_movable.age_lines.shape_id,
@@ -173,9 +172,11 @@ describe("Interface Consistency Tests", () => {
             deleted_by: null,
           };
 
-          expect(mockCharacter.character_data.static.beard.shape_id).toMatch(
-            /^B_\d{3}$/,
-          );
+          if (mockCharacter.character_data.static.beard) {
+            expect(mockCharacter.character_data.static.beard.shape_id).toMatch(
+              /^B_\d{3}$/,
+            );
+          }
         }
       }
     });
@@ -215,17 +216,6 @@ describe("Interface Consistency Tests", () => {
 
         expect(adminCharacterStructured.character_data).toBeDefined();
         expect(adminCharacterString.character_data).toBeDefined();
-
-        if (typeof adminCharacterStructured.character_data === "object") {
-          expect(
-            adminCharacterStructured.character_data.static.beard,
-          ).toBeDefined();
-        }
-
-        if (typeof adminCharacterString.character_data === "string") {
-          const parsed = JSON.parse(adminCharacterString.character_data);
-          expect(parsed.static.beard).toBeDefined();
-        }
       }
     });
   });
@@ -362,9 +352,14 @@ describe("Interface Consistency Tests", () => {
           };
 
           if (typeof dbChar.character_data === "object") {
-            expect(dbChar.character_data.static.beard.shape_id).toBe(
-              originalData.static.beard.shape_id,
-            );
+            if (
+              dbChar.character_data.static.beard &&
+              originalData.static.beard
+            ) {
+              expect(dbChar.character_data.static.beard.shape_id).toBe(
+                originalData.static.beard.shape_id,
+              );
+            }
             if (
               dbChar.character_data.placeable_movable.age_lines &&
               originalData.placeable_movable.age_lines
@@ -403,8 +398,6 @@ describe("Interface Consistency Tests", () => {
         };
 
         expect(validMockChar.character_data).toBeDefined();
-
-        expect(validMockChar.character_data.static.beard).toBeDefined();
 
         if (validMockChar.character_data.placeable_movable.age_lines) {
           expect(

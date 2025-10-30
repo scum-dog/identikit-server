@@ -62,7 +62,7 @@ export interface CharacterStatic {
     style_id: string;
     hair_color: HairColor;
   };
-  beard: {
+  beard?: {
     shape_id: string;
     facial_hair_color: HairColor;
   };

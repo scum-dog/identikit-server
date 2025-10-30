@@ -33,9 +33,11 @@ describe("Data Synchronization Tests", () => {
           /^H_\d{3}$/,
         );
 
-        expect(mockData.character_data.static.beard.shape_id).toMatch(
-          /^B_\d{3}$/,
-        );
+        if (mockData.character_data.static.beard) {
+          expect(mockData.character_data.static.beard.shape_id).toMatch(
+            /^B_\d{3}$/,
+          );
+        }
 
         expect(mockData.character_data.placeable_movable.eyes.shape_id).toMatch(
           /^EY_\d{3}$/,
@@ -205,19 +207,30 @@ describe("Data Synchronization Tests", () => {
   });
 
   describe("Consistent Beard Naming", () => {
-    it("should use 'beard' field name consistently", () => {
+    it("should use 'beard' field name consistently when present", () => {
       for (let i = 0; i < 10; i++) {
         const mockData = generateMockCharacterData();
 
-        expect(mockData.character_data.static).toHaveProperty("beard");
         expect(mockData.character_data.static).not.toHaveProperty(
           "facial_hair",
         );
 
         const beard = mockData.character_data.static.beard;
-        expect(beard).toHaveProperty("shape_id");
-        expect(beard).toHaveProperty("facial_hair_color");
-        expect(beard.shape_id).toMatch(/^B_\d{3}$/);
+        if (beard) {
+          expect(beard).toHaveProperty("shape_id");
+          expect(beard).toHaveProperty("facial_hair_color");
+          expect(beard.shape_id).toMatch(/^B_\d{3}$/);
+        }
+      }
+    });
+
+    it("should not generate beards for female characters", () => {
+      for (let i = 0; i < 100; i++) {
+        const mockData = generateMockCharacterData();
+
+        if (mockData.character_data.static.sex === "female") {
+          expect(mockData.character_data.static.beard).toBeUndefined();
+        }
       }
     });
   });

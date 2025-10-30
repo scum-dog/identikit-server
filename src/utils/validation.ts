@@ -93,31 +93,35 @@ const accessorySlotSchema = z.discriminatedUnion("type", [
 ]);
 
 export const characterDataSchema = z.object({
-  static: z.object({
-    name: z.string().min(1).max(100),
-    sex: sexEnum,
-    date_of_birth: z
-      .string()
-      .regex(/^\d{4}-\d{2}-\d{2}$/, "Date must be in YYYY-MM-DD format")
-      .refine((date) => {
-        const d = new Date(date);
-        return d >= new Date("1900-01-01") && d <= new Date();
-      }, "Date must be between 1900-01-01 and today"),
-    height_in: z.number().int().min(24).max(96), // 2-8 feet
-    weight_lb: z.number().int().min(50).max(500), // pounds
-    head: z.object({
-      shape_id: shapeIdSchema("HE"),
-      skin_color: skinColorEnum,
-    }),
-    hair: z.object({
-      style_id: shapeIdSchema("H"),
-      hair_color: hairColorEnum,
-    }),
-    beard: z.object({
-      shape_id: shapeIdSchema("B"),
-      facial_hair_color: hairColorEnum,
-    }),
-  }),
+  static: z
+    .object({
+      name: z.string().min(1).max(100),
+      sex: sexEnum,
+      date_of_birth: z
+        .string()
+        .regex(/^\d{4}-\d{2}-\d{2}$/, "Date must be in YYYY-MM-DD format")
+        .refine((date) => {
+          const d = new Date(date);
+          return d >= new Date("1900-01-01") && d <= new Date();
+        }, "Date must be between 1900-01-01 and today"),
+      height_in: z.number().int().min(24).max(96), // 2-8 feet
+      weight_lb: z.number().int().min(50).max(500), // pounds
+      head: z.object({
+        shape_id: shapeIdSchema("HE"),
+        skin_color: skinColorEnum,
+      }),
+      hair: z.object({
+        style_id: shapeIdSchema("H"),
+        hair_color: hairColorEnum,
+      }),
+      beard: z
+        .object({
+          shape_id: shapeIdSchema("B"),
+          facial_hair_color: hairColorEnum,
+        })
+        .optional(),
+    })
+    .strict(),
   placeable_movable: z.object({
     eyes: z.object({
       shape_id: shapeIdSchema("EY"),
@@ -235,8 +239,8 @@ export const characterDataUpdateSchema = z.object({
             .optional(),
           beard: z
             .object({
-              shape_id: shapeIdSchema("B").optional(),
-              facial_hair_color: hairColorEnum.optional(),
+              shape_id: shapeIdSchema("B"),
+              facial_hair_color: hairColorEnum,
             })
             .optional(),
         })
