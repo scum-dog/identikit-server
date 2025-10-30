@@ -32,12 +32,14 @@ describe("Type-Schema Alignment Tests", () => {
           },
         },
         character_data: {
-          static: {
+          info: {
             name: "John Doe",
             sex: "male",
             date_of_birth: "1990-01-01",
             height_in: 72,
             weight_lb: 180,
+          },
+          static: {
             head: {
               shape_id: "HE_001",
               skin_color: "medium",
@@ -162,12 +164,14 @@ describe("Type-Schema Alignment Tests", () => {
           },
         },
         character_data: {
-          static: {
+          info: {
             name: "Test",
             sex: "male" as const,
             date_of_birth: "1990-01-01",
             height_in: 70,
             weight_lb: 150,
+          },
+          static: {
             head: {
               shape_id: "HE_001",
               skin_color: "medium" as const,
@@ -254,12 +258,14 @@ describe("Type-Schema Alignment Tests", () => {
           },
         },
         character_data: {
-          static: {
+          info: {
             name: "Test",
             sex: "male" as const,
             date_of_birth: "1990-01-01",
             height_in: 70,
             weight_lb: 150,
+          },
+          static: {
             head: {
               shape_id: "HE_001",
               skin_color: "medium" as const,
@@ -332,12 +338,14 @@ describe("Type-Schema Alignment Tests", () => {
           },
         },
         character_data: {
-          static: {
+          info: {
             name: "Test",
             sex: "male" as const,
             date_of_birth: "1990-01-01",
             height_in: 70,
             weight_lb: 150,
+          },
+          static: {
             head: {
               shape_id: "HE_001",
               skin_color: "medium" as const,

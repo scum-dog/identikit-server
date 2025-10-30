@@ -218,7 +218,7 @@ export function generateMockCharacterData(): FullCharacter {
 
   return {
     character_data: {
-      static: {
+      info: {
         name: randomChoice(firstNames),
         sex: sex,
         date_of_birth: randomDate(new Date(1950, 0, 1), new Date(2005, 11, 31))
@@ -226,6 +226,8 @@ export function generateMockCharacterData(): FullCharacter {
           .split("T")[0],
         height_in: randomInt(60, 80),
         weight_lb: randomInt(120, 220),
+      },
+      static: {
         head: {
           shape_id: generateShapeId("HE"),
           skin_color: randomChoice(skinColors),

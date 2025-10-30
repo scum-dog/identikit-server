@@ -133,7 +133,7 @@ describe("Interface Consistency Tests", () => {
         expect(mockCharacter.character_data.static).toBeDefined();
         expect(mockCharacter.character_data.placeable_movable).toBeDefined();
 
-        expect(mockCharacter.character_data.static.name).toBeDefined();
+        expect(mockCharacter.character_data.info.name).toBeDefined();
         if (mockCharacter.character_data.placeable_movable.age_lines) {
           expect(
             mockCharacter.character_data.placeable_movable.age_lines.shape_id,

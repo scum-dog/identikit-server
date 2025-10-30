@@ -145,14 +145,15 @@ describe("Data Synchronization Tests", () => {
     it("should generate numeric values within validation ranges", () => {
       for (let i = 0; i < 50; i++) {
         const mockData = generateMockCharacterData();
+        const infoData = mockData.character_data.info;
         const staticData = mockData.character_data.static;
         const placeableData = mockData.character_data.placeable_movable;
 
         // height and weight ranges
-        expect(staticData.height_in).toBeGreaterThanOrEqual(24);
-        expect(staticData.height_in).toBeLessThanOrEqual(96);
-        expect(staticData.weight_lb).toBeGreaterThanOrEqual(50);
-        expect(staticData.weight_lb).toBeLessThanOrEqual(500);
+        expect(infoData.height_in).toBeGreaterThanOrEqual(24);
+        expect(infoData.height_in).toBeLessThanOrEqual(96);
+        expect(infoData.weight_lb).toBeGreaterThanOrEqual(50);
+        expect(infoData.weight_lb).toBeLessThanOrEqual(500);
 
         // offset values
         expect(placeableData.eyes.offset_y).toBeGreaterThanOrEqual(-1);
@@ -191,7 +192,7 @@ describe("Data Synchronization Tests", () => {
     it("should generate valid date formats", () => {
       for (let i = 0; i < 20; i++) {
         const mockData = generateMockCharacterData();
-        const dateOfBirth = mockData.character_data.static.date_of_birth;
+        const dateOfBirth = mockData.character_data.info.date_of_birth;
 
         expect(dateOfBirth).toMatch(/^\d{4}-\d{2}-\d{2}$/);
 
@@ -228,7 +229,7 @@ describe("Data Synchronization Tests", () => {
       for (let i = 0; i < 100; i++) {
         const mockData = generateMockCharacterData();
 
-        if (mockData.character_data.static.sex === "female") {
+        if (mockData.character_data.info.sex === "female") {
           expect(mockData.character_data.static.beard).toBeUndefined();
         }
       }

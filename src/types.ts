@@ -48,12 +48,15 @@ export interface CharacterMetadata {
   };
 }
 
-export interface CharacterStatic {
+export interface CharacterPersonalInfo {
   name: string;
   sex: "male" | "female" | "other";
   date_of_birth: string;
   height_in: number;
   weight_lb: number;
+}
+
+export interface CharacterStatic {
   head: {
     shape_id: string;
     skin_color: SkinColor;
@@ -105,6 +108,7 @@ export interface CharacterPlaceableMovable {
 }
 
 export interface CharacterDataStructure {
+  info: CharacterPersonalInfo;
   static: CharacterStatic;
   placeable_movable: CharacterPlaceableMovable;
 }

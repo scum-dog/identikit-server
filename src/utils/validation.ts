@@ -93,7 +93,7 @@ const accessorySlotSchema = z.discriminatedUnion("type", [
 ]);
 
 export const characterDataSchema = z.object({
-  static: z
+  info: z
     .object({
       name: z.string().min(1).max(100),
       sex: sexEnum,
@@ -106,6 +106,10 @@ export const characterDataSchema = z.object({
         }, "Date must be between 1900-01-01 and today"),
       height_in: z.number().int().min(24).max(96), // 2-8 feet
       weight_lb: z.number().int().min(50).max(500), // pounds
+    })
+    .strict(),
+  static: z
+    .object({
       head: z.object({
         shape_id: shapeIdSchema("HE"),
         skin_color: skinColorEnum,
@@ -211,7 +215,7 @@ export const fullCharacterSchema = z.object({
 export const characterDataUpdateSchema = z.object({
   character_data: z
     .object({
-      static: z
+      info: z
         .object({
           name: z.string().min(1).max(100).optional(),
           sex: sexEnum.optional(),
@@ -225,6 +229,10 @@ export const characterDataUpdateSchema = z.object({
             .optional(),
           height_in: z.number().int().min(24).max(96).optional(),
           weight_lb: z.number().int().min(50).max(500).optional(),
+        })
+        .optional(),
+      static: z
+        .object({
           head: z
             .object({
               shape_id: shapeIdSchema("HE").optional(),

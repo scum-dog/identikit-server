@@ -20,7 +20,7 @@ describe("Validation Schemas", () => {
       expect(result.success).toBe(true);
       if (result.success) {
         expect(result.data.metadata.upload_id).toBeDefined();
-        expect(result.data.character_data.static.name).toBeDefined();
+        expect(result.data.character_data.info.name).toBeDefined();
         expect(result.data.character_data.placeable_movable.eyes).toBeDefined();
       }
     });
@@ -38,7 +38,7 @@ describe("Validation Schemas", () => {
 
     it("should reject empty character name", () => {
       const data = generateMockCharacterData();
-      data.character_data.static.name = "";
+      data.character_data.info.name = "";
 
       const result = fullCharacterSchema.safeParse(data);
 
@@ -68,7 +68,7 @@ describe("Validation Schemas", () => {
 
     it("should reject invalid height values", () => {
       const data = generateMockCharacterData();
-      data.character_data.static.height_in = 10;
+      data.character_data.info.height_in = 10;
 
       const result = fullCharacterSchema.safeParse(data);
 
@@ -83,7 +83,7 @@ describe("Validation Schemas", () => {
 
     it("should reject invalid weight values", () => {
       const data = generateMockCharacterData();
-      data.character_data.static.weight_lb = 1000;
+      data.character_data.info.weight_lb = 1000;
 
       const result = fullCharacterSchema.safeParse(data);
 
@@ -172,7 +172,7 @@ describe("Validation Schemas", () => {
     it("should validate partial character updates", () => {
       const updateData = {
         character_data: {
-          static: {
+          info: {
             name: "Updated Name",
           },
         },
@@ -182,7 +182,7 @@ describe("Validation Schemas", () => {
 
       expect(result.success).toBe(true);
       if (result.success) {
-        expect(result.data.character_data?.static?.name).toBe("Updated Name");
+        expect(result.data.character_data?.info?.name).toBe("Updated Name");
       }
     });
 

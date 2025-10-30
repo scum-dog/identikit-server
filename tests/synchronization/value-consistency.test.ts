@@ -121,12 +121,14 @@ describe("Value Consistency Tests", () => {
           },
         },
         character_data: {
-          static: {
+          info: {
             name: "Test",
             sex: "male" as const,
             date_of_birth: "1990-01-01",
             height_in: 70,
             weight_lb: 150,
+          },
+          static: {
             head: {
               shape_id: "HE_001",
               skin_color: "medium" as const,
@@ -262,12 +264,14 @@ describe("Value Consistency Tests", () => {
             location: { country: "United States" },
           },
           character_data: {
-            static: {
+            info: {
               name: "Test",
               sex: "male" as const,
               date_of_birth: "1990-01-01",
               height_in: height,
               weight_lb: 150,
+            },
+            static: {
               head: { shape_id: "HE_001", skin_color: "medium" as const },
               hair: { style_id: "H_001", hair_color: "brown" as const },
               beard: { shape_id: "B_001", facial_hair_color: "brown" as const },
@@ -329,12 +333,14 @@ describe("Value Consistency Tests", () => {
             location: { country: "United States" },
           },
           character_data: {
-            static: {
+            info: {
               name: "Test",
               sex: "male" as const,
               date_of_birth: "1990-01-01",
               height_in: 70,
               weight_lb: weight,
+            },
+            static: {
               head: { shape_id: "HE_001", skin_color: "medium" as const },
               hair: { style_id: "H_001", hair_color: "brown" as const },
               beard: { shape_id: "B_001", facial_hair_color: "brown" as const },
@@ -396,12 +402,14 @@ describe("Value Consistency Tests", () => {
             location: { country: "United States" },
           },
           character_data: {
-            static: {
+            info: {
               name: "Test",
               sex: "male" as const,
               date_of_birth: "1990-01-01",
               height_in: 70,
               weight_lb: 150,
+            },
+            static: {
               head: { shape_id: "HE_001", skin_color: "medium" as const },
               hair: { style_id: "H_001", hair_color: "brown" as const },
               beard: { shape_id: "B_001", facial_hair_color: "brown" as const },
@@ -464,12 +472,14 @@ describe("Value Consistency Tests", () => {
             location: { country: "United States" },
           },
           character_data: {
-            static: {
+            info: {
               name: "Test",
               sex: "male" as const,
               date_of_birth: "1990-01-01",
               height_in: 70,
               weight_lb: 150,
+            },
+            static: {
               head: { shape_id: "HE_001", skin_color: "medium" as const },
               hair: { style_id: "H_001", hair_color: "brown" as const },
               beard: { shape_id: "B_001", facial_hair_color: "brown" as const },
