@@ -78,11 +78,11 @@ describe("Data Synchronization Tests", () => {
 
         const beard = mockData.character_data.static.beard;
         if (beard) {
-          expect(beard).toHaveProperty("shape_id");
+          expect(beard).toHaveProperty("asset_id");
           expect(beard).toHaveProperty("facial_hair_color");
-          expect(typeof beard.shape_id).toBe("number");
-          expect(beard.shape_id).toBeGreaterThanOrEqual(1);
-          expect(beard.shape_id).toBeLessThanOrEqual(999);
+          expect(typeof beard.asset_id).toBe("number");
+          expect(beard.asset_id).toBeGreaterThanOrEqual(1);
+          expect(beard.asset_id).toBeLessThanOrEqual(999);
         }
       }
     });

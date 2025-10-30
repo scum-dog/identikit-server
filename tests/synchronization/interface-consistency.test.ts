@@ -136,7 +136,7 @@ describe("Interface Consistency Tests", () => {
         expect(mockCharacter.character_data.info.name).toBeDefined();
         if (mockCharacter.character_data.placeable_movable.age_lines) {
           expect(
-            mockCharacter.character_data.placeable_movable.age_lines.shape_id,
+            mockCharacter.character_data.placeable_movable.age_lines.asset_id,
           ).toBeDefined();
 
           expect(
@@ -174,7 +174,7 @@ describe("Interface Consistency Tests", () => {
 
           if (mockCharacter.character_data.static.beard) {
             expect(
-              mockCharacter.character_data.static.beard.shape_id,
+              mockCharacter.character_data.static.beard.asset_id,
             ).toBeDefined();
           }
         }
@@ -356,8 +356,8 @@ describe("Interface Consistency Tests", () => {
               dbChar.character_data.static.beard &&
               originalData.static.beard
             ) {
-              expect(dbChar.character_data.static.beard.shape_id).toBe(
-                originalData.static.beard.shape_id,
+              expect(dbChar.character_data.static.beard.asset_id).toBe(
+                originalData.static.beard.asset_id,
               );
             }
             if (
@@ -365,8 +365,8 @@ describe("Interface Consistency Tests", () => {
               originalData.placeable_movable.age_lines
             ) {
               expect(
-                dbChar.character_data.placeable_movable.age_lines.shape_id,
-              ).toBe(originalData.placeable_movable.age_lines.shape_id);
+                dbChar.character_data.placeable_movable.age_lines.asset_id,
+              ).toBe(originalData.placeable_movable.age_lines.asset_id);
             }
           }
         }
@@ -402,7 +402,7 @@ describe("Interface Consistency Tests", () => {
         if (validMockChar.character_data.placeable_movable.age_lines) {
           expect(
             validMockChar.character_data.placeable_movable.age_lines,
-          ).toHaveProperty("shape_id");
+          ).toHaveProperty("asset_id");
           expect(
             validMockChar.character_data.placeable_movable.age_lines,
           ).not.toHaveProperty("offset_y");

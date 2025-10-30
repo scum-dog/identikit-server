@@ -61,7 +61,7 @@ export const invalidCharacterData = {
       height_in: 0,
       weight_lb: 1000,
       head: {
-        shape_id: "INVALID_FORMAT",
+        asset_id: "INVALID_FORMAT",
         skin_color: "invalid" as any,
       },
     },

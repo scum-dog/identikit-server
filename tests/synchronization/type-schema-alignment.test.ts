@@ -41,21 +41,21 @@ describe("Type-Schema Alignment Tests", () => {
           },
           static: {
             head: {
-              shape_id: 1,
+              asset_id: 1,
               skin_color: "medium",
             },
             hair: {
-              style_id: 1,
+              asset_id: 1,
               hair_color: "brown",
             },
             beard: {
-              shape_id: 1,
+              asset_id: 1,
               facial_hair_color: "brown",
             },
           },
           placeable_movable: {
             eyes: {
-              shape_id: 1,
+              asset_id: 1,
               eye_color: "brown",
               offset_y: 0.1,
               scale: 1.0,
@@ -63,24 +63,24 @@ describe("Type-Schema Alignment Tests", () => {
               distance: 0.5,
             },
             eyebrows: {
-              shape_id: 1,
+              asset_id: 1,
               offset_y: -0.2,
               scale: 1.1,
               rotation: 10,
               distance: 0.3,
             },
             nose: {
-              shape_id: 1,
+              asset_id: 1,
               offset_y: 0.0,
               scale: 0.9,
             },
             lips: {
-              shape_id: 1,
+              asset_id: 1,
               offset_y: 0.2,
               scale: 1.2,
             },
             age_lines: {
-              shape_id: 1,
+              asset_id: 1,
             },
             accessories: {
               slot_1: {
@@ -173,21 +173,21 @@ describe("Type-Schema Alignment Tests", () => {
           },
           static: {
             head: {
-              shape_id: 1,
+              asset_id: 1,
               skin_color: "medium" as const,
             },
             hair: {
-              style_id: 1,
+              asset_id: 1,
               hair_color: "brown" as const,
             },
             beard: {
-              shape_id: 1,
+              asset_id: 1,
               facial_hair_color: "brown" as const,
             },
           },
           placeable_movable: {
             eyes: {
-              shape_id: 1,
+              asset_id: 1,
               eye_color: "brown" as const,
               offset_y: 0,
               scale: 1.0,
@@ -195,24 +195,24 @@ describe("Type-Schema Alignment Tests", () => {
               distance: 0,
             },
             eyebrows: {
-              shape_id: 1,
+              asset_id: 1,
               offset_y: 0,
               scale: 1.0,
               rotation: 0,
               distance: 0,
             },
             nose: {
-              shape_id: 1,
+              asset_id: 1,
               offset_y: 0,
               scale: 1.0,
             },
             lips: {
-              shape_id: 1,
+              asset_id: 1,
               offset_y: 0,
               scale: 1.0,
             },
             age_lines: {
-              shape_id: 1,
+              asset_id: 1,
             },
             accessories: {
               slot_1: glassesAccessory,
@@ -267,21 +267,21 @@ describe("Type-Schema Alignment Tests", () => {
           },
           static: {
             head: {
-              shape_id: 1,
+              asset_id: 1,
               skin_color: "medium" as const,
             },
             hair: {
-              style_id: 1,
+              asset_id: 1,
               hair_color: "brown" as const,
             },
             beard: {
-              shape_id: 1,
+              asset_id: 1,
               facial_hair_color: "brown" as const,
             },
           },
           placeable_movable: {
             eyes: {
-              shape_id: 1,
+              asset_id: 1,
               eye_color: "brown" as const,
               offset_y: 0,
               scale: 1.0,
@@ -289,24 +289,24 @@ describe("Type-Schema Alignment Tests", () => {
               distance: 0,
             },
             eyebrows: {
-              shape_id: 1,
+              asset_id: 1,
               offset_y: 0,
               scale: 1.0,
               rotation: 0,
               distance: 0,
             },
             nose: {
-              shape_id: 1,
+              asset_id: 1,
               offset_y: 0,
               scale: 1.0,
             },
             lips: {
-              shape_id: 1,
+              asset_id: 1,
               offset_y: 0,
               scale: 1.0,
             },
             age_lines: {
-              shape_id: 1,
+              asset_id: 1,
             },
             accessories: {
               slot_1: undefined,
@@ -347,21 +347,21 @@ describe("Type-Schema Alignment Tests", () => {
           },
           static: {
             head: {
-              shape_id: 1,
+              asset_id: 1,
               skin_color: "medium" as const,
             },
             hair: {
-              style_id: 1,
+              asset_id: 1,
               hair_color: "brown" as const,
             },
             beard: {
-              shape_id: 1,
+              asset_id: 1,
               facial_hair_color: "brown" as const,
             },
           },
           placeable_movable: {
             eyes: {
-              shape_id: 1,
+              asset_id: 1,
               eye_color: "brown" as const,
               offset_y: 0,
               scale: 1.0,
@@ -369,24 +369,24 @@ describe("Type-Schema Alignment Tests", () => {
               distance: 0,
             },
             eyebrows: {
-              shape_id: 1,
+              asset_id: 1,
               offset_y: 0,
               scale: 1.0,
               rotation: 0,
               distance: 0,
             },
             nose: {
-              shape_id: 1,
+              asset_id: 1,
               offset_y: 0,
               scale: 1.0,
             },
             lips: {
-              shape_id: 1,
+              asset_id: 1,
               offset_y: 0,
               scale: 1.0,
             },
             age_lines: {
-              shape_id: 1,
+              asset_id: 1,
             },
             accessories: {
               slot_1: undefined,
@@ -403,7 +403,7 @@ describe("Type-Schema Alignment Tests", () => {
       if (result.success) {
         expect(result.data.character_data.static.beard).toBeDefined();
         if (result.data.character_data.static.beard) {
-          expect(result.data.character_data.static.beard.shape_id).toBe(1);
+          expect(result.data.character_data.static.beard.asset_id).toBe(1);
           expect(
             result.data.character_data.static.beard.facial_hair_color,
           ).toBe("brown");
@@ -435,25 +435,25 @@ describe("Type-Schema Alignment Tests", () => {
             height_in: 70,
             weight_lb: 150,
             head: {
-              shape_id: 1,
+              asset_id: 1,
               skin_color: "medium",
             },
             hair: {
-              style_id: 1,
+              asset_id: 1,
               hair_color: "brown",
             },
             beard: {
-              shape_id: 1,
+              asset_id: 1,
               facial_hair_color: "brown",
             },
             facial_hair: {
-              shape_id: 2,
+              asset_id: 2,
               facial_hair_color: "black",
             },
           },
           placeable_movable: {
             eyes: {
-              shape_id: 1,
+              asset_id: 1,
               eye_color: "brown",
               offset_y: 0,
               scale: 1.0,
@@ -461,24 +461,24 @@ describe("Type-Schema Alignment Tests", () => {
               distance: 0,
             },
             eyebrows: {
-              shape_id: 1,
+              asset_id: 1,
               offset_y: 0,
               scale: 1.0,
               rotation: 0,
               distance: 0,
             },
             nose: {
-              shape_id: 1,
+              asset_id: 1,
               offset_y: 0,
               scale: 1.0,
             },
             lips: {
-              shape_id: 1,
+              asset_id: 1,
               offset_y: 0,
               scale: 1.0,
             },
             age_lines: {
-              shape_id: 1,
+              asset_id: 1,
             },
             accessories: {
               slot_1: undefined,

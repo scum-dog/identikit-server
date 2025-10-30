@@ -53,14 +53,14 @@ describe("Validation Schemas", () => {
 
     it("should reject invalid shape ID values", () => {
       const data = generateMockCharacterData();
-      data.character_data.static.head.shape_id = 0; // below minimum
+      data.character_data.static.head.asset_id = 0; // below minimum
 
       const result = fullCharacterSchema.safeParse(data);
 
       expect(result.success).toBe(false);
       if (!result.success) {
         const shapeError = result.error.errors.find((e) =>
-          e.path.includes("shape_id"),
+          e.path.includes("asset_id"),
         );
         expect(shapeError).toBeDefined();
       }

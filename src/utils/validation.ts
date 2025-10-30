@@ -2,7 +2,7 @@ import { z } from "zod";
 import { Request, Response, NextFunction } from "express";
 import { log } from "./logger";
 
-const shapeIdSchema = () => z.number().int().min(1).max(999);
+const assetIdSchema = () => z.number().int().min(1).max(999);
 
 const offsetSchema = z
   .number()
@@ -103,16 +103,16 @@ export const characterDataSchema = z.object({
   static: z
     .object({
       head: z.object({
-        shape_id: shapeIdSchema(),
+        asset_id: assetIdSchema(),
         skin_color: skinColorEnum,
       }),
       hair: z.object({
-        style_id: shapeIdSchema(),
+        asset_id: assetIdSchema(),
         hair_color: hairColorEnum,
       }),
       beard: z
         .object({
-          shape_id: shapeIdSchema(),
+          asset_id: assetIdSchema(),
           facial_hair_color: hairColorEnum,
         })
         .optional(),
@@ -120,7 +120,7 @@ export const characterDataSchema = z.object({
     .strict(),
   placeable_movable: z.object({
     eyes: z.object({
-      shape_id: shapeIdSchema(),
+      asset_id: assetIdSchema(),
       eye_color: eyeColorEnum,
       offset_y: offsetSchema.default(0),
       scale: scaleSchema.default(1.0),
@@ -128,25 +128,25 @@ export const characterDataSchema = z.object({
       distance: distanceSchema.default(0),
     }),
     eyebrows: z.object({
-      shape_id: shapeIdSchema(),
+      asset_id: assetIdSchema(),
       offset_y: offsetSchema.default(0),
       scale: scaleSchema.default(1.0),
       rotation: rotationSchema.default(0),
       distance: distanceSchema.default(0),
     }),
     nose: z.object({
-      shape_id: shapeIdSchema(),
+      asset_id: assetIdSchema(),
       offset_y: offsetSchema.default(0),
       scale: scaleSchema.default(1.0),
     }),
     lips: z.object({
-      shape_id: shapeIdSchema(),
+      asset_id: assetIdSchema(),
       offset_y: offsetSchema.default(0),
       scale: scaleSchema.default(1.0),
     }),
     age_lines: z
       .object({
-        shape_id: shapeIdSchema(),
+        asset_id: assetIdSchema(),
       })
       .optional(),
     accessories: z
@@ -227,19 +227,19 @@ export const characterDataUpdateSchema = z.object({
         .object({
           head: z
             .object({
-              shape_id: shapeIdSchema().optional(),
+              asset_id: assetIdSchema().optional(),
               skin_color: skinColorEnum.optional(),
             })
             .optional(),
           hair: z
             .object({
-              style_id: shapeIdSchema().optional(),
+              asset_id: assetIdSchema().optional(),
               hair_color: hairColorEnum.optional(),
             })
             .optional(),
           beard: z
             .object({
-              shape_id: shapeIdSchema(),
+              asset_id: assetIdSchema(),
               facial_hair_color: hairColorEnum,
             })
             .optional(),
@@ -249,7 +249,7 @@ export const characterDataUpdateSchema = z.object({
         .object({
           eyes: z
             .object({
-              shape_id: shapeIdSchema().optional(),
+              asset_id: assetIdSchema().optional(),
               eye_color: eyeColorEnum.optional(),
               offset_y: offsetSchema.optional(),
               scale: scaleSchema.optional(),
@@ -259,7 +259,7 @@ export const characterDataUpdateSchema = z.object({
             .optional(),
           eyebrows: z
             .object({
-              shape_id: shapeIdSchema().optional(),
+              asset_id: assetIdSchema().optional(),
               offset_y: offsetSchema.optional(),
               scale: scaleSchema.optional(),
               rotation: rotationSchema.optional(),
@@ -268,21 +268,21 @@ export const characterDataUpdateSchema = z.object({
             .optional(),
           nose: z
             .object({
-              shape_id: shapeIdSchema().optional(),
+              asset_id: assetIdSchema().optional(),
               offset_y: offsetSchema.optional(),
               scale: scaleSchema.optional(),
             })
             .optional(),
           lips: z
             .object({
-              shape_id: shapeIdSchema().optional(),
+              asset_id: assetIdSchema().optional(),
               offset_y: offsetSchema.optional(),
               scale: scaleSchema.optional(),
             })
             .optional(),
           age_lines: z
             .object({
-              shape_id: shapeIdSchema(),
+              asset_id: assetIdSchema(),
             })
             .optional(),
           accessories: z

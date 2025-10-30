@@ -229,17 +229,17 @@ export function generateMockCharacterData(): FullCharacter {
       },
       static: {
         head: {
-          shape_id: generateShapeId(),
+          asset_id: generateShapeId(),
           skin_color: randomChoice(skinColors),
         },
         hair: {
-          style_id: generateShapeId(),
+          asset_id: generateShapeId(),
           hair_color: randomChoice(hairColors),
         },
         ...(shouldHaveBeard
           ? {
               beard: {
-                shape_id: generateShapeId(),
+                asset_id: generateShapeId(),
                 facial_hair_color: randomChoice(hairColors),
               },
             }
@@ -247,7 +247,7 @@ export function generateMockCharacterData(): FullCharacter {
       },
       placeable_movable: {
         eyes: {
-          shape_id: generateShapeId(),
+          asset_id: generateShapeId(),
           eye_color: randomChoice(eyeColors),
           offset_y: generateOffset(),
           scale: parseFloat(randomFloat(0.5, 1.5).toFixed(1)),
@@ -255,24 +255,24 @@ export function generateMockCharacterData(): FullCharacter {
           distance: parseFloat(randomFloat(0, 1).toFixed(1)),
         },
         eyebrows: {
-          shape_id: generateShapeId(),
+          asset_id: generateShapeId(),
           offset_y: generateOffset(),
           scale: parseFloat(randomFloat(0.5, 1.5).toFixed(1)),
           rotation: randomInt(0, 359),
           distance: parseFloat(randomFloat(0, 1).toFixed(1)),
         },
         nose: {
-          shape_id: generateShapeId(),
+          asset_id: generateShapeId(),
           offset_y: generateOffset(),
           scale: parseFloat(randomFloat(0.5, 1.5).toFixed(1)),
         },
         lips: {
-          shape_id: generateShapeId(),
+          asset_id: generateShapeId(),
           offset_y: generateOffset(),
           scale: parseFloat(randomFloat(0.5, 1.5).toFixed(1)),
         },
         ...(Math.random() < 0.7
-          ? { age_lines: { shape_id: generateShapeId() } }
+          ? { age_lines: { asset_id: generateShapeId() } }
           : {}),
         accessories: generateAccessoriesWithoutDuplicates(),
       },

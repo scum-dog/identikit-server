@@ -58,22 +58,22 @@ export interface CharacterPersonalInfo {
 
 export interface CharacterStatic {
   head: {
-    shape_id: number;
+    asset_id: number;
     skin_color: SkinColor;
   };
   hair: {
-    style_id: number;
+    asset_id: number;
     hair_color: HairColor;
   };
   beard?: {
-    shape_id: number;
+    asset_id: number;
     facial_hair_color: HairColor;
   };
 }
 
 export interface CharacterPlaceableMovable {
   eyes: {
-    shape_id: number;
+    asset_id: number;
     eye_color: EyeColor;
     offset_y: number;
     scale: number;
@@ -81,24 +81,24 @@ export interface CharacterPlaceableMovable {
     distance: number;
   };
   eyebrows: {
-    shape_id: number;
+    asset_id: number;
     offset_y: number;
     scale: number;
     rotation: number;
     distance: number;
   };
   nose: {
-    shape_id: number;
+    asset_id: number;
     offset_y: number;
     scale: number;
   };
   lips: {
-    shape_id: number;
+    asset_id: number;
     offset_y: number;
     scale: number;
   };
   age_lines?: {
-    shape_id: number;
+    asset_id: number;
   };
   accessories: {
     slot_1?: AccessorySlot;
