@@ -262,9 +262,9 @@ export function generateMockCharacterData(): FullCharacter {
           offset_y: generateOffset(),
           scale: parseFloat(randomFloat(0.5, 1.5).toFixed(1)),
         },
-        age_lines: {
-          shape_id: generateShapeId("A"),
-        },
+        ...(Math.random() < 0.7
+          ? { age_lines: { shape_id: generateShapeId("A") } }
+          : {}),
         accessories: generateAccessoriesWithoutDuplicates(),
       },
     },

@@ -94,7 +94,7 @@ export interface CharacterPlaceableMovable {
     offset_y: number;
     scale: number;
   };
-  age_lines: {
+  age_lines?: {
     shape_id: string;
   };
   accessories: {

@@ -135,16 +135,18 @@ describe("Interface Consistency Tests", () => {
 
         expect(mockCharacter.character_data.static.name).toBeDefined();
         expect(mockCharacter.character_data.static.beard).toBeDefined();
-        expect(
-          mockCharacter.character_data.placeable_movable.age_lines.shape_id,
-        ).toBeDefined();
+        if (mockCharacter.character_data.placeable_movable.age_lines) {
+          expect(
+            mockCharacter.character_data.placeable_movable.age_lines.shape_id,
+          ).toBeDefined();
 
-        expect(
-          mockCharacter.character_data.placeable_movable.age_lines,
-        ).not.toHaveProperty("offset_y");
-        expect(
-          mockCharacter.character_data.placeable_movable.age_lines,
-        ).not.toHaveProperty("scale");
+          expect(
+            mockCharacter.character_data.placeable_movable.age_lines,
+          ).not.toHaveProperty("offset_y");
+          expect(
+            mockCharacter.character_data.placeable_movable.age_lines,
+          ).not.toHaveProperty("scale");
+        }
       }
     });
 
@@ -363,9 +365,14 @@ describe("Interface Consistency Tests", () => {
             expect(dbChar.character_data.static.beard.shape_id).toBe(
               originalData.static.beard.shape_id,
             );
-            expect(
-              dbChar.character_data.placeable_movable.age_lines.shape_id,
-            ).toBe(originalData.placeable_movable.age_lines.shape_id);
+            if (
+              dbChar.character_data.placeable_movable.age_lines &&
+              originalData.placeable_movable.age_lines
+            ) {
+              expect(
+                dbChar.character_data.placeable_movable.age_lines.shape_id,
+              ).toBe(originalData.placeable_movable.age_lines.shape_id);
+            }
           }
         }
       }
@@ -398,19 +405,18 @@ describe("Interface Consistency Tests", () => {
         expect(validMockChar.character_data).toBeDefined();
 
         expect(validMockChar.character_data.static.beard).toBeDefined();
-        expect(
-          validMockChar.character_data.placeable_movable.age_lines,
-        ).toBeDefined();
 
-        expect(
-          validMockChar.character_data.placeable_movable.age_lines,
-        ).toHaveProperty("shape_id");
-        expect(
-          validMockChar.character_data.placeable_movable.age_lines,
-        ).not.toHaveProperty("offset_y");
-        expect(
-          validMockChar.character_data.placeable_movable.age_lines,
-        ).not.toHaveProperty("scale");
+        if (validMockChar.character_data.placeable_movable.age_lines) {
+          expect(
+            validMockChar.character_data.placeable_movable.age_lines,
+          ).toHaveProperty("shape_id");
+          expect(
+            validMockChar.character_data.placeable_movable.age_lines,
+          ).not.toHaveProperty("offset_y");
+          expect(
+            validMockChar.character_data.placeable_movable.age_lines,
+          ).not.toHaveProperty("scale");
+        }
       }
     });
   });

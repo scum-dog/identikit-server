@@ -49,9 +49,11 @@ describe("Data Synchronization Tests", () => {
         expect(mockData.character_data.placeable_movable.lips.shape_id).toMatch(
           /^L_\d{3}$/,
         );
-        expect(
-          mockData.character_data.placeable_movable.age_lines.shape_id,
-        ).toMatch(/^A_\d{3}$/);
+        if (mockData.character_data.placeable_movable.age_lines) {
+          expect(
+            mockData.character_data.placeable_movable.age_lines.shape_id,
+          ).toMatch(/^A_\d{3}$/);
+        }
 
         const accessories =
           mockData.character_data.placeable_movable.accessories;
@@ -122,17 +124,19 @@ describe("Data Synchronization Tests", () => {
       }
     });
 
-    it("should generate age_lines with correct structure", () => {
+    it("should generate age_lines with correct structure when present", () => {
       for (let i = 0; i < 50; i++) {
         const mockData = generateMockCharacterData();
         const ageLines = mockData.character_data.placeable_movable.age_lines;
 
-        expect(ageLines.shape_id).toMatch(/^A_\d{3}$/);
+        if (ageLines) {
+          expect(ageLines.shape_id).toMatch(/^A_\d{3}$/);
 
-        expect(ageLines).not.toHaveProperty("offset_y");
-        expect(ageLines).not.toHaveProperty("scale");
-        expect(ageLines).not.toHaveProperty("rotation");
-        expect(ageLines).not.toHaveProperty("distance");
+          expect(ageLines).not.toHaveProperty("offset_y");
+          expect(ageLines).not.toHaveProperty("scale");
+          expect(ageLines).not.toHaveProperty("rotation");
+          expect(ageLines).not.toHaveProperty("distance");
+        }
       }
     });
 

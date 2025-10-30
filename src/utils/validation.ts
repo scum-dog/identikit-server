@@ -144,9 +144,11 @@ export const characterDataSchema = z.object({
       offset_y: offsetSchema.default(0),
       scale: scaleSchema.default(1.0),
     }),
-    age_lines: z.object({
-      shape_id: shapeIdSchema("A"),
-    }),
+    age_lines: z
+      .object({
+        shape_id: shapeIdSchema("A"),
+      })
+      .optional(),
     accessories: z
       .object({
         slot_1: accessorySlotSchema.optional(),
@@ -276,7 +278,7 @@ export const characterDataUpdateSchema = z.object({
             .optional(),
           age_lines: z
             .object({
-              shape_id: shapeIdSchema("A").optional(),
+              shape_id: shapeIdSchema("A"),
             })
             .optional(),
           accessories: z
