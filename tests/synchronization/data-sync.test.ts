@@ -30,7 +30,6 @@ describe("Data Synchronization Tests", () => {
         [accessories.slot_1, accessories.slot_2, accessories.slot_3].forEach(
           (accessory) => {
             if (accessory) {
-              // Verify glasses and mustache don't have offset_x, rotation, distance
               if (
                 accessory.type === "glasses" ||
                 accessory.type === "mustache"
@@ -40,7 +39,6 @@ describe("Data Synchronization Tests", () => {
                 expect(accessory).not.toHaveProperty("distance");
               }
 
-              // Verify misc accessories don't have rotation, distance
               if (accessory.type === "misc") {
                 expect(accessory).not.toHaveProperty("rotation");
                 expect(accessory).not.toHaveProperty("distance");

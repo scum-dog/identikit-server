@@ -75,17 +75,17 @@ export interface CharacterPlaceableMovable {
   eyes: {
     asset_id: number;
     eye_color: EyeColor;
+    offset_x: number;
     offset_y: number;
     scale: number;
     rotation: number;
-    distance: number;
   };
   eyebrows: {
     asset_id: number;
+    offset_x: number;
     offset_y: number;
     scale: number;
     rotation: number;
-    distance: number;
   };
   nose: {
     asset_id: number;

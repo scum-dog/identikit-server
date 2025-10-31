@@ -12,7 +12,7 @@ const offsetSchema = z
 
 const rotationSchema = z.number().min(0).max(359).int();
 
-const distanceSchema = z
+const offsetXSchema = z
   .number()
   .min(0)
   .max(1)
@@ -122,17 +122,17 @@ export const characterDataSchema = z.object({
     eyes: z.object({
       asset_id: assetIdSchema(),
       eye_color: eyeColorEnum,
+      offset_x: offsetXSchema.default(0),
       offset_y: offsetSchema.default(0),
       scale: scaleSchema.default(1.0),
       rotation: rotationSchema.default(0),
-      distance: distanceSchema.default(0),
     }),
     eyebrows: z.object({
       asset_id: assetIdSchema(),
+      offset_x: offsetXSchema.default(0),
       offset_y: offsetSchema.default(0),
       scale: scaleSchema.default(1.0),
       rotation: rotationSchema.default(0),
-      distance: distanceSchema.default(0),
     }),
     nose: z.object({
       asset_id: assetIdSchema(),
@@ -251,19 +251,19 @@ export const characterDataUpdateSchema = z.object({
             .object({
               asset_id: assetIdSchema().optional(),
               eye_color: eyeColorEnum.optional(),
+              offset_x: offsetXSchema.optional(),
               offset_y: offsetSchema.optional(),
               scale: scaleSchema.optional(),
               rotation: rotationSchema.optional(),
-              distance: distanceSchema.optional(),
             })
             .optional(),
           eyebrows: z
             .object({
               asset_id: assetIdSchema().optional(),
+              offset_x: offsetXSchema.optional(),
               offset_y: offsetSchema.optional(),
               scale: scaleSchema.optional(),
               rotation: rotationSchema.optional(),
-              distance: distanceSchema.optional(),
             })
             .optional(),
           nose: z

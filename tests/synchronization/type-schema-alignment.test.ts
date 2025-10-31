@@ -57,17 +57,17 @@ describe("Type-Schema Alignment Tests", () => {
             eyes: {
               asset_id: 1,
               eye_color: "brown",
+              offset_x: 0.5,
               offset_y: 0.1,
               scale: 1.0,
               rotation: 45,
-              distance: 0.5,
             },
             eyebrows: {
               asset_id: 1,
+              offset_x: 0.3,
               offset_y: -0.2,
               scale: 1.1,
               rotation: 10,
-              distance: 0.3,
             },
             nose: {
               asset_id: 1,
@@ -189,17 +189,17 @@ describe("Type-Schema Alignment Tests", () => {
             eyes: {
               asset_id: 1,
               eye_color: "brown" as const,
+              offset_x: 0,
               offset_y: 0,
               scale: 1.0,
               rotation: 0,
-              distance: 0,
             },
             eyebrows: {
               asset_id: 1,
+              offset_x: 0,
               offset_y: 0,
               scale: 1.0,
               rotation: 0,
-              distance: 0,
             },
             nose: {
               asset_id: 1,
@@ -283,17 +283,17 @@ describe("Type-Schema Alignment Tests", () => {
             eyes: {
               asset_id: 1,
               eye_color: "brown" as const,
+              offset_x: 0,
               offset_y: 0,
               scale: 1.0,
               rotation: 0,
-              distance: 0,
             },
             eyebrows: {
               asset_id: 1,
+              offset_x: 0,
               offset_y: 0,
               scale: 1.0,
               rotation: 0,
-              distance: 0,
             },
             nose: {
               asset_id: 1,
@@ -363,17 +363,17 @@ describe("Type-Schema Alignment Tests", () => {
             eyes: {
               asset_id: 1,
               eye_color: "brown" as const,
+              offset_x: 0,
               offset_y: 0,
               scale: 1.0,
               rotation: 0,
-              distance: 0,
             },
             eyebrows: {
               asset_id: 1,
+              offset_x: 0,
               offset_y: 0,
               scale: 1.0,
               rotation: 0,
-              distance: 0,
             },
             nose: {
               asset_id: 1,
@@ -455,17 +455,17 @@ describe("Type-Schema Alignment Tests", () => {
             eyes: {
               asset_id: 1,
               eye_color: "brown",
+              offset_x: 0,
               offset_y: 0,
               scale: 1.0,
               rotation: 0,
-              distance: 0,
             },
             eyebrows: {
               asset_id: 1,
+              offset_x: 0,
               offset_y: 0,
               scale: 1.0,
               rotation: 0,
-              distance: 0,
             },
             nose: {
               asset_id: 1,
