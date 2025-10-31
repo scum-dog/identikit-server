@@ -146,17 +146,17 @@ describe("Value Consistency Tests", () => {
             eyes: {
               asset_id: 1,
               eye_color: "brown" as const,
+              offset_x: 0,
               offset_y: 0,
               scale: 1.0,
               rotation: 0,
-              distance: 0,
             },
             eyebrows: {
               asset_id: 1,
+              offset_x: 0,
               offset_y: 0,
               scale: 1.0,
               rotation: 0,
-              distance: 0,
             },
             nose: {
               asset_id: 1,
