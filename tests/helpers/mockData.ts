@@ -49,17 +49,19 @@ export const invalidCharacterData = {
     upload_id: "invalid-uuid",
     user_id: "invalid-uuid",
     created_at: "invalid-date",
-    location: {
-      country: "",
-    },
   },
   character_data: {
-    static: {
+    info: {
       name: "",
       sex: "invalid" as any,
       date_of_birth: "invalid-date",
       height_in: 0,
       weight_lb: 1000,
+      location: {
+        country: "",
+      },
+    },
+    static: {
       head: {
         asset_id: "INVALID_FORMAT",
         skin_color: "invalid" as any,

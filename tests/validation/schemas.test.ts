@@ -200,10 +200,12 @@ describe("Validation Schemas", () => {
 
     it("should validate location updates", () => {
       const updateData = {
-        metadata: {
-          location: {
-            country: "Canada",
-            region: "Ontario",
+        character_data: {
+          info: {
+            location: {
+              country: "Canada",
+              region: "Ontario",
+            },
           },
         },
       };
@@ -212,8 +214,12 @@ describe("Validation Schemas", () => {
 
       expect(result.success).toBe(true);
       if (result.success) {
-        expect(result.data.metadata?.location?.country).toBe("Canada");
-        expect(result.data.metadata?.location?.region).toBe("Ontario");
+        expect(result.data.character_data?.info?.location?.country).toBe(
+          "Canada",
+        );
+        expect(result.data.character_data?.info?.location?.region).toBe(
+          "Ontario",
+        );
       }
     });
   });

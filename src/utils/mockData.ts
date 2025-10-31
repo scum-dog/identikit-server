@@ -226,6 +226,11 @@ export function generateMockCharacterData(): FullCharacter {
           .split("T")[0],
         height_in: randomInt(60, 80),
         weight_lb: randomInt(120, 220),
+        location: {
+          country,
+          region,
+          city,
+        },
       },
       static: {
         head: {
@@ -287,18 +292,13 @@ export function generateMockCharacterData(): FullCharacter {
       is_deleted: false,
       deleted_at: null,
       deleted_by: null,
-      location: {
-        country,
-        region,
-        city,
-      },
     },
   };
 }
 
 export function generateMockCharacter(userId?: string, uploadId?: string) {
   const creationTime = randomDate(new Date(2023, 0, 1), new Date());
-  const hasBeenEdited = Math.random() < 0.3; // 30% chance of being edited
+  const hasBeenEdited = Math.random() < 0.3;
   const editTime = hasBeenEdited ? randomDate(creationTime, new Date()) : null;
   const characterData = generateMockCharacterData();
 
@@ -314,9 +314,6 @@ export function generateMockCharacter(userId?: string, uploadId?: string) {
     created_at: characterData.metadata.created_at,
     last_edited_at: characterData.metadata.last_edited_at,
     character_data: characterData.character_data,
-    country: characterData.metadata.location.country,
-    region: characterData.metadata.location.region,
-    city: characterData.metadata.location.city,
     is_edited: characterData.metadata.is_edited,
     is_deleted: characterData.metadata.is_deleted,
     deleted_at: characterData.metadata.deleted_at,

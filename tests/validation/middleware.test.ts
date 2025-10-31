@@ -82,15 +82,21 @@ describe("Validation Middleware (Logic Tests)", () => {
             upload_id: "invalid-uuid",
             user_id: "invalid-uuid",
             created_at: "invalid-date",
-            location: {
-              country: "", // should fail
-            },
           },
           character_data: {
-            static: {
+            info: {
               name: "", // should fail
               sex: "invalid",
               height_in: 0, // too small
+              location: {
+                country: "", // should fail
+              },
+            },
+            static: {
+              head: {
+                asset_id: "INVALID_FORMAT",
+                skin_color: "invalid",
+              },
             },
           },
         },

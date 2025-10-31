@@ -55,7 +55,6 @@ describe("Data Synchronization Tests", () => {
         const ageLines = mockData.character_data.placeable_movable.age_lines;
 
         if (ageLines) {
-          // Verify age_lines doesn't have movable properties (since it's static)
           expect(ageLines).not.toHaveProperty("offset_y");
           expect(ageLines).not.toHaveProperty("scale");
           expect(ageLines).not.toHaveProperty("rotation");

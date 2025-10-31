@@ -98,6 +98,11 @@ export const characterDataSchema = z.object({
         }, "Date must be between 1900-01-01 and today"),
       height_in: z.number().int().min(24).max(96), // 2-8 feet
       weight_lb: z.number().int().min(50).max(500), // pounds
+      location: z.object({
+        country: z.string().min(1).max(100),
+        region: z.string().min(1).max(100).optional(),
+        city: z.string().min(1).max(100).optional(),
+      }),
     })
     .strict(),
   static: z
@@ -192,11 +197,6 @@ export const characterMetadataSchema = z.object({
   is_deleted: z.boolean().default(false),
   deleted_at: z.string().datetime().nullable(),
   deleted_by: z.string().uuid().nullable(),
-  location: z.object({
-    country: z.string().min(1).max(100),
-    region: z.string().min(1).max(100).optional(),
-    city: z.string().min(1).max(100).optional(),
-  }),
 });
 
 export const fullCharacterSchema = z.object({
@@ -221,6 +221,13 @@ export const characterDataUpdateSchema = z.object({
             .optional(),
           height_in: z.number().int().min(24).max(96).optional(),
           weight_lb: z.number().int().min(50).max(500).optional(),
+          location: z
+            .object({
+              country: z.string().min(1).max(100).optional(),
+              region: z.string().min(1).max(100).or(z.literal("")).optional(),
+              city: z.string().min(1).max(100).or(z.literal("")).optional(),
+            })
+            .optional(),
         })
         .optional(),
       static: z
@@ -322,17 +329,7 @@ export const characterDataUpdateSchema = z.object({
         .optional(),
     })
     .optional(),
-  metadata: z
-    .object({
-      location: z
-        .object({
-          country: z.string().min(1).max(100).optional(),
-          region: z.string().min(1).max(100).or(z.literal("")).optional(),
-          city: z.string().min(1).max(100).or(z.literal("")).optional(),
-        })
-        .optional(),
-    })
-    .optional(),
+  metadata: z.object({}).optional(),
 });
 
 export const characterUploadSchema = fullCharacterSchema;

@@ -25,11 +25,6 @@ describe("Type-Schema Alignment Tests", () => {
           is_deleted: false,
           deleted_at: null,
           deleted_by: null,
-          location: {
-            country: "United States",
-            region: "California",
-            city: "Los Angeles",
-          },
         },
         character_data: {
           info: {
@@ -38,6 +33,11 @@ describe("Type-Schema Alignment Tests", () => {
             date_of_birth: "1990-01-01",
             height_in: 72,
             weight_lb: 180,
+            location: {
+              country: "United States",
+              region: "California",
+              city: "Los Angeles",
+            },
           },
           static: {
             head: {
@@ -159,9 +159,6 @@ describe("Type-Schema Alignment Tests", () => {
           is_deleted: false,
           deleted_at: null,
           deleted_by: null,
-          location: {
-            country: "United States",
-          },
         },
         character_data: {
           info: {
@@ -170,6 +167,9 @@ describe("Type-Schema Alignment Tests", () => {
             date_of_birth: "1990-01-01",
             height_in: 70,
             weight_lb: 150,
+            location: {
+              country: "United States",
+            },
           },
           static: {
             head: {
@@ -252,10 +252,6 @@ describe("Type-Schema Alignment Tests", () => {
           is_deleted: false,
           deleted_at: null,
           deleted_by: null,
-          location: {
-            country: "United States",
-            // region and city are optional
-          },
         },
         character_data: {
           info: {
@@ -264,6 +260,9 @@ describe("Type-Schema Alignment Tests", () => {
             date_of_birth: "1990-01-01",
             height_in: 70,
             weight_lb: 150,
+            location: {
+              country: "United States",
+            },
           },
           static: {
             head: {
@@ -333,9 +332,6 @@ describe("Type-Schema Alignment Tests", () => {
           is_deleted: false,
           deleted_at: null,
           deleted_by: null,
-          location: {
-            country: "United States",
-          },
         },
         character_data: {
           info: {
@@ -344,6 +340,9 @@ describe("Type-Schema Alignment Tests", () => {
             date_of_birth: "1990-01-01",
             height_in: 70,
             weight_lb: 150,
+            location: {
+              country: "United States",
+            },
           },
           static: {
             head: {
@@ -423,9 +422,6 @@ describe("Type-Schema Alignment Tests", () => {
           is_deleted: false,
           deleted_at: null,
           deleted_by: null,
-          location: {
-            country: "United States",
-          },
         },
         character_data: {
           static: {
@@ -434,6 +430,9 @@ describe("Type-Schema Alignment Tests", () => {
             date_of_birth: "1990-01-01",
             height_in: 70,
             weight_lb: 150,
+            location: {
+              country: "United States",
+            },
             head: {
               asset_id: 1,
               skin_color: "medium",

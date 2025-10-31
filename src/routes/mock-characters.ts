@@ -56,11 +56,6 @@ router.get("/me", (_req: Request, res: Response) => {
         is_deleted: character.is_deleted,
         deleted_at: character.deleted_at,
         deleted_by: character.deleted_by,
-        location: {
-          country: character.country,
-          region: character.region,
-          city: character.city,
-        },
       },
     });
   } catch (error) {
@@ -94,9 +89,6 @@ router.post(
         created_at: metadata.created_at,
         last_edited_at: metadata.last_edited_at,
         character_data: character_data,
-        country: metadata.location.country,
-        region: metadata.location.region,
-        city: metadata.location.city,
         is_edited: metadata.is_edited,
         is_deleted: metadata.is_deleted,
         deleted_at: metadata.deleted_at,
@@ -117,11 +109,6 @@ router.post(
           is_deleted: newCharacter.is_deleted,
           deleted_at: newCharacter.deleted_at,
           deleted_by: newCharacter.deleted_by,
-          location: {
-            country: newCharacter.country,
-            region: newCharacter.region,
-            city: newCharacter.city,
-          },
         },
       });
     } catch (error) {
@@ -195,11 +182,6 @@ router.put(
           is_deleted: updatedCharacter.is_deleted,
           deleted_at: updatedCharacter.deleted_at,
           deleted_by: updatedCharacter.deleted_by,
-          location: {
-            country: updatedCharacter.country,
-            region: updatedCharacter.region,
-            city: updatedCharacter.city,
-          },
         },
       });
     } catch (error) {
@@ -224,8 +206,10 @@ router.get("/plaza", validatePlazaQuery, (req: Request, res: Response) => {
     if (country) {
       characters = characters.filter((char) => {
         return (
-          char.country &&
-          char.country.toLowerCase().includes((country as string).toLowerCase())
+          char.character_data.info.location.country &&
+          char.character_data.info.location.country
+            .toLowerCase()
+            .includes((country as string).toLowerCase())
         );
       });
     }
@@ -233,8 +217,10 @@ router.get("/plaza", validatePlazaQuery, (req: Request, res: Response) => {
     if (region) {
       characters = characters.filter((char) => {
         return (
-          char.region &&
-          char.region.toLowerCase().includes((region as string).toLowerCase())
+          char.character_data.info.location.region &&
+          char.character_data.info.location.region
+            .toLowerCase()
+            .includes((region as string).toLowerCase())
         );
       });
     }
@@ -249,9 +235,9 @@ router.get("/plaza", validatePlazaQuery, (req: Request, res: Response) => {
         edit_time:
           char.last_edited_at !== char.created_at ? char.last_edited_at : null,
         location: {
-          country: char.country,
-          region: char.region || null,
-          city: char.city || null,
+          country: char.character_data.info.location.country,
+          region: char.character_data.info.location.region || null,
+          city: char.character_data.info.location.city || null,
         },
         character_data: char.character_data,
       };
@@ -285,11 +271,6 @@ router.get("/:id", (req: Request, res: Response) => {
         character.last_edited_at !== character.created_at
           ? character.last_edited_at
           : null,
-      location: {
-        country: character.country,
-        region: character.region || null,
-        city: character.city || null,
-      },
       character_data: character.character_data,
     };
 

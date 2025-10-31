@@ -79,8 +79,6 @@ describe("Value Consistency Tests", () => {
     });
 
     it("should have matching AccessoryType values between types and validation", () => {
-      const typeValues: AccessoryType[] = ["glasses", "mustache", "misc"];
-
       const glassesAccessory = {
         type: "glasses" as const,
         asset_id: 123,
@@ -114,11 +112,6 @@ describe("Value Consistency Tests", () => {
           is_deleted: false,
           deleted_at: null,
           deleted_by: null,
-          location: {
-            country: "United States",
-            region: "California",
-            city: "Los Angeles",
-          },
         },
         character_data: {
           info: {
@@ -127,6 +120,11 @@ describe("Value Consistency Tests", () => {
             date_of_birth: "1990-01-01",
             height_in: 70,
             weight_lb: 150,
+            location: {
+              country: "United States",
+              region: "California",
+              city: "Los Angeles",
+            },
           },
           static: {
             head: {
@@ -210,7 +208,6 @@ describe("Value Consistency Tests", () => {
             is_deleted: false,
             deleted_at: null,
             deleted_by: null,
-            location: { country: "United States" },
           },
           character_data: {
             info: {
@@ -219,6 +216,7 @@ describe("Value Consistency Tests", () => {
               date_of_birth: "1990-01-01",
               height_in: height,
               weight_lb: 150,
+              location: { country: "United States" },
             },
             static: {
               head: { asset_id: 1, skin_color: "medium" as const },
@@ -279,7 +277,6 @@ describe("Value Consistency Tests", () => {
             is_deleted: false,
             deleted_at: null,
             deleted_by: null,
-            location: { country: "United States" },
           },
           character_data: {
             info: {
@@ -288,6 +285,7 @@ describe("Value Consistency Tests", () => {
               date_of_birth: "1990-01-01",
               height_in: 70,
               weight_lb: weight,
+              location: { country: "United States" },
             },
             static: {
               head: { asset_id: 1, skin_color: "medium" as const },
@@ -348,7 +346,6 @@ describe("Value Consistency Tests", () => {
             is_deleted: false,
             deleted_at: null,
             deleted_by: null,
-            location: { country: "United States" },
           },
           character_data: {
             info: {
@@ -357,6 +354,7 @@ describe("Value Consistency Tests", () => {
               date_of_birth: "1990-01-01",
               height_in: 70,
               weight_lb: 150,
+              location: { country: "United States" },
             },
             static: {
               head: { asset_id: 1, skin_color: "medium" as const },
@@ -418,7 +416,6 @@ describe("Value Consistency Tests", () => {
             is_deleted: false,
             deleted_at: null,
             deleted_by: null,
-            location: { country: "United States" },
           },
           character_data: {
             info: {
@@ -427,6 +424,7 @@ describe("Value Consistency Tests", () => {
               date_of_birth: "1990-01-01",
               height_in: 70,
               weight_lb: 150,
+              location: { country: "United States" },
             },
             static: {
               head: { asset_id: 1, skin_color: "medium" as const },

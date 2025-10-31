@@ -20,9 +20,6 @@ export interface DatabaseCharacter {
   id: string;
   user_id: string;
   character_data: string | CharacterDataStructure;
-  country: string;
-  region?: string;
-  city?: string;
   created_at: string;
   last_edited_at: string | null;
   is_edited: boolean;
@@ -41,11 +38,6 @@ export interface CharacterMetadata {
   is_deleted: boolean;
   deleted_at: string | null;
   deleted_by: string | null;
-  location: {
-    country: string;
-    region?: string;
-    city?: string;
-  };
 }
 
 export interface CharacterPersonalInfo {
@@ -54,6 +46,11 @@ export interface CharacterPersonalInfo {
   date_of_birth: string;
   height_in: number;
   weight_lb: number;
+  location: {
+    country: string;
+    region?: string;
+    city?: string;
+  };
 }
 
 export interface CharacterStatic {
@@ -161,13 +158,7 @@ export interface PlazaCharacterData {
 
 export interface MockCharacterRouteUpdates {
   character_data?: object;
-  metadata?: {
-    location?: {
-      country?: string;
-      region?: string;
-      city?: string;
-    };
-  };
+  metadata?: object;
 }
 
 export type AccessoryType = "glasses" | "mustache" | "misc";
@@ -223,9 +214,6 @@ export interface MockCharacter {
   created_at: string;
   last_edited_at: string | null;
   character_data: CharacterDataStructure;
-  country: string;
-  region?: string;
-  city?: string;
   is_edited: boolean;
   is_deleted: boolean;
   deleted_at: string | null;
