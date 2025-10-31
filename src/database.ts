@@ -155,13 +155,13 @@ export const characterQueries = {
 
     if (country) {
       paramCount++;
-      whereClause += ` AND character_data -> 'metadata' -> 'location' ->> 'country' ILIKE $${paramCount}`;
+      whereClause += ` AND character_data -> 'info' -> 'location' ->> 'country' ILIKE $${paramCount}`;
       params.push(`%${country}%`);
     }
 
     if (region) {
       paramCount++;
-      whereClause += ` AND character_data -> 'metadata' -> 'location' ->> 'region' ILIKE $${paramCount}`;
+      whereClause += ` AND character_data -> 'info' -> 'location' ->> 'region' ILIKE $${paramCount}`;
       params.push(`%${region}%`);
     }
 

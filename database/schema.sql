@@ -57,19 +57,19 @@ WHERE
 
 CREATE INDEX idx_characters_location_country ON characters USING gin (
   (
-    character_data -> 'metadata' -> 'location' ->> 'country'
+    character_data -> 'info' -> 'location' ->> 'country'
   ) gin_trgm_ops
 )
 WHERE
-  character_data -> 'metadata' -> 'location' ->> 'country' IS NOT NULL;
+  character_data -> 'info' -> 'location' ->> 'country' IS NOT NULL;
 
 CREATE INDEX idx_characters_location_region ON characters USING gin (
   (
-    character_data -> 'metadata' -> 'location' ->> 'region'
+    character_data -> 'info' -> 'location' ->> 'region'
   ) gin_trgm_ops
 )
 WHERE
-  character_data -> 'metadata' -> 'location' ->> 'region' IS NOT NULL;
+  character_data -> 'info' -> 'location' ->> 'region' IS NOT NULL;
 
 CREATE INDEX idx_characters_sex ON characters USING gin (
   (character_data -> 'static' ->> 'sex') gin_trgm_ops
