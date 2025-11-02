@@ -160,30 +160,24 @@ function generateAccessories() {
     };
   } = {};
 
-  if (Math.random() < 0.3) {
-    accessories.glasses = {
-      asset_id: generateShapeId(),
-      offset_y: generateOffset(),
-      scale: parseFloat(randomFloat(0.5, 1.5).toFixed(1)),
-    };
-  }
+  accessories.glasses = {
+    asset_id: generateShapeId(),
+    offset_y: generateOffset(),
+    scale: parseFloat(randomFloat(0.5, 1.5).toFixed(1)),
+  };
 
-  if (Math.random() < 0.25) {
-    accessories.mustache = {
-      asset_id: generateShapeId(),
-      offset_y: generateOffset(),
-      scale: parseFloat(randomFloat(0.5, 1.5).toFixed(1)),
-    };
-  }
+  accessories.mustache = {
+    asset_id: generateShapeId(),
+    offset_y: generateOffset(),
+    scale: parseFloat(randomFloat(0.5, 1.5).toFixed(1)),
+  };
 
-  if (Math.random() < 0.2) {
-    accessories.misc = {
-      asset_id: generateShapeId(),
-      offset_x: generateOffset(),
-      offset_y: generateOffset(),
-      scale: parseFloat(randomFloat(0.5, 1.5).toFixed(1)),
-    };
-  }
+  accessories.misc = {
+    asset_id: generateShapeId(),
+    offset_x: generateOffset(),
+    offset_y: generateOffset(),
+    scale: parseFloat(randomFloat(0.5, 1.5).toFixed(1)),
+  };
 
   return accessories;
 }
@@ -200,7 +194,7 @@ export function generateMockCharacterData(): FullCharacter {
   const city = cityList.length > 0 ? randomChoice(cityList) : undefined;
 
   const sex = randomChoice(sexOptions);
-  const shouldHaveBeard = sex !== "female" && Math.random() < 0.6;
+  const shouldHaveBeard = sex !== "female";
 
   return {
     character_data: {
@@ -235,9 +229,7 @@ export function generateMockCharacterData(): FullCharacter {
               },
             }
           : {}),
-        ...(Math.random() < 0.7
-          ? { age_lines: { asset_id: generateShapeId() } }
-          : {}),
+        age_lines: { asset_id: generateShapeId() },
       },
       placeable_movable: {
         eyes: {
