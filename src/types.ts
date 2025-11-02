@@ -66,6 +66,9 @@ export interface CharacterStatic {
     asset_id: number;
     facial_hair_color: HairColor;
   };
+  age_lines?: {
+    asset_id: number;
+  };
 }
 
 export interface CharacterPlaceableMovable {
@@ -93,9 +96,6 @@ export interface CharacterPlaceableMovable {
     asset_id: number;
     offset_y: number;
     scale: number;
-  };
-  age_lines?: {
-    asset_id: number;
   };
   accessories: {
     slot_1?: AccessorySlot;

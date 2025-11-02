@@ -52,7 +52,7 @@ describe("Data Synchronization Tests", () => {
     it("should generate age_lines with correct structure when present", () => {
       for (let i = 0; i < 50; i++) {
         const mockData = generateMockCharacterData();
-        const ageLines = mockData.character_data.placeable_movable.age_lines;
+        const ageLines = mockData.character_data.static.age_lines;
 
         if (ageLines) {
           expect(ageLines).not.toHaveProperty("offset_y");

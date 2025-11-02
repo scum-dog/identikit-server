@@ -249,6 +249,9 @@ export function generateMockCharacterData(): FullCharacter {
               },
             }
           : {}),
+        ...(Math.random() < 0.7
+          ? { age_lines: { asset_id: generateShapeId() } }
+          : {}),
       },
       placeable_movable: {
         eyes: {
@@ -276,9 +279,6 @@ export function generateMockCharacterData(): FullCharacter {
           offset_y: generateOffset(),
           scale: parseFloat(randomFloat(0.5, 1.5).toFixed(1)),
         },
-        ...(Math.random() < 0.7
-          ? { age_lines: { asset_id: generateShapeId() } }
-          : {}),
         accessories: generateAccessoriesWithoutDuplicates(),
       },
     },

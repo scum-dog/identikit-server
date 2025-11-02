@@ -121,6 +121,11 @@ export const characterDataSchema = z.object({
           facial_hair_color: hairColorEnum,
         })
         .optional(),
+      age_lines: z
+        .object({
+          asset_id: assetIdSchema(),
+        })
+        .optional(),
     })
     .strict(),
   placeable_movable: z.object({
@@ -149,11 +154,6 @@ export const characterDataSchema = z.object({
       offset_y: offsetSchema.default(0),
       scale: scaleSchema.default(1.0),
     }),
-    age_lines: z
-      .object({
-        asset_id: assetIdSchema(),
-      })
-      .optional(),
     accessories: z
       .object({
         slot_1: accessorySlotSchema.optional(),
@@ -250,6 +250,11 @@ export const characterDataUpdateSchema = z.object({
               facial_hair_color: hairColorEnum,
             })
             .optional(),
+          age_lines: z
+            .object({
+              asset_id: assetIdSchema(),
+            })
+            .optional(),
         })
         .optional(),
       placeable_movable: z
@@ -285,11 +290,6 @@ export const characterDataUpdateSchema = z.object({
               asset_id: assetIdSchema().optional(),
               offset_y: offsetSchema.optional(),
               scale: scaleSchema.optional(),
-            })
-            .optional(),
-          age_lines: z
-            .object({
-              asset_id: assetIdSchema(),
             })
             .optional(),
           accessories: z

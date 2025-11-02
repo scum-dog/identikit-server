@@ -52,6 +52,9 @@ describe("Type-Schema Alignment Tests", () => {
               asset_id: 1,
               facial_hair_color: "brown",
             },
+            age_lines: {
+              asset_id: 1,
+            },
           },
           placeable_movable: {
             eyes: {
@@ -78,9 +81,6 @@ describe("Type-Schema Alignment Tests", () => {
               asset_id: 1,
               offset_y: 0.2,
               scale: 1.2,
-            },
-            age_lines: {
-              asset_id: 1,
             },
             accessories: {
               slot_1: {
@@ -184,6 +184,9 @@ describe("Type-Schema Alignment Tests", () => {
               asset_id: 1,
               facial_hair_color: "brown" as const,
             },
+            age_lines: {
+              asset_id: 1,
+            },
           },
           placeable_movable: {
             eyes: {
@@ -210,9 +213,6 @@ describe("Type-Schema Alignment Tests", () => {
               asset_id: 1,
               offset_y: 0,
               scale: 1.0,
-            },
-            age_lines: {
-              asset_id: 1,
             },
             accessories: {
               slot_1: glassesAccessory,
@@ -277,6 +277,9 @@ describe("Type-Schema Alignment Tests", () => {
               asset_id: 1,
               facial_hair_color: "brown" as const,
             },
+            age_lines: {
+              asset_id: 1,
+            },
           },
           placeable_movable: {
             eyes: {
@@ -303,9 +306,6 @@ describe("Type-Schema Alignment Tests", () => {
               asset_id: 1,
               offset_y: 0,
               scale: 1.0,
-            },
-            age_lines: {
-              asset_id: 1,
             },
             accessories: {
               slot_1: undefined,
@@ -357,6 +357,9 @@ describe("Type-Schema Alignment Tests", () => {
               asset_id: 1,
               facial_hair_color: "brown" as const,
             },
+            age_lines: {
+              asset_id: 1,
+            },
           },
           placeable_movable: {
             eyes: {
@@ -383,9 +386,6 @@ describe("Type-Schema Alignment Tests", () => {
               asset_id: 1,
               offset_y: 0,
               scale: 1.0,
-            },
-            age_lines: {
-              asset_id: 1,
             },
             accessories: {
               slot_1: undefined,
@@ -475,9 +475,6 @@ describe("Type-Schema Alignment Tests", () => {
               asset_id: 1,
               offset_y: 0,
               scale: 1.0,
-            },
-            age_lines: {
-              asset_id: 1,
             },
             accessories: {
               slot_1: undefined,

@@ -125,16 +125,16 @@ describe("Interface Consistency Tests", () => {
         expect(mockCharacter.character_data.placeable_movable).toBeDefined();
 
         expect(mockCharacter.character_data.info.name).toBeDefined();
-        if (mockCharacter.character_data.placeable_movable.age_lines) {
+        if (mockCharacter.character_data.static.age_lines) {
           expect(
-            mockCharacter.character_data.placeable_movable.age_lines.asset_id,
+            mockCharacter.character_data.static.age_lines.asset_id,
           ).toBeDefined();
 
           expect(
-            mockCharacter.character_data.placeable_movable.age_lines,
+            mockCharacter.character_data.static.age_lines,
           ).not.toHaveProperty("offset_y");
           expect(
-            mockCharacter.character_data.placeable_movable.age_lines,
+            mockCharacter.character_data.static.age_lines,
           ).not.toHaveProperty("scale");
         }
       }
@@ -337,12 +337,12 @@ describe("Interface Consistency Tests", () => {
               );
             }
             if (
-              dbChar.character_data.placeable_movable.age_lines &&
-              originalData.placeable_movable.age_lines
+              dbChar.character_data.static.age_lines &&
+              originalData.static.age_lines
             ) {
-              expect(
-                dbChar.character_data.placeable_movable.age_lines.asset_id,
-              ).toBe(originalData.placeable_movable.age_lines.asset_id);
+              expect(dbChar.character_data.static.age_lines.asset_id).toBe(
+                originalData.static.age_lines.asset_id,
+              );
             }
           }
         }
@@ -372,15 +372,15 @@ describe("Interface Consistency Tests", () => {
 
         expect(validMockChar.character_data).toBeDefined();
 
-        if (validMockChar.character_data.placeable_movable.age_lines) {
+        if (validMockChar.character_data.static.age_lines) {
+          expect(validMockChar.character_data.static.age_lines).toHaveProperty(
+            "asset_id",
+          );
           expect(
-            validMockChar.character_data.placeable_movable.age_lines,
-          ).toHaveProperty("asset_id");
-          expect(
-            validMockChar.character_data.placeable_movable.age_lines,
+            validMockChar.character_data.static.age_lines,
           ).not.toHaveProperty("offset_y");
           expect(
-            validMockChar.character_data.placeable_movable.age_lines,
+            validMockChar.character_data.static.age_lines,
           ).not.toHaveProperty("scale");
         }
       }

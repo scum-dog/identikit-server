@@ -139,6 +139,9 @@ describe("Value Consistency Tests", () => {
               asset_id: 1,
               facial_hair_color: "brown" as const,
             },
+            age_lines: {
+              asset_id: 1,
+            },
           },
           placeable_movable: {
             eyes: {
@@ -165,9 +168,6 @@ describe("Value Consistency Tests", () => {
               asset_id: 1,
               offset_y: 0,
               scale: 1.0,
-            },
-            age_lines: {
-              asset_id: 1,
             },
             accessories: {
               slot_1: glassesAccessory,
@@ -222,6 +222,7 @@ describe("Value Consistency Tests", () => {
               head: { asset_id: 1, skin_color: "medium" as const },
               hair: { asset_id: 1, hair_color: "brown" as const },
               beard: { asset_id: 1, facial_hair_color: "brown" as const },
+              age_lines: { asset_id: 1 },
             },
             placeable_movable: {
               eyes: {
@@ -241,7 +242,6 @@ describe("Value Consistency Tests", () => {
               },
               nose: { asset_id: 1, offset_y: 0, scale: 1.0 },
               lips: { asset_id: 1, offset_y: 0, scale: 1.0 },
-              age_lines: { asset_id: 1 },
               accessories: {
                 slot_1: undefined,
                 slot_2: undefined,
@@ -291,6 +291,7 @@ describe("Value Consistency Tests", () => {
               head: { asset_id: 1, skin_color: "medium" as const },
               hair: { asset_id: 1, hair_color: "brown" as const },
               beard: { asset_id: 1, facial_hair_color: "brown" as const },
+              age_lines: { asset_id: 1 },
             },
             placeable_movable: {
               eyes: {
@@ -310,7 +311,6 @@ describe("Value Consistency Tests", () => {
               },
               nose: { asset_id: 1, offset_y: 0, scale: 1.0 },
               lips: { asset_id: 1, offset_y: 0, scale: 1.0 },
-              age_lines: { asset_id: 1 },
               accessories: {
                 slot_1: undefined,
                 slot_2: undefined,
@@ -360,6 +360,7 @@ describe("Value Consistency Tests", () => {
               head: { asset_id: 1, skin_color: "medium" as const },
               hair: { asset_id: 1, hair_color: "brown" as const },
               beard: { asset_id: 1, facial_hair_color: "brown" as const },
+              age_lines: { asset_id: 1 },
             },
             placeable_movable: {
               eyes: {
@@ -379,7 +380,6 @@ describe("Value Consistency Tests", () => {
               },
               nose: { asset_id: 1, offset_y: 0, scale: 1.0 },
               lips: { asset_id: 1, offset_y: 0, scale: 1.0 },
-              age_lines: { asset_id: 1 },
               accessories: {
                 slot_1: undefined,
                 slot_2: undefined,
@@ -430,6 +430,7 @@ describe("Value Consistency Tests", () => {
               head: { asset_id: 1, skin_color: "medium" as const },
               hair: { asset_id: 1, hair_color: "brown" as const },
               beard: { asset_id: 1, facial_hair_color: "brown" as const },
+              age_lines: { asset_id: 1 },
             },
             placeable_movable: {
               eyes: {
@@ -449,7 +450,6 @@ describe("Value Consistency Tests", () => {
               },
               nose: { asset_id: 1, offset_y: 0, scale: 1.0 },
               lips: { asset_id: 1, offset_y: 0, scale: 1.0 },
-              age_lines: { asset_id: 1 },
               accessories: {
                 slot_1: undefined,
                 slot_2: undefined,
