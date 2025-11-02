@@ -77,6 +77,8 @@ CREATE INDEX idx_characters_sex ON characters USING gin (
 
 CREATE INDEX idx_users_platform ON users (platform, platform_user_id);
 
+CREATE INDEX idx_user_sessions_user_id ON user_sessions (user_id);
+
 CREATE INDEX idx_user_sessions_expires_at ON user_sessions (expires_at);
 
 -- business logic
@@ -115,7 +117,7 @@ BEGIN
 
 EXCEPTION
     WHEN OTHERS THEN
-        RAISE WARNING 'can_user_edit_character: Unexpected error for character % and user %: %', character_uuid, user_uuid, SQLERRM;
+        RAISE WARNING 'can_user_edit_character: Unexpected database error occurred';
         RETURN false;
 END;
 $$ language plpgsql;
@@ -159,8 +161,7 @@ BEGIN
 
 EXCEPTION
     WHEN OTHERS THEN
-        RAISE EXCEPTION 'prevent_deleted_character_edit: Unexpected error for character %: %',
-                       COALESCE(OLD.id, NEW.id), SQLERRM;
+        RAISE EXCEPTION 'prevent_deleted_character_edit: Unexpected database error occurred';
 END;
 $$ language plpgsql;
 
