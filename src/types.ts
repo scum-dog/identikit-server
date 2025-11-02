@@ -97,10 +97,21 @@ export interface CharacterPlaceableMovable {
     offset_y: number;
     scale: number;
   };
-  accessories: {
-    slot_1?: AccessorySlot;
-    slot_2?: AccessorySlot;
-    slot_3?: AccessorySlot;
+  glasses?: {
+    asset_id: number;
+    offset_y: number;
+    scale: number;
+  };
+  mustache?: {
+    asset_id: number;
+    offset_y: number;
+    scale: number;
+  };
+  misc?: {
+    asset_id: number;
+    offset_x?: number;
+    offset_y: number;
+    scale?: number;
   };
 }
 
@@ -114,27 +125,6 @@ export interface FullCharacterData {
   character_data: CharacterDataStructure;
   metadata: CharacterMetadata;
 }
-
-export type AccessorySlot =
-  | {
-      type: "glasses";
-      asset_id: number;
-      offset_y: number;
-      scale: number;
-    }
-  | {
-      type: "mustache";
-      asset_id: number;
-      offset_y: number;
-      scale: number;
-    }
-  | {
-      type: "misc";
-      asset_id: number;
-      offset_x?: number;
-      offset_y: number;
-      scale?: number;
-    };
 
 export interface CharacterRouteUpdates {
   character_data?: object;

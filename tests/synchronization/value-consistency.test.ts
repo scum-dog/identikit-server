@@ -78,23 +78,20 @@ describe("Value Consistency Tests", () => {
       expect(validationValues.sort()).toEqual(typeValues.sort());
     });
 
-    it("should have matching AccessoryType values between types and validation", () => {
+    it("should have matching accessory structure between types and validation", () => {
       const glassesAccessory = {
-        type: "glasses" as const,
         asset_id: 123,
         offset_y: 0,
         scale: 1.0,
       };
 
       const mustacheAccessory = {
-        type: "mustache" as const,
         asset_id: 123,
         offset_y: 0,
         scale: 1.0,
       };
 
       const miscAccessory = {
-        type: "misc" as const,
         asset_id: 123,
         offset_x: 0,
         offset_y: 0,
@@ -169,11 +166,9 @@ describe("Value Consistency Tests", () => {
               offset_y: 0,
               scale: 1.0,
             },
-            accessories: {
-              slot_1: glassesAccessory,
-              slot_2: mustacheAccessory,
-              slot_3: miscAccessory,
-            },
+            glasses: glassesAccessory,
+            mustache: mustacheAccessory,
+            misc: miscAccessory,
           },
         },
       };
@@ -182,11 +177,10 @@ describe("Value Consistency Tests", () => {
       expect(result.success).toBe(true);
 
       if (result.success) {
-        const accessories =
-          result.data.character_data.placeable_movable.accessories;
-        expect(accessories.slot_1?.type).toBe("glasses");
-        expect(accessories.slot_2?.type).toBe("mustache");
-        expect(accessories.slot_3?.type).toBe("misc");
+        const placeableMovable = result.data.character_data.placeable_movable;
+        expect(placeableMovable.glasses).toBeDefined();
+        expect(placeableMovable.mustache).toBeDefined();
+        expect(placeableMovable.misc).toBeDefined();
       }
     });
   });

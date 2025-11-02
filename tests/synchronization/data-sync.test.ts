@@ -24,28 +24,24 @@ describe("Data Synchronization Tests", () => {
     it("should generate accessory structures with correct properties", () => {
       for (let i = 0; i < 100; i++) {
         const mockData = generateMockCharacterData();
-        const accessories =
-          mockData.character_data.placeable_movable.accessories;
+        const placeableMovable = mockData.character_data.placeable_movable;
 
-        [accessories.slot_1, accessories.slot_2, accessories.slot_3].forEach(
-          (accessory) => {
-            if (accessory) {
-              if (
-                accessory.type === "glasses" ||
-                accessory.type === "mustache"
-              ) {
-                expect(accessory).not.toHaveProperty("offset_x");
-                expect(accessory).not.toHaveProperty("rotation");
-                expect(accessory).not.toHaveProperty("distance");
-              }
+        if (placeableMovable.glasses) {
+          expect(placeableMovable.glasses).not.toHaveProperty("offset_x");
+          expect(placeableMovable.glasses).not.toHaveProperty("rotation");
+          expect(placeableMovable.glasses).not.toHaveProperty("distance");
+        }
 
-              if (accessory.type === "misc") {
-                expect(accessory).not.toHaveProperty("rotation");
-                expect(accessory).not.toHaveProperty("distance");
-              }
-            }
-          },
-        );
+        if (placeableMovable.mustache) {
+          expect(placeableMovable.mustache).not.toHaveProperty("offset_x");
+          expect(placeableMovable.mustache).not.toHaveProperty("rotation");
+          expect(placeableMovable.mustache).not.toHaveProperty("distance");
+        }
+
+        if (placeableMovable.misc) {
+          expect(placeableMovable.misc).not.toHaveProperty("rotation");
+          expect(placeableMovable.misc).not.toHaveProperty("distance");
+        }
       }
     });
 

@@ -63,27 +63,24 @@ export const skinColorEnum = z.enum([
 
 export const sexEnum = z.enum(["male", "female", "other"]);
 
-const accessorySlotSchema = z.discriminatedUnion("type", [
-  z.object({
-    type: z.literal("glasses"),
-    asset_id: z.number().int().min(1).max(999),
-    offset_y: offsetSchema.default(0),
-    scale: scaleSchema.default(1.0),
-  }),
-  z.object({
-    type: z.literal("mustache"),
-    asset_id: z.number().int().min(1).max(999),
-    offset_y: offsetSchema.default(0),
-    scale: scaleSchema.default(1.0),
-  }),
-  z.object({
-    type: z.literal("misc"),
-    asset_id: z.number().int().min(1).max(999),
-    offset_x: offsetSchema.default(0),
-    offset_y: offsetSchema.default(0),
-    scale: scaleSchema.default(1.0),
-  }),
-]);
+const glassesSchema = z.object({
+  asset_id: z.number().int().min(1).max(999),
+  offset_y: offsetSchema.default(0),
+  scale: scaleSchema.default(1.0),
+});
+
+const mustacheSchema = z.object({
+  asset_id: z.number().int().min(1).max(999),
+  offset_y: offsetSchema.default(0),
+  scale: scaleSchema.default(1.0),
+});
+
+const miscSchema = z.object({
+  asset_id: z.number().int().min(1).max(999),
+  offset_x: offsetSchema.default(0).optional(),
+  offset_y: offsetSchema.default(0),
+  scale: scaleSchema.default(1.0).optional(),
+});
 
 export const characterDataSchema = z.object({
   info: z
@@ -155,36 +152,9 @@ export const characterDataSchema = z.object({
       offset_y: offsetSchema.default(0),
       scale: scaleSchema.default(1.0),
     }),
-    accessories: z
-      .object({
-        slot_1: accessorySlotSchema.optional(),
-        slot_2: accessorySlotSchema.optional(),
-        slot_3: accessorySlotSchema.optional(),
-      })
-      .refine(
-        (accessories) => {
-          const types = new Set<string>();
-
-          const slots = [
-            accessories.slot_1,
-            accessories.slot_2,
-            accessories.slot_3,
-          ];
-
-          for (const slot of slots) {
-            if (slot && types.has(slot.type)) {
-              return false;
-            }
-            if (slot) {
-              types.add(slot.type);
-            }
-          }
-          return true;
-        },
-        {
-          message: "Cannot have duplicate accessory types in different slots",
-        },
-      ),
+    glasses: glassesSchema.optional(),
+    mustache: mustacheSchema.optional(),
+    misc: miscSchema.optional(),
   }),
 });
 
@@ -293,39 +263,9 @@ export const characterDataUpdateSchema = z.object({
               scale: scaleSchema.optional(),
             })
             .optional(),
-          accessories: z
-            .object({
-              slot_1: accessorySlotSchema.optional(),
-              slot_2: accessorySlotSchema.optional(),
-              slot_3: accessorySlotSchema.optional(),
-            })
-            .refine(
-              (accessories) => {
-                if (!accessories) return true;
-                const types = new Set<string>();
-
-                const slots = [
-                  accessories.slot_1,
-                  accessories.slot_2,
-                  accessories.slot_3,
-                ];
-
-                for (const slot of slots) {
-                  if (slot && types.has(slot.type)) {
-                    return false;
-                  }
-                  if (slot) {
-                    types.add(slot.type);
-                  }
-                }
-                return true;
-              },
-              {
-                message:
-                  "Cannot have duplicate accessory types in different slots",
-              },
-            )
-            .optional(),
+          glasses: glassesSchema.optional(),
+          mustache: mustacheSchema.optional(),
+          misc: miscSchema.optional(),
         })
         .optional(),
     })
@@ -410,7 +350,6 @@ export type CharacterMetadata = z.infer<typeof characterMetadataSchema>;
 export type FullCharacter = z.infer<typeof fullCharacterSchema>;
 export type CharacterUpload = z.infer<typeof characterUploadSchema>;
 export type CharacterUpdate = z.infer<typeof characterUpdateSchema>;
-export type AccessorySlot = z.infer<typeof accessorySlotSchema>;
 export type PlazaSearchInput = {
   country?: string;
   region?: string;

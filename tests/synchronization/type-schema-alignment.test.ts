@@ -4,7 +4,6 @@ import {
   CharacterDataStructure,
   CharacterStatic,
   CharacterPlaceableMovable,
-  AccessorySlot,
   CharacterMetadata,
 } from "../../src/types";
 
@@ -82,26 +81,21 @@ describe("Type-Schema Alignment Tests", () => {
               offset_y: 0.2,
               scale: 1.2,
             },
-            accessories: {
-              slot_1: {
-                type: "glasses",
-                asset_id: 123,
-                offset_y: 0.1,
-                scale: 1.0,
-              },
-              slot_2: {
-                type: "mustache",
-                asset_id: 456,
-                offset_y: -0.1,
-                scale: 0.9,
-              },
-              slot_3: {
-                type: "misc",
-                asset_id: 789,
-                offset_x: 0.2,
-                offset_y: 0.3,
-                scale: 1.1,
-              },
+            glasses: {
+              asset_id: 123,
+              offset_y: 0.1,
+              scale: 1.0,
+            },
+            mustache: {
+              asset_id: 456,
+              offset_y: -0.1,
+              scale: 0.9,
+            },
+            misc: {
+              asset_id: 789,
+              offset_x: 0.2,
+              offset_y: 0.3,
+              scale: 1.1,
             },
           },
         },
@@ -119,31 +113,27 @@ describe("Type-Schema Alignment Tests", () => {
       }
     });
 
-    it("should validate AccessorySlot type variations", () => {
-      const glassesAccessory: AccessorySlot = {
-        type: "glasses",
+    it("should validate accessory type variations", () => {
+      const glassesAccessory = {
         asset_id: 123,
         offset_y: 0.1,
         scale: 1.0,
       };
 
-      const mustacheAccessory: AccessorySlot = {
-        type: "mustache",
+      const mustacheAccessory = {
         asset_id: 456,
         offset_y: -0.1,
         scale: 0.9,
       };
 
-      const miscAccessory: AccessorySlot = {
-        type: "misc",
+      const miscAccessory = {
         asset_id: 789,
         offset_x: 0.2,
         offset_y: 0.3,
         scale: 1.1,
       };
 
-      const miscAccessoryMinimal: AccessorySlot = {
-        type: "misc",
+      const miscAccessoryMinimal = {
         asset_id: 999,
         offset_y: 0.0,
       };
@@ -214,11 +204,9 @@ describe("Type-Schema Alignment Tests", () => {
               offset_y: 0,
               scale: 1.0,
             },
-            accessories: {
-              slot_1: glassesAccessory,
-              slot_2: mustacheAccessory,
-              slot_3: miscAccessory,
-            },
+            glasses: glassesAccessory,
+            mustache: mustacheAccessory,
+            misc: miscAccessory,
           },
         },
       };
@@ -226,17 +214,25 @@ describe("Type-Schema Alignment Tests", () => {
       const result1 = fullCharacterSchema.safeParse(testData);
       expect(result1.success).toBe(true);
 
-      testData.character_data.placeable_movable.accessories.slot_3 =
-        miscAccessoryMinimal;
+      testData.character_data.placeable_movable.misc = {
+        ...miscAccessoryMinimal,
+        offset_x: 0,
+        scale: 1.0,
+      };
       const result2 = fullCharacterSchema.safeParse(testData);
       expect(result2.success).toBe(true);
 
-      (testData.character_data.placeable_movable.accessories as any) = {
-        slot_1: undefined,
-        slot_2: undefined,
-        slot_3: undefined,
+      const testDataNoAccessories = { ...testData };
+      testDataNoAccessories.character_data.placeable_movable = {
+        ...testDataNoAccessories.character_data.placeable_movable,
       };
-      const result3 = fullCharacterSchema.safeParse(testData);
+      delete (testDataNoAccessories.character_data.placeable_movable as any)
+        .glasses;
+      delete (testDataNoAccessories.character_data.placeable_movable as any)
+        .mustache;
+      delete (testDataNoAccessories.character_data.placeable_movable as any)
+        .misc;
+      const result3 = fullCharacterSchema.safeParse(testDataNoAccessories);
       expect(result3.success).toBe(true);
     });
 

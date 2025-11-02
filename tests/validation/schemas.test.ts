@@ -127,10 +127,7 @@ describe("Validation Schemas", () => {
     it("should validate accessory slots", () => {
       const data = generateMockCharacterData();
 
-      data.character_data.placeable_movable.accessories = {};
-
-      data.character_data.placeable_movable.accessories.slot_1 = {
-        type: "glasses",
+      data.character_data.placeable_movable.glasses = {
         asset_id: 123,
         offset_y: 0.5,
         scale: 1.0,
@@ -140,17 +137,15 @@ describe("Validation Schemas", () => {
 
       expect(result.success).toBe(true);
       if (result.success) {
-        const accessory =
-          result.data.character_data.placeable_movable.accessories.slot_1;
-        expect(accessory).toBeDefined();
-        expect(accessory!.type).toBe("glasses");
+        const glasses = result.data.character_data.placeable_movable.glasses;
+        expect(glasses).toBeDefined();
+        expect(glasses!.asset_id).toBe(123);
       }
     });
 
     it("should reject invalid accessory asset IDs", () => {
       const data = generateMockCharacterData();
-      data.character_data.placeable_movable.accessories.slot_1 = {
-        type: "glasses",
+      data.character_data.placeable_movable.glasses = {
         asset_id: 0, // below minimum
         offset_y: 0,
         scale: 1.0,

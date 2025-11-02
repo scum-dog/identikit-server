@@ -1,8 +1,6 @@
 import { FullCharacter } from "./validation";
 import { randomUUID } from "crypto";
 import {
-  AccessoryType,
-  AccessorySlot,
   SkinColor,
   EyeColor,
   HairColor,
@@ -13,8 +11,9 @@ import {
 
 const firstNames = [
   "John",
-  "Jordan",
-  "Casey",
+  "Jacob",
+  "Jingleheimer",
+  "Schmidt",
   "Riley",
   "Lukas",
   "Taylor",
@@ -121,13 +120,6 @@ const hairColors: HairColor[] = [
   "white",
 ];
 
-const accessoryTypes: (AccessoryType | "none")[] = [
-  "glasses",
-  "mustache",
-  "misc",
-  "none",
-];
-
 const sexOptions: Sex[] = ["male", "female", "other"];
 
 function randomChoice<T>(array: T[]): T {
@@ -156,47 +148,41 @@ function generateOffset(): number {
   return parseFloat(randomFloat(-1, 1).toFixed(1));
 }
 
-function generateAccessoriesWithoutDuplicates() {
-  const usedTypes = new Set<AccessoryType>();
-  const accessories: { [key: string]: AccessorySlot } = {};
+function generateAccessories() {
+  const accessories: {
+    glasses?: { asset_id: number; offset_y: number; scale: number };
+    mustache?: { asset_id: number; offset_y: number; scale: number };
+    misc?: {
+      asset_id: number;
+      offset_x?: number;
+      offset_y: number;
+      scale?: number;
+    };
+  } = {};
 
-  const slots = ["slot_1", "slot_2", "slot_3"];
+  if (Math.random() < 0.3) {
+    accessories.glasses = {
+      asset_id: generateShapeId(),
+      offset_y: generateOffset(),
+      scale: parseFloat(randomFloat(0.5, 1.5).toFixed(1)),
+    };
+  }
 
-  for (const slot of slots) {
-    if (Math.random() < 0.7) {
-      const availableTypes = accessoryTypes.filter(
-        (type) => type !== "none" && !usedTypes.has(type as AccessoryType),
-      ) as AccessoryType[];
+  if (Math.random() < 0.25) {
+    accessories.mustache = {
+      asset_id: generateShapeId(),
+      offset_y: generateOffset(),
+      scale: parseFloat(randomFloat(0.5, 1.5).toFixed(1)),
+    };
+  }
 
-      if (availableTypes.length > 0) {
-        const type = randomChoice(availableTypes);
-        usedTypes.add(type);
-
-        if (type === "glasses") {
-          accessories[slot] = {
-            type: "glasses" as const,
-            asset_id: generateShapeId(),
-            offset_y: generateOffset(),
-            scale: parseFloat(randomFloat(0.5, 1.5).toFixed(1)),
-          };
-        } else if (type === "mustache") {
-          accessories[slot] = {
-            type: "mustache" as const,
-            asset_id: generateShapeId(),
-            offset_y: generateOffset(),
-            scale: parseFloat(randomFloat(0.5, 1.5).toFixed(1)),
-          };
-        } else if (type === "misc") {
-          accessories[slot] = {
-            type: "misc" as const,
-            asset_id: generateShapeId(),
-            offset_x: generateOffset(),
-            offset_y: generateOffset(),
-            scale: parseFloat(randomFloat(0.5, 1.5).toFixed(1)),
-          };
-        }
-      }
-    }
+  if (Math.random() < 0.2) {
+    accessories.misc = {
+      asset_id: generateShapeId(),
+      offset_x: generateOffset(),
+      offset_y: generateOffset(),
+      scale: parseFloat(randomFloat(0.5, 1.5).toFixed(1)),
+    };
   }
 
   return accessories;
@@ -279,7 +265,7 @@ export function generateMockCharacterData(): FullCharacter {
           offset_y: generateOffset(),
           scale: parseFloat(randomFloat(0.5, 1.5).toFixed(1)),
         },
-        accessories: generateAccessoriesWithoutDuplicates(),
+        ...generateAccessories(),
       },
     },
     metadata: {
