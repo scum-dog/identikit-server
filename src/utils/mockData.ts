@@ -260,14 +260,14 @@ export function generateMockCharacterData(): FullCharacter {
           offset_x: parseFloat(randomFloat(0, 1).toFixed(1)),
           offset_y: generateOffset(),
           scale: parseFloat(randomFloat(0.5, 1.5).toFixed(1)),
-          rotation: randomInt(0, 359),
+          rotation: randomInt(-35, 35),
         },
         eyebrows: {
           asset_id: generateShapeId(),
           offset_x: parseFloat(randomFloat(0, 1).toFixed(1)),
           offset_y: generateOffset(),
           scale: parseFloat(randomFloat(0.5, 1.5).toFixed(1)),
-          rotation: randomInt(0, 359),
+          rotation: randomInt(-45, 45),
         },
         nose: {
           asset_id: generateShapeId(),

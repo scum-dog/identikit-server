@@ -10,7 +10,8 @@ const offsetSchema = z
   .max(1)
   .transform((val) => Math.round(val * 10) / 10);
 
-const rotationSchema = z.number().min(0).max(359).int();
+const eyeRotationSchema = z.number().min(-35).max(35).int();
+const eyebrowRotationSchema = z.number().min(-45).max(45).int();
 
 const offsetXSchema = z
   .number()
@@ -135,14 +136,14 @@ export const characterDataSchema = z.object({
       offset_x: offsetXSchema.default(0),
       offset_y: offsetSchema.default(0),
       scale: scaleSchema.default(1.0),
-      rotation: rotationSchema.default(0),
+      rotation: eyeRotationSchema.default(0),
     }),
     eyebrows: z.object({
       asset_id: assetIdSchema(),
       offset_x: offsetXSchema.default(0),
       offset_y: offsetSchema.default(0),
       scale: scaleSchema.default(1.0),
-      rotation: rotationSchema.default(0),
+      rotation: eyebrowRotationSchema.default(0),
     }),
     nose: z.object({
       asset_id: assetIdSchema(),
@@ -266,7 +267,7 @@ export const characterDataUpdateSchema = z.object({
               offset_x: offsetXSchema.optional(),
               offset_y: offsetSchema.optional(),
               scale: scaleSchema.optional(),
-              rotation: rotationSchema.optional(),
+              rotation: eyeRotationSchema.optional(),
             })
             .optional(),
           eyebrows: z
@@ -275,7 +276,7 @@ export const characterDataUpdateSchema = z.object({
               offset_x: offsetXSchema.optional(),
               offset_y: offsetSchema.optional(),
               scale: scaleSchema.optional(),
-              rotation: rotationSchema.optional(),
+              rotation: eyebrowRotationSchema.optional(),
             })
             .optional(),
           nose: z

@@ -63,7 +63,7 @@ describe("Type-Schema Alignment Tests", () => {
               offset_x: 0.5,
               offset_y: 0.1,
               scale: 1.0,
-              rotation: 45,
+              rotation: 30,
             },
             eyebrows: {
               asset_id: 1,
