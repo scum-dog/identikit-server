@@ -50,8 +50,10 @@ describe("Rotation Range Validation", () => {
   };
 
   describe("Eye rotation validation", () => {
-    it("should accept eye rotation values within -35 to +35 range", () => {
-      const validRotations = [-35, -20, 0, 20, 35];
+    it("should accept eye rotation values within -35 to +35 range in 5-degree increments", () => {
+      const validRotations = [
+        -35, -30, -25, -20, -15, -10, -5, 0, 5, 10, 15, 20, 25, 30, 35,
+      ];
 
       validRotations.forEach((rotation) => {
         const testData = {
@@ -73,8 +75,10 @@ describe("Rotation Range Validation", () => {
       });
     });
 
-    it("should reject eye rotation values outside -35 to +35 range", () => {
-      const invalidRotations = [-36, -180, 36, 45, 180, 360];
+    it("should reject eye rotation values outside -35 to +35 range or not in 5-degree increments", () => {
+      const invalidRotations = [
+        -36, -180, 36, 45, 180, 360, -34, -31, -1, 1, 3, 7, 23, 31, 34,
+      ];
 
       invalidRotations.forEach((rotation) => {
         const testData = {
@@ -98,8 +102,11 @@ describe("Rotation Range Validation", () => {
   });
 
   describe("Eyebrow rotation validation", () => {
-    it("should accept eyebrow rotation values within -45 to +45 range", () => {
-      const validRotations = [-45, -30, 0, 30, 45];
+    it("should accept eyebrow rotation values within -45 to +45 range in 5-degree increments", () => {
+      const validRotations = [
+        -45, -40, -35, -30, -25, -20, -15, -10, -5, 0, 5, 10, 15, 20, 25, 30,
+        35, 40, 45,
+      ];
 
       validRotations.forEach((rotation) => {
         const testData = {
@@ -121,8 +128,10 @@ describe("Rotation Range Validation", () => {
       });
     });
 
-    it("should reject eyebrow rotation values outside -45 to +45 range", () => {
-      const invalidRotations = [-46, -180, 46, 90, 180, 360];
+    it("should reject eyebrow rotation values outside -45 to +45 range or not in 5-degree increments", () => {
+      const invalidRotations = [
+        -46, -180, 46, 90, 180, 360, -44, -41, -1, 1, 3, 7, 23, 41, 44,
+      ];
 
       invalidRotations.forEach((rotation) => {
         const testData = {

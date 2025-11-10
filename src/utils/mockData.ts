@@ -130,6 +130,12 @@ function randomInt(min: number, max: number): number {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
+function randomRotation(min: number, max: number): number {
+  const steps = Math.floor((max - min) / 5) + 1;
+  const randomStep = Math.floor(Math.random() * steps);
+  return min + randomStep * 5;
+}
+
 function randomFloat(min: number, max: number): number {
   return Math.random() * (max - min) + min;
 }
@@ -238,14 +244,14 @@ export function generateMockCharacterData(): FullCharacter {
           offset_x: parseFloat(randomFloat(0, 1).toFixed(1)),
           offset_y: generateOffset(),
           scale: parseFloat(randomFloat(0.5, 1.5).toFixed(1)),
-          rotation: randomInt(-35, 35),
+          rotation: randomRotation(-35, 35),
         },
         eyebrows: {
           asset_id: generateShapeId(),
           offset_x: parseFloat(randomFloat(0, 1).toFixed(1)),
           offset_y: generateOffset(),
           scale: parseFloat(randomFloat(0.5, 1.5).toFixed(1)),
-          rotation: randomInt(-45, 45),
+          rotation: randomRotation(-45, 45),
         },
         nose: {
           asset_id: generateShapeId(),
