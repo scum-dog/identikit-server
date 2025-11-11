@@ -57,7 +57,7 @@ router.get("/me", (_req: Request, res: Response) => {
       user_id: character.user_id,
       created_at: character.created_at,
       last_edited_at: character.last_edited_at,
-      location: character.character_data.character_data.info.location || {},
+      location: character.character_data.info.location || {},
       character_data: character.character_data,
       is_edited: character.is_edited,
       is_deleted: character.is_deleted,
