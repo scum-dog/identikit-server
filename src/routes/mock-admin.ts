@@ -4,6 +4,13 @@ import { validateRequest } from "../utils/validation";
 import { z } from "zod";
 import { log } from "../utils/logger";
 import { mockRouteAdmin } from "../utils/testMockData";
+import {
+  successResponse,
+  collectionResponse,
+  notFoundResponse,
+  conflictResponse,
+  internalServerErrorResponse,
+} from "../utils/responseHelpers";
 
 const router = Router();
 
@@ -52,29 +59,31 @@ router.get("/characters", (req: Request, res: Response) => {
       };
     });
 
-    res.json({
-      characters: charactersWithUsers,
-      pagination: {
+    collectionResponse(
+      res,
+      charactersWithUsers,
+      {
         page,
         limit,
         total,
         totalPages: Math.ceil(total / limit),
       },
-    });
+      "/mock/admin/characters",
+    );
   } catch (error) {
     log.error("Mock admin get characters error", { error });
-    res.status(500).json({ error: "Failed to fetch characters" });
+    internalServerErrorResponse(res, "Failed to fetch characters");
   }
 });
 
-// GET /mock/admin/character/:id - get specific mock character with full details
-router.get("/character/:id", (req: Request, res: Response) => {
+// GET /mock/admin/characters/:id - get specific mock character with full details
+router.get("/characters/:id", (req: Request, res: Response) => {
   try {
     const { id } = req.params;
     const character = mockDataStore.getCharacter(id);
 
     if (!character) {
-      return res.status(404).json({ error: "Character not found" });
+      return notFoundResponse(res, "Character");
     }
 
     const user = mockDataStore.getUser(character.user_id);
@@ -88,18 +97,16 @@ router.get("/character/:id", (req: Request, res: Response) => {
       last_login: user?.last_login || null,
     };
 
-    res.json({
-      character: characterWithDetails,
-    });
+    successResponse(res, characterWithDetails);
   } catch (error) {
     log.error("Mock admin get character details error", { error });
-    res.status(500).json({ error: "Failed to fetch character details" });
+    internalServerErrorResponse(res, "Failed to fetch character details");
   }
 });
 
-// DELETE /mock/admin/character/:id - delete a mock character
+// DELETE /mock/admin/characters/:id - delete a mock character
 router.delete(
-  "/character/:id",
+  "/characters/:id",
   validateRequest(
     z.object({
       reason: z
@@ -117,20 +124,20 @@ router.delete(
       const character = mockDataStore.getCharacter(id);
 
       if (!character) {
-        return res.status(404).json({ error: "Character not found" });
+        return notFoundResponse(res, "Character");
       }
 
       if (character.is_deleted) {
-        return res.status(409).json({ error: "Character is already deleted" });
+        return conflictResponse(res, "Character is already deleted");
       }
 
       const deletedCharacter = mockDataStore.deleteCharacter(id, MOCK_ADMIN.id);
 
       if (!deletedCharacter) {
-        return res.status(500).json({ error: "Failed to delete character" });
+        return internalServerErrorResponse(res, "Failed to delete character");
       }
 
-      res.json({
+      successResponse(res, {
         success: true,
         message: `Character has been deleted`,
         deletedCharacter: {
@@ -140,7 +147,7 @@ router.delete(
       });
     } catch (error) {
       log.error("Mock admin delete character error", { error });
-      res.status(500).json({ error: "Failed to delete character" });
+      internalServerErrorResponse(res, "Failed to delete character");
     }
   },
 );
@@ -174,18 +181,20 @@ router.get("/users", (req: Request, res: Response) => {
       };
     });
 
-    res.json({
-      users: usersWithData,
-      pagination: {
+    collectionResponse(
+      res,
+      usersWithData,
+      {
         page,
         limit,
         total,
         totalPages: Math.ceil(total / limit),
       },
-    });
+      "/mock/admin/users",
+    );
   } catch (error) {
     log.error("Mock admin get users error", { error });
-    res.status(500).json({ error: "Failed to fetch users" });
+    internalServerErrorResponse(res, "Failed to fetch users");
   }
 });
 

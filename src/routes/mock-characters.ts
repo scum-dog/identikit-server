@@ -15,6 +15,14 @@ import {
 } from "../types";
 import { log } from "../utils/logger";
 import { mockRouteUser, canUserEditCharacter } from "../utils/testMockData";
+import {
+  successResponse,
+  createdResponse,
+  notFoundResponse,
+  conflictResponse,
+  forbiddenResponse,
+  internalServerErrorResponse,
+} from "../utils/responseHelpers";
 
 const router = Router();
 
@@ -44,23 +52,22 @@ router.get("/me", (_req: Request, res: Response) => {
 
     const canEdit = mockCanUserEditCharacter(character);
 
-    res.json({
+    successResponse(res, {
+      upload_id: character.upload_id,
+      user_id: character.user_id,
+      created_at: character.created_at,
+      last_edited_at: character.last_edited_at,
+      location: character.character_data.character_data.info.location || {},
       character_data: character.character_data,
-      metadata: {
-        upload_id: character.upload_id,
-        user_id: character.user_id,
-        created_at: character.created_at,
-        last_edited_at: character.last_edited_at,
-        is_edited: character.is_edited,
-        can_edit: canEdit,
-        is_deleted: character.is_deleted,
-        deleted_at: character.deleted_at,
-        deleted_by: character.deleted_by,
-      },
+      is_edited: character.is_edited,
+      is_deleted: character.is_deleted,
+      deleted_at: character.deleted_at,
+      deleted_by: character.deleted_by,
+      can_edit: canEdit,
     });
   } catch (error) {
     log.error("Mock get character error", { error });
-    res.status(500).json({ error: "Failed to retrieve character" });
+    internalServerErrorResponse(res, "Failed to retrieve character");
   }
 });
 
@@ -76,9 +83,10 @@ router.post(
       );
 
       if (existingCharacter) {
-        return res.status(409).json({
-          error: "User already has a character. Use PUT to update.",
-        });
+        return conflictResponse(
+          res,
+          "User already has a character. Use PUT to update.",
+        );
       }
 
       const { character_data, metadata } = req.body;
@@ -97,23 +105,21 @@ router.post(
 
       mockDataStore.addCharacter(newCharacter);
 
-      res.status(201).json({
+      createdResponse(res, {
         message: "Character created successfully",
+        upload_id: newCharacter.upload_id,
+        user_id: newCharacter.user_id,
+        created_at: newCharacter.created_at,
+        last_edited_at: newCharacter.last_edited_at,
         character_data: newCharacter.character_data,
-        metadata: {
-          upload_id: newCharacter.upload_id,
-          user_id: newCharacter.user_id,
-          created_at: newCharacter.created_at,
-          last_edited_at: newCharacter.last_edited_at,
-          is_edited: newCharacter.is_edited,
-          is_deleted: newCharacter.is_deleted,
-          deleted_at: newCharacter.deleted_at,
-          deleted_by: newCharacter.deleted_by,
-        },
+        is_edited: newCharacter.is_edited,
+        is_deleted: newCharacter.is_deleted,
+        deleted_at: newCharacter.deleted_at,
+        deleted_by: newCharacter.deleted_by,
       });
     } catch (error) {
       log.error("Mock create character error", { error });
-      res.status(500).json({ error: "Failed to create character" });
+      internalServerErrorResponse(res, "Failed to create character");
     }
   },
 );
@@ -130,16 +136,16 @@ router.put(
       );
 
       if (!character) {
-        return res.status(404).json({ error: "No character found to update" });
+        return notFoundResponse(res, "Character");
       }
 
       const canEdit = mockCanUserEditCharacter(character);
 
       if (!canEdit) {
-        return res.status(403).json({
-          error:
-            "Cannot edit character: either in freeze period or weekly limit exceeded",
-        });
+        return forbiddenResponse(
+          res,
+          "Cannot edit character: either in freeze period or weekly limit exceeded",
+        );
       }
 
       const updates: MockCharacterRouteUpdates = {};
@@ -166,33 +172,34 @@ router.put(
       );
 
       if (!updatedCharacter) {
-        return res.status(500).json({ error: "Failed to update character" });
+        return internalServerErrorResponse(res, "Failed to update character");
       }
 
-      res.json({
+      successResponse(res, {
         message: "Character updated successfully",
+        upload_id: updatedCharacter.upload_id,
+        user_id: updatedCharacter.user_id,
+        created_at: updatedCharacter.created_at,
+        last_edited_at: updatedCharacter.last_edited_at,
         character_data: updatedCharacter.character_data,
-        metadata: {
-          upload_id: updatedCharacter.upload_id,
-          user_id: updatedCharacter.user_id,
-          created_at: updatedCharacter.created_at,
-          last_edited_at: updatedCharacter.last_edited_at,
-          is_edited: updatedCharacter.is_edited,
-          can_edit: mockCanUserEditCharacter(updatedCharacter),
-          is_deleted: updatedCharacter.is_deleted,
-          deleted_at: updatedCharacter.deleted_at,
-          deleted_by: updatedCharacter.deleted_by,
-        },
+        is_edited: updatedCharacter.is_edited,
+        is_deleted: updatedCharacter.is_deleted,
+        deleted_at: updatedCharacter.deleted_at,
+        deleted_by: updatedCharacter.deleted_by,
+        can_edit: mockCanUserEditCharacter(updatedCharacter),
       });
     } catch (error) {
       log.error("Mock update character error", { error });
-      res.status(500).json({ error: "Failed to update character" });
+      internalServerErrorResponse(res, "Failed to update character");
     }
   },
 );
 
-// GET /mock/characters/plaza - get mock characters for plaza display
-router.get("/plaza", validatePlazaQuery, (req: Request, res: Response) => {
+// GET /mock/characters?view=plaza - get mock characters for plaza display
+router.get("/", validatePlazaQuery, (req: Request, res: Response) => {
+  if (req.query.view !== "plaza") {
+    return res.status(404).json({ error: "Route not found" });
+  }
   try {
     const {
       country,
@@ -250,7 +257,7 @@ router.get("/plaza", validatePlazaQuery, (req: Request, res: Response) => {
     });
   } catch (error) {
     log.error("Mock plaza fetch error", { error });
-    res.status(500).json({ error: "Failed to fetch plaza characters" });
+    internalServerErrorResponse(res, "Failed to fetch plaza characters");
   }
 });
 
@@ -261,7 +268,7 @@ router.get("/:id", (req: Request, res: Response) => {
     const character = mockDataStore.getCharacter(id);
 
     if (!character || character.is_deleted) {
-      return res.status(404).json({ error: "Character not found" });
+      return notFoundResponse(res, "Character");
     }
 
     const publicCharacter = {
@@ -274,12 +281,10 @@ router.get("/:id", (req: Request, res: Response) => {
       character_data: character.character_data,
     };
 
-    res.json({
-      character: publicCharacter,
-    });
+    successResponse(res, publicCharacter);
   } catch (error) {
     log.error("Mock get character by ID error", { error });
-    res.status(500).json({ error: "Failed to retrieve character" });
+    internalServerErrorResponse(res, "Failed to retrieve character");
   }
 });
 
