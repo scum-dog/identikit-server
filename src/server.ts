@@ -48,6 +48,8 @@ const globalRateLimit = rateLimit({
   message: {
     error: "Too many requests from this IP. Please try again later",
   },
+  standardHeaders: "draft-7",
+  legacyHeaders: false,
 });
 
 app.use(globalRateLimit);
@@ -75,23 +77,25 @@ app.get("/", (req: Request, res: Response) => {
       auth: {
         "POST /auth/newgrounds/authenticate":
           "Authenticate with Newgrounds session",
-        "GET /auth/itchio/url": "Get Itch.io OAuth URL",
-        "GET /auth/google/url": "Get Google OAuth URL",
-        "POST /auth/verify": "Verify current session",
+        "GET /auth/itchio/authorization-url":
+          "Get Itch.io OAuth authorization URL",
+        "GET /auth/google/authorization-url":
+          "Get Google OAuth authorization URL",
+        "GET /auth/session": "Verify current session",
         "GET /auth/me": "Get current user info",
-        "POST /auth/logout": "Logout with serverside cleanup",
+        "DELETE /auth/session": "Logout with serverside cleanup",
       },
       characters: {
         "GET /characters/me": "Get user's character",
         "POST /characters": "Create new character",
         "PUT /characters/me": "Update user's character",
-        "GET /characters/plaza": "Get plaza characters",
+        "GET /characters?view=plaza": "Get characters for plaza display",
         "GET /characters/:id": "Get character by ID",
       },
       admin: {
         "GET /admin/characters": "List all characters (admin)",
-        "GET /admin/character/:id": "Get character details (admin)",
-        "DELETE /admin/character/:id": "Delete character (admin)",
+        "GET /admin/characters/:id": "Get character details (admin)",
+        "DELETE /admin/characters/:id": "Delete character (admin)",
         "GET /admin/users": "List all users (admin)",
       },
       callbacks: {
@@ -104,7 +108,7 @@ app.get("/", (req: Request, res: Response) => {
         "GET /mock/characters/me": "Mock user's character",
         "POST /mock/characters": "Mock character creation",
         "PUT /mock/characters/me": "Mock character update",
-        "GET /mock/characters/plaza": "Mock plaza characters",
+        "GET /mock/characters?view=plaza": "Mock characters for plaza display",
         "GET /mock/characters/:id": "Mock character by ID",
         "GET /mock/admin/characters": "Mock admin character list",
         "GET /mock/admin/character/:id": "Mock admin character details",

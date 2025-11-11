@@ -12,6 +12,13 @@ import { addCharacterProcessingJob } from "../queue";
 import { JobPriority } from "../types";
 import { log } from "../utils/logger";
 import {
+  successResponse,
+  acceptedResponse,
+  notFoundResponse,
+  conflictResponse,
+  internalServerErrorResponse,
+} from "../utils/responseHelpers";
+import {
   PlazaQueryRequest,
   PlazaCharacterData,
   PlazaCharacterResult,
@@ -23,12 +30,16 @@ const characterRateLimit = rateLimit({
   windowMs: 60 * 1000,
   max: 10,
   message: { error: "Too many requests, please try again later" },
+  standardHeaders: "draft-7",
+  legacyHeaders: false,
 });
 
 const uploadRateLimit = rateLimit({
   windowMs: 60 * 60 * 1000,
   max: 5,
   message: { error: "Upload limit exceeded, please try again later" },
+  standardHeaders: "draft-7",
+  legacyHeaders: false,
   skip: (req) => {
     const user = req.user;
     return user?.isAdmin || req.headers["x-bulk-operation"] === "true";
@@ -41,9 +52,7 @@ router.get("/me", authenticateUser, async (req: Request, res: Response) => {
     const character = await characterQueries.findByUserId(req.user!.id);
 
     if (!character) {
-      return res
-        .status(404)
-        .json({ error: "No character found for this user" });
+      return notFoundResponse(res, "Character");
     }
 
     const parsedCharacterData =
@@ -51,27 +60,27 @@ router.get("/me", authenticateUser, async (req: Request, res: Response) => {
         ? JSON.parse(character.character_data)
         : character.character_data;
 
-    res.json({
-      character: {
-        upload_id: character.id,
-        user_id: character.user_id,
-        created_at: character.created_at,
-        last_edited_at: character.last_edited_at,
-        location: parsedCharacterData.character_data.info.location || {},
-        character_data: parsedCharacterData,
-        is_edited: character.is_edited,
-        is_deleted: character.is_deleted,
-        deleted_at: character.deleted_at,
-        deleted_by: character.deleted_by,
-      },
-      can_edit: await query<{ can_user_edit_character: boolean }>(
-        "SELECT can_user_edit_character($1, $2) as can_user_edit_character",
-        [character.id, req.user!.id],
-      ).then((result) => result.rows[0]?.can_user_edit_character || false),
+    const canEdit = await query<{ can_user_edit_character: boolean }>(
+      "SELECT can_user_edit_character($1, $2) as can_user_edit_character",
+      [character.id, req.user!.id],
+    ).then((result) => result.rows[0]?.can_user_edit_character || false);
+
+    successResponse(res, {
+      upload_id: character.id,
+      user_id: character.user_id,
+      created_at: character.created_at,
+      last_edited_at: character.last_edited_at,
+      location: parsedCharacterData.character_data.info.location || {},
+      character_data: parsedCharacterData,
+      is_edited: character.is_edited,
+      is_deleted: character.is_deleted,
+      deleted_at: character.deleted_at,
+      deleted_by: character.deleted_by,
+      can_edit: canEdit,
     });
   } catch (error) {
     log.error("Get character error:", { error });
-    res.status(500).json({ error: "Failed to retrieve character" });
+    internalServerErrorResponse(res, "Failed to retrieve character");
   }
 });
 
@@ -88,9 +97,10 @@ router.post(
         req.user!.id,
       );
       if (existingCharacter) {
-        return res
-          .status(409)
-          .json({ error: "User already has a character. Use PUT to update." });
+        return conflictResponse(
+          res,
+          "User already has a character. Use PUT to update.",
+        );
       }
 
       const job = await addCharacterProcessingJob(
@@ -107,14 +117,18 @@ router.post(
         JobPriority.NORMAL,
       );
 
-      res.status(202).json({
-        message: "Character creation queued successfully",
-        jobId: job,
-        status: "processing",
-      });
+      acceptedResponse(
+        res,
+        {
+          message: "Character creation queued successfully",
+          jobId: job,
+          status: "processing",
+        },
+        `/characters/${job}`,
+      );
     } catch (error) {
       log.error("Create character error:", { error });
-      res.status(500).json({ error: "Failed to create character" });
+      internalServerErrorResponse(res, "Failed to create character");
     }
   },
 );
@@ -130,7 +144,7 @@ router.put(
       const character = await characterQueries.findByUserId(req.user!.id);
 
       if (!character) {
-        return res.status(404).json({ error: "No character found to update" });
+        return notFoundResponse(res, "Character");
       }
 
       const job = await addCharacterProcessingJob(
@@ -148,11 +162,15 @@ router.put(
         JobPriority.HIGH,
       );
 
-      res.status(202).json({
-        message: "Character update queued successfully",
-        jobId: job,
-        status: "processing",
-      });
+      acceptedResponse(
+        res,
+        {
+          message: "Character update queued successfully",
+          jobId: job,
+          status: "processing",
+        },
+        `/characters/${job}`,
+      );
     } catch (error) {
       log.error("Update character error:", { error });
 
@@ -168,60 +186,55 @@ router.put(
   },
 );
 
-// GET /characters/plaza - get characters for plaza display
-router.get(
-  "/plaza",
-  validatePlazaQuery,
-  async (req: Request, res: Response) => {
-    try {
-      const { country, region, limit } =
-        (req as PlazaQueryRequest).validatedQuery || req.query;
+// GET /characters?view=plaza - get characters for plaza display
+router.get("/", validatePlazaQuery, async (req: Request, res: Response) => {
+  if (req.query.view !== "plaza") {
+    return res.status(404).json({ error: "Route not found" });
+  }
+  try {
+    const { country, region, limit } =
+      (req as PlazaQueryRequest).validatedQuery || req.query;
 
-      let characters;
+    let characters;
 
-      if (country || region) {
-        characters = await characterQueries.searchByLocation(
-          country as string,
-          region as string,
-          Number(limit) || 100,
-        );
-      } else {
-        characters = await characterQueries.getRandomCharacters(
-          Number(limit) || 100,
-        );
-      }
-
-      const formattedCharacters = characters.map(
-        (char: PlazaCharacterResult) => {
-          const parsedCharacterData =
-            typeof char.character_data === "string"
-              ? JSON.parse(char.character_data)
-              : char.character_data;
-
-          return {
-            upload_id: char.id,
-            creation_time: char.created_at,
-            edit_time:
-              char.last_edited_at !== char.created_at
-                ? char.last_edited_at
-                : null,
-            location: parsedCharacterData.character_data.info.location || {},
-            character_data: parsedCharacterData,
-          };
-        },
+    if (country || region) {
+      characters = await characterQueries.searchByLocation(
+        country as string,
+        region as string,
+        Number(limit) || 100,
       );
-
-      res.json({
-        characters: formattedCharacters,
-        count: formattedCharacters.length,
-        filters: { country, region },
-      });
-    } catch (error) {
-      log.error("Plaza fetch error:", { error });
-      res.status(500).json({ error: "Failed to fetch plaza characters" });
+    } else {
+      characters = await characterQueries.getRandomCharacters(
+        Number(limit) || 100,
+      );
     }
-  },
-);
+
+    const formattedCharacters = characters.map((char: PlazaCharacterResult) => {
+      const parsedCharacterData =
+        typeof char.character_data === "string"
+          ? JSON.parse(char.character_data)
+          : char.character_data;
+
+      return {
+        upload_id: char.id,
+        creation_time: char.created_at,
+        edit_time:
+          char.last_edited_at !== char.created_at ? char.last_edited_at : null,
+        location: parsedCharacterData.character_data.info.location || {},
+        character_data: parsedCharacterData,
+      };
+    });
+
+    res.json({
+      characters: formattedCharacters,
+      count: formattedCharacters.length,
+      filters: { country, region },
+    });
+  } catch (error) {
+    log.error("Plaza fetch error:", { error });
+    res.status(500).json({ error: "Failed to fetch plaza characters" });
+  }
+});
 
 // GET /characters/:id - get specific character by ID
 router.get("/:id", async (req: Request, res: Response) => {

@@ -14,6 +14,8 @@ const adminRateLimit = rateLimit({
   windowMs: 5 * 60 * 1000,
   max: 20,
   message: { error: "Too many admin actions, please slow down!!!" },
+  standardHeaders: "draft-7",
+  legacyHeaders: false,
 });
 
 // require auth & admin privileges
@@ -68,8 +70,8 @@ router.get("/characters", async (req: Request, res: Response) => {
   }
 });
 
-// GET /admin/character/:id - get specific character with full details
-router.get("/character/:id", async (req: Request, res: Response) => {
+// GET /admin/characters/:id - get specific character with full details
+router.get("/characters/:id", async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
 
@@ -107,9 +109,9 @@ router.get("/character/:id", async (req: Request, res: Response) => {
   }
 });
 
-// DELETE /admin/character/:id - delete a character
+// DELETE /admin/characters/:id - delete a character
 router.delete(
-  "/character/:id",
+  "/characters/:id",
   validateRequest(
     z.object({
       reason: z

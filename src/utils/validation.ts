@@ -15,19 +15,13 @@ const eyeRotationSchema = z
   .min(-35)
   .max(35)
   .int()
-  .refine(
-    (val) => val % 5 === 0,
-    "Rotation must be in 5-degree increments",
-  );
+  .refine((val) => val % 5 === 0, "Rotation must be in 5-degree increments");
 const eyebrowRotationSchema = z
   .number()
   .min(-45)
   .max(45)
   .int()
-  .refine(
-    (val) => val % 5 === 0,
-    "Rotation must be in 5-degree increments",
-  );
+  .refine((val) => val % 5 === 0, "Rotation must be in 5-degree increments");
 
 const offsetXSchema = z
   .number()

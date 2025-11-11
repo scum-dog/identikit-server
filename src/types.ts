@@ -462,6 +462,35 @@ export interface QueueJob {
   priority: JobPriority;
 }
 
+export interface APIResponse<T = unknown> {
+  data?: T;
+  meta?: {
+    pagination?: {
+      page: number;
+      limit: number;
+      total: number;
+      totalPages: number;
+    };
+    [key: string]: unknown;
+  };
+  links?: {
+    self: string;
+    first?: string;
+    prev?: string;
+    next?: string;
+    last?: string;
+    [key: string]: string | undefined;
+  };
+}
+
+export interface APIError {
+  error: {
+    code: string;
+    message: string;
+    details?: unknown;
+  };
+}
+
 declare global {
   namespace Express {
     interface Request {

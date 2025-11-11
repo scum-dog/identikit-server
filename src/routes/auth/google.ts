@@ -10,7 +10,7 @@ import {
 
 const router = Router();
 
-router.get("/url", async (req: Request, res: Response) => {
+router.get("/authorization-url", async (req: Request, res: Response) => {
   try {
     const { authUrl, state, expiresAt } = googleAuth.generateAuthUrl();
     res.json({ authUrl, state, expiresAt });

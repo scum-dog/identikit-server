@@ -15,8 +15,8 @@ router.use("/newgrounds", newgroundsRoutes);
 router.use("/itchio", itchRoutes);
 router.use("/google", googleRoutes);
 
-// POST /auth/verify - verify current session
-router.post("/verify", authenticateUser, (req: Request, res: Response) => {
+// GET /auth/session - verify current session
+router.get("/session", authenticateUser, (req: Request, res: Response) => {
   res.json({
     valid: true,
     user: {
@@ -52,9 +52,9 @@ router.get("/me", authenticateUser, async (req: Request, res: Response) => {
   }
 });
 
-// POST /auth/logout - logout with serverside cleanup
-router.post(
-  "/logout",
+// DELETE /auth/session - logout with serverside cleanup
+router.delete(
+  "/session",
   authenticateUser,
   async (req: Request, res: Response) => {
     try {
