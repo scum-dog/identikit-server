@@ -12,8 +12,6 @@ import { addCharacterProcessingJob } from "../queue";
 import { JobPriority } from "../types";
 import { log } from "../utils/logger";
 import {
-  successResponse,
-  acceptedResponse,
   notFoundResponse,
   conflictResponse,
   internalServerErrorResponse,
@@ -65,17 +63,19 @@ router.get("/me", authenticateUser, async (req: Request, res: Response) => {
       [character.id, req.user!.id],
     ).then((result) => result.rows[0]?.can_user_edit_character || false);
 
-    successResponse(res, {
-      upload_id: character.id,
-      user_id: character.user_id,
-      created_at: character.created_at,
-      last_edited_at: character.last_edited_at,
-      location: parsedCharacterData.character_data.info.location || {},
-      character_data: parsedCharacterData,
-      is_edited: character.is_edited,
-      is_deleted: character.is_deleted,
-      deleted_at: character.deleted_at,
-      deleted_by: character.deleted_by,
+    res.json({
+      character: {
+        upload_id: character.id,
+        user_id: character.user_id,
+        created_at: character.created_at,
+        last_edited_at: character.last_edited_at,
+        location: parsedCharacterData.character_data.info.location || {},
+        character_data: parsedCharacterData,
+        is_edited: character.is_edited,
+        is_deleted: character.is_deleted,
+        deleted_at: character.deleted_at,
+        deleted_by: character.deleted_by,
+      },
       can_edit: canEdit,
     });
   } catch (error) {
@@ -117,15 +117,11 @@ router.post(
         JobPriority.NORMAL,
       );
 
-      acceptedResponse(
-        res,
-        {
-          message: "Character creation queued successfully",
-          jobId: job,
-          status: "processing",
-        },
-        `/characters/${job}`,
-      );
+      res.status(202).location(`/characters/${job}`).json({
+        message: "Character creation queued successfully",
+        jobId: job,
+        status: "processing",
+      });
     } catch (error) {
       log.error("Create character error:", { error });
       internalServerErrorResponse(res, "Failed to create character");
@@ -162,15 +158,11 @@ router.put(
         JobPriority.HIGH,
       );
 
-      acceptedResponse(
-        res,
-        {
-          message: "Character update queued successfully",
-          jobId: job,
-          status: "processing",
-        },
-        `/characters/${job}`,
-      );
+      res.status(202).location(`/characters/${job}`).json({
+        message: "Character update queued successfully",
+        jobId: job,
+        status: "processing",
+      });
     } catch (error) {
       log.error("Update character error:", { error });
 
