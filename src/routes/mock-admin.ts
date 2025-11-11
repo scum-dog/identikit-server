@@ -88,16 +88,24 @@ router.get("/characters/:id", (req: Request, res: Response) => {
 
     const user = mockDataStore.getUser(character.user_id);
 
-    const characterWithDetails = {
-      ...character,
-      username: user?.username || "Unknown",
-      platform: user?.platform || "unknown",
-      platform_user_id: user?.platform_user_id || "unknown",
-      user_created_at: user?.created_at || null,
-      last_login: user?.last_login || null,
-    };
-
-    successResponse(res, characterWithDetails);
+    successResponse(res, {
+      character_data: character.character_data,
+      metadata: {
+        upload_id: character.upload_id,
+        user_id: character.user_id,
+        created_at: character.created_at,
+        last_edited_at: character.last_edited_at,
+        is_edited: character.is_edited,
+        is_deleted: character.is_deleted,
+        deleted_at: character.deleted_at,
+        deleted_by: character.deleted_by,
+        username: user?.username || "Unknown",
+        platform: user?.platform || "unknown",
+        platform_user_id: user?.platform_user_id || "unknown",
+        user_created_at: user?.created_at || null,
+        last_login: user?.last_login || null,
+      },
+    });
   } catch (error) {
     log.error("Mock admin get character details error", { error });
     internalServerErrorResponse(res, "Failed to fetch character details");

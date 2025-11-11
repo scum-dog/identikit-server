@@ -53,17 +53,18 @@ router.get("/me", (_req: Request, res: Response) => {
     const canEdit = mockCanUserEditCharacter(character);
 
     successResponse(res, {
-      upload_id: character.upload_id,
-      user_id: character.user_id,
-      created_at: character.created_at,
-      last_edited_at: character.last_edited_at,
-      location: character.character_data.info.location || {},
       character_data: character.character_data,
-      is_edited: character.is_edited,
-      is_deleted: character.is_deleted,
-      deleted_at: character.deleted_at,
-      deleted_by: character.deleted_by,
-      can_edit: canEdit,
+      metadata: {
+        upload_id: character.upload_id,
+        user_id: character.user_id,
+        created_at: character.created_at,
+        last_edited_at: character.last_edited_at,
+        is_edited: character.is_edited,
+        can_edit: canEdit,
+        is_deleted: character.is_deleted,
+        deleted_at: character.deleted_at,
+        deleted_by: character.deleted_by,
+      },
     });
   } catch (error) {
     log.error("Mock get character error", { error });
@@ -107,15 +108,17 @@ router.post(
 
       createdResponse(res, {
         message: "Character created successfully",
-        upload_id: newCharacter.upload_id,
-        user_id: newCharacter.user_id,
-        created_at: newCharacter.created_at,
-        last_edited_at: newCharacter.last_edited_at,
         character_data: newCharacter.character_data,
-        is_edited: newCharacter.is_edited,
-        is_deleted: newCharacter.is_deleted,
-        deleted_at: newCharacter.deleted_at,
-        deleted_by: newCharacter.deleted_by,
+        metadata: {
+          upload_id: newCharacter.upload_id,
+          user_id: newCharacter.user_id,
+          created_at: newCharacter.created_at,
+          last_edited_at: newCharacter.last_edited_at,
+          is_edited: newCharacter.is_edited,
+          is_deleted: newCharacter.is_deleted,
+          deleted_at: newCharacter.deleted_at,
+          deleted_by: newCharacter.deleted_by,
+        },
       });
     } catch (error) {
       log.error("Mock create character error", { error });
@@ -177,16 +180,18 @@ router.put(
 
       successResponse(res, {
         message: "Character updated successfully",
-        upload_id: updatedCharacter.upload_id,
-        user_id: updatedCharacter.user_id,
-        created_at: updatedCharacter.created_at,
-        last_edited_at: updatedCharacter.last_edited_at,
         character_data: updatedCharacter.character_data,
-        is_edited: updatedCharacter.is_edited,
-        is_deleted: updatedCharacter.is_deleted,
-        deleted_at: updatedCharacter.deleted_at,
-        deleted_by: updatedCharacter.deleted_by,
-        can_edit: mockCanUserEditCharacter(updatedCharacter),
+        metadata: {
+          upload_id: updatedCharacter.upload_id,
+          user_id: updatedCharacter.user_id,
+          created_at: updatedCharacter.created_at,
+          last_edited_at: updatedCharacter.last_edited_at,
+          is_edited: updatedCharacter.is_edited,
+          can_edit: mockCanUserEditCharacter(updatedCharacter),
+          is_deleted: updatedCharacter.is_deleted,
+          deleted_at: updatedCharacter.deleted_at,
+          deleted_by: updatedCharacter.deleted_by,
+        },
       });
     } catch (error) {
       log.error("Mock update character error", { error });
