@@ -473,14 +473,6 @@ export interface APIResponse<T = unknown> {
     };
     [key: string]: unknown;
   };
-  links?: {
-    self: string;
-    first?: string;
-    prev?: string;
-    next?: string;
-    last?: string;
-    [key: string]: string | undefined;
-  };
 }
 
 export interface APIError {

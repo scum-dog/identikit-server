@@ -12,13 +12,11 @@ export function successResponse<T>(
   data: T,
   statusCode: number = 200,
   meta?: APIResponse<T>["meta"],
-  links?: APIResponse<T>["links"],
   enableETag: boolean = false,
 ): void {
   const response: APIResponse<T> = { data };
 
   if (meta) response.meta = meta;
-  if (links) response.links = links;
 
   if (enableETag && statusCode === 200) {
     res.setHeader("ETag", generateETag(response));
@@ -58,23 +56,8 @@ export function collectionResponse<T>(
     total: number;
     totalPages: number;
   },
-  baseUrl: string,
 ): void {
-  const links: APIResponse<T[]>["links"] = {
-    self: `${baseUrl}?page=${pagination.page}&limit=${pagination.limit}`,
-  };
-
-  if (pagination.page > 1) {
-    links.first = `${baseUrl}?page=1&limit=${pagination.limit}`;
-    links.prev = `${baseUrl}?page=${pagination.page - 1}&limit=${pagination.limit}`;
-  }
-
-  if (pagination.page < pagination.totalPages) {
-    links.next = `${baseUrl}?page=${pagination.page + 1}&limit=${pagination.limit}`;
-    links.last = `${baseUrl}?page=${pagination.totalPages}&limit=${pagination.limit}`;
-  }
-
-  successResponse(res, items, 200, { pagination }, links);
+  successResponse(res, items, 200, { pagination });
 }
 
 export function errorResponse(

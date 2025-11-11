@@ -59,17 +59,12 @@ router.get("/characters", (req: Request, res: Response) => {
       };
     });
 
-    collectionResponse(
-      res,
-      charactersWithUsers,
-      {
-        page,
-        limit,
-        total,
-        totalPages: Math.ceil(total / limit),
-      },
-      "/mock/admin/characters",
-    );
+    collectionResponse(res, charactersWithUsers, {
+      page,
+      limit,
+      total,
+      totalPages: Math.ceil(total / limit),
+    });
   } catch (error) {
     log.error("Mock admin get characters error", { error });
     internalServerErrorResponse(res, "Failed to fetch characters");
@@ -189,17 +184,12 @@ router.get("/users", (req: Request, res: Response) => {
       };
     });
 
-    collectionResponse(
-      res,
-      usersWithData,
-      {
-        page,
-        limit,
-        total,
-        totalPages: Math.ceil(total / limit),
-      },
-      "/mock/admin/users",
-    );
+    collectionResponse(res, usersWithData, {
+      page,
+      limit,
+      total,
+      totalPages: Math.ceil(total / limit),
+    });
   } catch (error) {
     log.error("Mock admin get users error", { error });
     internalServerErrorResponse(res, "Failed to fetch users");
