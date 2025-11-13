@@ -35,7 +35,6 @@ describe("Type-Schema Alignment Tests", () => {
             location: {
               country: "United States",
               region: "California",
-              city: "Los Angeles",
             },
           },
           static: {

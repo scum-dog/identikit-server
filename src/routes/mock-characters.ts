@@ -249,7 +249,6 @@ router.get("/", validatePlazaQuery, (req: Request, res: Response) => {
         location: {
           country: char.character_data.info.location.country,
           region: char.character_data.info.location.region || null,
-          city: char.character_data.info.location.city || null,
         },
         character_data: char.character_data,
       };

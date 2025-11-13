@@ -49,7 +49,6 @@ export interface CharacterPersonalInfo {
   location: {
     country: string;
     region?: string;
-    city?: string;
   };
 }
 

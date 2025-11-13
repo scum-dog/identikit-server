@@ -74,16 +74,6 @@ const regions = {
   Australia: ["New South Wales", "Victoria", "Queensland", "Western Australia"],
 };
 
-const cities = {
-  California: ["Los Angeles", "San Francisco", "San Diego", "Oakland"],
-  "New York": ["New York City", "Buffalo", "Rochester", "Syracuse"],
-  Texas: ["Houston", "Dallas", "Austin", "San Antonio"],
-  Ontario: ["Toronto", "Ottawa", "Hamilton", "London"],
-  England: ["London", "Manchester", "Birmingham", "Liverpool"],
-  Bavaria: ["Munich", "Nuremberg", "Augsburg", "Würzburg"],
-  Tokyo: ["Shibuya", "Shinjuku", "Harajuku", "Akihabara"],
-};
-
 const skinColors: SkinColor[] = [
   "pale",
   "light",
@@ -193,11 +183,6 @@ export function generateMockCharacterData(): FullCharacter {
   const country = randomChoice(countries);
   const regionList = regions[country as keyof typeof regions] || [];
   const region = regionList.length > 0 ? randomChoice(regionList) : undefined;
-  const cityList =
-    region && cities[region as keyof typeof cities]
-      ? cities[region as keyof typeof cities]
-      : [];
-  const city = cityList.length > 0 ? randomChoice(cityList) : undefined;
 
   const sex = randomChoice(sexOptions);
   const shouldHaveBeard = sex !== "female";
@@ -215,7 +200,6 @@ export function generateMockCharacterData(): FullCharacter {
         location: {
           country,
           region,
-          city,
         },
       },
       static: {

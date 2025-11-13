@@ -109,7 +109,6 @@ export const characterDataSchema = z.object({
       location: z.object({
         country: z.string().min(1).max(100),
         region: z.string().min(1).max(100).optional(),
-        city: z.string().min(1).max(100).optional(),
       }),
     })
     .strict(),
@@ -206,7 +205,6 @@ export const characterDataUpdateSchema = z.object({
             .object({
               country: z.string().min(1).max(100).optional(),
               region: z.string().min(1).max(100).or(z.literal("")).optional(),
-              city: z.string().min(1).max(100).or(z.literal("")).optional(),
             })
             .optional(),
         })

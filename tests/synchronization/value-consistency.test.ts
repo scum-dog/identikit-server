@@ -120,7 +120,6 @@ describe("Value Consistency Tests", () => {
             location: {
               country: "United States",
               region: "California",
-              city: "Los Angeles",
             },
           },
           static: {
