@@ -20,16 +20,18 @@ describe("Rotation Range Validation", () => {
         date_of_birth: "1990-01-01",
         height_in: 70,
         weight_lb: 150,
+        eye_color: "brown" as const,
+        hair_color: "brown" as const,
+        race: "white" as const,
         location: { country: "United States" },
       },
       static: {
-        head: { asset_id: 1, skin_color: "medium" as const },
-        hair: { asset_id: 1, hair_color: "brown" as const },
+        head: { asset_id: 1 },
+        hair: { asset_id: 1 },
       },
       placeable_movable: {
         eyes: {
           asset_id: 1,
-          eye_color: "brown" as const,
           offset_x: 0,
           offset_y: 0,
           scale: 1.0,

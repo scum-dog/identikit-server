@@ -1,11 +1,6 @@
 import { z } from "zod";
 import { fullCharacterSchema } from "../../src/utils/validation";
-import {
-  CharacterDataStructure,
-  CharacterStatic,
-  CharacterPlaceableMovable,
-  CharacterMetadata,
-} from "../../src/types";
+import { CharacterDataStructure, CharacterMetadata } from "../../src/types";
 
 describe("Type-Schema Alignment Tests", () => {
   describe("Schema Structure vs TypeScript Types", () => {
@@ -32,6 +27,9 @@ describe("Type-Schema Alignment Tests", () => {
             date_of_birth: "1990-01-01",
             height_in: 72,
             weight_lb: 180,
+            eye_color: "brown",
+            hair_color: "brown",
+            race: "white",
             location: {
               country: "United States",
               region: "California",
@@ -40,15 +38,12 @@ describe("Type-Schema Alignment Tests", () => {
           static: {
             head: {
               asset_id: 1,
-              skin_color: "medium",
             },
             hair: {
               asset_id: 1,
-              hair_color: "brown",
             },
             beard: {
               asset_id: 1,
-              facial_hair_color: "brown",
             },
             age_lines: {
               asset_id: 1,
@@ -57,7 +52,6 @@ describe("Type-Schema Alignment Tests", () => {
           placeable_movable: {
             eyes: {
               asset_id: 1,
-              eye_color: "brown",
               offset_x: 0.5,
               offset_y: 0.1,
               scale: 1.0,
@@ -156,6 +150,9 @@ describe("Type-Schema Alignment Tests", () => {
             date_of_birth: "1990-01-01",
             height_in: 70,
             weight_lb: 150,
+            eye_color: "brown" as const,
+            hair_color: "brown" as const,
+            race: "white" as const,
             location: {
               country: "United States",
             },
@@ -163,15 +160,12 @@ describe("Type-Schema Alignment Tests", () => {
           static: {
             head: {
               asset_id: 1,
-              skin_color: "medium" as const,
             },
             hair: {
               asset_id: 1,
-              hair_color: "brown" as const,
             },
             beard: {
               asset_id: 1,
-              facial_hair_color: "brown" as const,
             },
             age_lines: {
               asset_id: 1,
@@ -180,7 +174,6 @@ describe("Type-Schema Alignment Tests", () => {
           placeable_movable: {
             eyes: {
               asset_id: 1,
-              eye_color: "brown" as const,
               offset_x: 0,
               offset_y: 0,
               scale: 1.0,
@@ -255,6 +248,9 @@ describe("Type-Schema Alignment Tests", () => {
             date_of_birth: "1990-01-01",
             height_in: 70,
             weight_lb: 150,
+            eye_color: "brown" as const,
+            hair_color: "brown" as const,
+            race: "white" as const,
             location: {
               country: "United States",
             },
@@ -262,15 +258,12 @@ describe("Type-Schema Alignment Tests", () => {
           static: {
             head: {
               asset_id: 1,
-              skin_color: "medium" as const,
             },
             hair: {
               asset_id: 1,
-              hair_color: "brown" as const,
             },
             beard: {
               asset_id: 1,
-              facial_hair_color: "brown" as const,
             },
             age_lines: {
               asset_id: 1,
@@ -279,7 +272,6 @@ describe("Type-Schema Alignment Tests", () => {
           placeable_movable: {
             eyes: {
               asset_id: 1,
-              eye_color: "brown" as const,
               offset_x: 0,
               offset_y: 0,
               scale: 1.0,
@@ -301,11 +293,6 @@ describe("Type-Schema Alignment Tests", () => {
               asset_id: 1,
               offset_y: 0,
               scale: 1.0,
-            },
-            accessories: {
-              slot_1: undefined,
-              slot_2: undefined,
-              slot_3: undefined,
             },
           },
         },
@@ -335,6 +322,9 @@ describe("Type-Schema Alignment Tests", () => {
             date_of_birth: "1990-01-01",
             height_in: 70,
             weight_lb: 150,
+            eye_color: "brown" as const,
+            hair_color: "brown" as const,
+            race: "white" as const,
             location: {
               country: "United States",
             },
@@ -342,15 +332,12 @@ describe("Type-Schema Alignment Tests", () => {
           static: {
             head: {
               asset_id: 1,
-              skin_color: "medium" as const,
             },
             hair: {
               asset_id: 1,
-              hair_color: "brown" as const,
             },
             beard: {
               asset_id: 1,
-              facial_hair_color: "brown" as const,
             },
             age_lines: {
               asset_id: 1,
@@ -359,7 +346,6 @@ describe("Type-Schema Alignment Tests", () => {
           placeable_movable: {
             eyes: {
               asset_id: 1,
-              eye_color: "brown" as const,
               offset_x: 0,
               offset_y: 0,
               scale: 1.0,
@@ -382,11 +368,6 @@ describe("Type-Schema Alignment Tests", () => {
               offset_y: 0,
               scale: 1.0,
             },
-            accessories: {
-              slot_1: undefined,
-              slot_2: undefined,
-              slot_3: undefined,
-            },
           },
         },
       };
@@ -398,9 +379,6 @@ describe("Type-Schema Alignment Tests", () => {
         expect(result.data.character_data.static.beard).toBeDefined();
         if (result.data.character_data.static.beard) {
           expect(result.data.character_data.static.beard.asset_id).toBe(1);
-          expect(
-            result.data.character_data.static.beard.facial_hair_color,
-          ).toBe("brown");
         }
       }
     });
@@ -430,7 +408,6 @@ describe("Type-Schema Alignment Tests", () => {
             },
             head: {
               asset_id: 1,
-              skin_color: "medium",
             },
             hair: {
               asset_id: 1,
@@ -438,11 +415,9 @@ describe("Type-Schema Alignment Tests", () => {
             },
             beard: {
               asset_id: 1,
-              facial_hair_color: "brown",
             },
             facial_hair: {
               asset_id: 2,
-              facial_hair_color: "black",
             },
           },
           placeable_movable: {
@@ -470,11 +445,6 @@ describe("Type-Schema Alignment Tests", () => {
               asset_id: 1,
               offset_y: 0,
               scale: 1.0,
-            },
-            accessories: {
-              slot_1: undefined,
-              slot_2: undefined,
-              slot_3: undefined,
             },
           },
         },

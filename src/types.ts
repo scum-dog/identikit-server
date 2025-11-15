@@ -46,6 +46,9 @@ export interface CharacterPersonalInfo {
   date_of_birth: string;
   height_in: number;
   weight_lb: number;
+  eye_color: EyeColor;
+  hair_color: HairColor;
+  race: Race;
   location: {
     country: string;
     region?: string;
@@ -55,15 +58,12 @@ export interface CharacterPersonalInfo {
 export interface CharacterStatic {
   head: {
     asset_id: number;
-    skin_color: SkinColor;
   };
   hair: {
     asset_id: number;
-    hair_color: HairColor;
   };
   beard?: {
     asset_id: number;
-    facial_hair_color: HairColor;
   };
   age_lines?: {
     asset_id: number;
@@ -73,7 +73,6 @@ export interface CharacterStatic {
 export interface CharacterPlaceableMovable {
   eyes: {
     asset_id: number;
-    eye_color: EyeColor;
     offset_x: number;
     offset_y: number;
     scale: number;
@@ -152,35 +151,24 @@ export interface MockCharacterRouteUpdates {
 
 export type AccessoryType = "glasses" | "mustache" | "misc";
 
-export type SkinColor =
-  | "pale"
-  | "light"
-  | "medium"
-  | "medium-tan"
-  | "tan"
-  | "dark"
-  | "very-dark";
+export type Race = "native" | "asian" | "black" | "pacific_islander" | "white";
 
 export type EyeColor =
   | "black"
+  | "blue"
   | "brown"
   | "gray"
-  | "blue"
   | "green"
   | "hazel"
-  | "maroon";
+  | "maroon"
+  | "pink";
 
 export type HairColor =
   | "bald"
   | "black"
-  | "blonde"
-  | "blue"
+  | "blond"
   | "brown"
   | "gray"
-  | "green"
-  | "orange"
-  | "pink"
-  | "purple"
   | "red"
   | "sandy"
   | "white";

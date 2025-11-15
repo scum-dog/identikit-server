@@ -3,16 +3,10 @@ import {
   fullCharacterSchema,
   eyeColorEnum,
   hairColorEnum,
-  skinColorEnum,
+  raceEnum,
   sexEnum,
 } from "../../src/utils/validation";
-import {
-  SkinColor,
-  EyeColor,
-  HairColor,
-  Sex,
-  AccessoryType,
-} from "../../src/types";
+import { Race, EyeColor, HairColor, Sex, AccessoryType } from "../../src/types";
 
 const extractZodEnumValues = (zodEnum: z.ZodEnum<any>) => {
   return zodEnum.options;
@@ -20,16 +14,14 @@ const extractZodEnumValues = (zodEnum: z.ZodEnum<any>) => {
 
 describe("Value Consistency Tests", () => {
   describe("Enum Value Synchronization", () => {
-    it("should have matching SkinColor values between types and validation", () => {
-      const validationValues = extractZodEnumValues(skinColorEnum);
-      const typeValues: SkinColor[] = [
-        "pale",
-        "light",
-        "medium",
-        "medium-tan",
-        "tan",
-        "dark",
-        "very-dark",
+    it("should have matching Race values between types and validation", () => {
+      const validationValues = extractZodEnumValues(raceEnum);
+      const typeValues: Race[] = [
+        "native",
+        "asian",
+        "black",
+        "pacific_islander",
+        "white",
       ];
 
       expect(validationValues.sort()).toEqual(typeValues.sort());
@@ -39,12 +31,13 @@ describe("Value Consistency Tests", () => {
       const validationValues = extractZodEnumValues(eyeColorEnum);
       const typeValues: EyeColor[] = [
         "black",
+        "blue",
         "brown",
         "gray",
-        "blue",
         "green",
         "hazel",
         "maroon",
+        "pink",
       ];
 
       expect(validationValues.sort()).toEqual(typeValues.sort());
@@ -55,14 +48,9 @@ describe("Value Consistency Tests", () => {
       const typeValues: HairColor[] = [
         "bald",
         "black",
-        "blonde",
-        "blue",
+        "blond",
         "brown",
         "gray",
-        "green",
-        "orange",
-        "pink",
-        "purple",
         "red",
         "sandy",
         "white",
@@ -117,6 +105,9 @@ describe("Value Consistency Tests", () => {
             date_of_birth: "1990-01-01",
             height_in: 70,
             weight_lb: 150,
+            eye_color: "brown" as const,
+            hair_color: "brown" as const,
+            race: "white" as const,
             location: {
               country: "United States",
               region: "California",
@@ -125,15 +116,12 @@ describe("Value Consistency Tests", () => {
           static: {
             head: {
               asset_id: 1,
-              skin_color: "medium" as const,
             },
             hair: {
               asset_id: 1,
-              hair_color: "brown" as const,
             },
             beard: {
               asset_id: 1,
-              facial_hair_color: "brown" as const,
             },
             age_lines: {
               asset_id: 1,
@@ -142,7 +130,6 @@ describe("Value Consistency Tests", () => {
           placeable_movable: {
             eyes: {
               asset_id: 1,
-              eye_color: "brown" as const,
               offset_x: 0,
               offset_y: 0,
               scale: 1.0,
@@ -209,18 +196,20 @@ describe("Value Consistency Tests", () => {
               date_of_birth: "1990-01-01",
               height_in: height,
               weight_lb: 150,
+              eye_color: "brown" as const,
+              hair_color: "brown" as const,
+              race: "white" as const,
               location: { country: "United States" },
             },
             static: {
-              head: { asset_id: 1, skin_color: "medium" as const },
-              hair: { asset_id: 1, hair_color: "brown" as const },
-              beard: { asset_id: 1, facial_hair_color: "brown" as const },
+              head: { asset_id: 1 },
+              hair: { asset_id: 1 },
+              beard: { asset_id: 1 },
               age_lines: { asset_id: 1 },
             },
             placeable_movable: {
               eyes: {
                 asset_id: 1,
-                eye_color: "brown" as const,
                 offset_x: 0,
                 offset_y: 0,
                 scale: 1.0,
@@ -235,11 +224,6 @@ describe("Value Consistency Tests", () => {
               },
               nose: { asset_id: 1, offset_y: 0, scale: 1.0 },
               lips: { asset_id: 1, offset_y: 0, scale: 1.0 },
-              accessories: {
-                slot_1: undefined,
-                slot_2: undefined,
-                slot_3: undefined,
-              },
             },
           },
         };
@@ -278,18 +262,20 @@ describe("Value Consistency Tests", () => {
               date_of_birth: "1990-01-01",
               height_in: 70,
               weight_lb: weight,
+              eye_color: "brown" as const,
+              hair_color: "brown" as const,
+              race: "white" as const,
               location: { country: "United States" },
             },
             static: {
-              head: { asset_id: 1, skin_color: "medium" as const },
-              hair: { asset_id: 1, hair_color: "brown" as const },
-              beard: { asset_id: 1, facial_hair_color: "brown" as const },
+              head: { asset_id: 1 },
+              hair: { asset_id: 1 },
+              beard: { asset_id: 1 },
               age_lines: { asset_id: 1 },
             },
             placeable_movable: {
               eyes: {
                 asset_id: 1,
-                eye_color: "brown" as const,
                 offset_x: 0,
                 offset_y: 0,
                 scale: 1.0,
@@ -304,11 +290,6 @@ describe("Value Consistency Tests", () => {
               },
               nose: { asset_id: 1, offset_y: 0, scale: 1.0 },
               lips: { asset_id: 1, offset_y: 0, scale: 1.0 },
-              accessories: {
-                slot_1: undefined,
-                slot_2: undefined,
-                slot_3: undefined,
-              },
             },
           },
         };
@@ -347,18 +328,20 @@ describe("Value Consistency Tests", () => {
               date_of_birth: "1990-01-01",
               height_in: 70,
               weight_lb: 150,
+              eye_color: "brown" as const,
+              hair_color: "brown" as const,
+              race: "white" as const,
               location: { country: "United States" },
             },
             static: {
-              head: { asset_id: 1, skin_color: "medium" as const },
-              hair: { asset_id: 1, hair_color: "brown" as const },
-              beard: { asset_id: 1, facial_hair_color: "brown" as const },
+              head: { asset_id: 1 },
+              hair: { asset_id: 1 },
+              beard: { asset_id: 1 },
               age_lines: { asset_id: 1 },
             },
             placeable_movable: {
               eyes: {
                 asset_id: 1,
-                eye_color: "brown" as const,
                 offset_x: 0,
                 offset_y: offset,
                 scale: 1.0,
@@ -373,11 +356,6 @@ describe("Value Consistency Tests", () => {
               },
               nose: { asset_id: 1, offset_y: 0, scale: 1.0 },
               lips: { asset_id: 1, offset_y: 0, scale: 1.0 },
-              accessories: {
-                slot_1: undefined,
-                slot_2: undefined,
-                slot_3: undefined,
-              },
             },
           },
         };
@@ -417,18 +395,20 @@ describe("Value Consistency Tests", () => {
               date_of_birth: "1990-01-01",
               height_in: 70,
               weight_lb: 150,
+              eye_color: "brown" as const,
+              hair_color: "brown" as const,
+              race: "white" as const,
               location: { country: "United States" },
             },
             static: {
-              head: { asset_id: 1, skin_color: "medium" as const },
-              hair: { asset_id: 1, hair_color: "brown" as const },
-              beard: { asset_id: 1, facial_hair_color: "brown" as const },
+              head: { asset_id: 1 },
+              hair: { asset_id: 1 },
+              beard: { asset_id: 1 },
               age_lines: { asset_id: 1 },
             },
             placeable_movable: {
               eyes: {
                 asset_id: 1,
-                eye_color: "brown" as const,
                 offset_x: 0,
                 offset_y: 0,
                 scale: scale,
@@ -443,11 +423,6 @@ describe("Value Consistency Tests", () => {
               },
               nose: { asset_id: 1, offset_y: 0, scale: 1.0 },
               lips: { asset_id: 1, offset_y: 0, scale: 1.0 },
-              accessories: {
-                slot_1: undefined,
-                slot_2: undefined,
-                slot_3: undefined,
-              },
             },
           },
         };

@@ -43,32 +43,26 @@ export const eyeColorEnum = z.enum([
   "green",
   "hazel",
   "maroon",
+  "pink",
 ]);
 
 export const hairColorEnum = z.enum([
   "bald",
   "black",
-  "blonde",
-  "blue",
+  "blond",
   "brown",
   "gray",
-  "green",
-  "orange",
-  "pink",
-  "purple",
   "red",
   "sandy",
   "white",
 ]);
 
-export const skinColorEnum = z.enum([
-  "pale",
-  "light",
-  "medium",
-  "medium-tan",
-  "tan",
-  "dark",
-  "very-dark",
+export const raceEnum = z.enum([
+  "native",
+  "asian",
+  "black",
+  "pacific_islander",
+  "white",
 ]);
 
 export const sexEnum = z.enum(["male", "female", "other"]);
@@ -106,6 +100,9 @@ export const characterDataSchema = z.object({
         }, "Date must be between 1900-01-01 and today"),
       height_in: z.number().int().min(24).max(96), // 2-8 feet
       weight_lb: z.number().int().min(50).max(500), // pounds
+      eye_color: eyeColorEnum,
+      hair_color: hairColorEnum,
+      race: raceEnum,
       location: z.object({
         country: z.string().min(1).max(100),
         region: z.string().min(1).max(100).optional(),
@@ -116,16 +113,13 @@ export const characterDataSchema = z.object({
     .object({
       head: z.object({
         asset_id: assetIdSchema(),
-        skin_color: skinColorEnum,
       }),
       hair: z.object({
         asset_id: assetIdSchema(),
-        hair_color: hairColorEnum,
       }),
       beard: z
         .object({
           asset_id: assetIdSchema(),
-          facial_hair_color: hairColorEnum,
         })
         .optional(),
       age_lines: z
@@ -138,7 +132,6 @@ export const characterDataSchema = z.object({
   placeable_movable: z.object({
     eyes: z.object({
       asset_id: assetIdSchema(),
-      eye_color: eyeColorEnum,
       offset_x: offsetXSchema.default(0),
       offset_y: offsetSchema.default(0),
       scale: scaleSchema.default(1.0),
@@ -201,6 +194,9 @@ export const characterDataUpdateSchema = z.object({
             .optional(),
           height_in: z.number().int().min(24).max(96).optional(),
           weight_lb: z.number().int().min(50).max(500).optional(),
+          eye_color: eyeColorEnum.optional(),
+          hair_color: hairColorEnum.optional(),
+          race: raceEnum.optional(),
           location: z
             .object({
               country: z.string().min(1).max(100).optional(),
@@ -214,19 +210,16 @@ export const characterDataUpdateSchema = z.object({
           head: z
             .object({
               asset_id: assetIdSchema().optional(),
-              skin_color: skinColorEnum.optional(),
             })
             .optional(),
           hair: z
             .object({
               asset_id: assetIdSchema().optional(),
-              hair_color: hairColorEnum.optional(),
             })
             .optional(),
           beard: z
             .object({
               asset_id: assetIdSchema(),
-              facial_hair_color: hairColorEnum,
             })
             .optional(),
           age_lines: z
@@ -241,7 +234,6 @@ export const characterDataUpdateSchema = z.object({
           eyes: z
             .object({
               asset_id: assetIdSchema().optional(),
-              eye_color: eyeColorEnum.optional(),
               offset_x: offsetXSchema.optional(),
               offset_y: offsetSchema.optional(),
               scale: scaleSchema.optional(),

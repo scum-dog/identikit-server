@@ -1,7 +1,7 @@
 import { FullCharacter } from "./validation";
 import { randomUUID } from "crypto";
 import {
-  SkinColor,
+  Race,
   EyeColor,
   HairColor,
   Sex,
@@ -74,37 +74,25 @@ const regions = {
   Australia: ["New South Wales", "Victoria", "Queensland", "Western Australia"],
 };
 
-const skinColors: SkinColor[] = [
-  "pale",
-  "light",
-  "medium",
-  "medium-tan",
-  "tan",
-  "dark",
-  "very-dark",
-];
+const races: Race[] = ["native", "asian", "black", "pacific_islander", "white"];
 
 const eyeColors: EyeColor[] = [
-  "brown",
+  "black",
   "blue",
+  "brown",
+  "gray",
   "green",
   "hazel",
-  "gray",
-  "black",
   "maroon",
+  "pink",
 ];
 
 const hairColors: HairColor[] = [
   "bald",
   "black",
-  "blonde",
-  "blue",
+  "blond",
   "brown",
   "gray",
-  "green",
-  "orange",
-  "pink",
-  "purple",
   "red",
   "sandy",
   "white",
@@ -197,6 +185,9 @@ export function generateMockCharacterData(): FullCharacter {
           .split("T")[0],
         height_in: randomInt(60, 80),
         weight_lb: randomInt(120, 220),
+        eye_color: randomChoice(eyeColors),
+        hair_color: randomChoice(hairColors),
+        race: randomChoice(races),
         location: {
           country,
           region,
@@ -205,17 +196,14 @@ export function generateMockCharacterData(): FullCharacter {
       static: {
         head: {
           asset_id: generateShapeId(),
-          skin_color: randomChoice(skinColors),
         },
         hair: {
           asset_id: generateShapeId(),
-          hair_color: randomChoice(hairColors),
         },
         ...(shouldHaveBeard
           ? {
               beard: {
                 asset_id: generateShapeId(),
-                facial_hair_color: randomChoice(hairColors),
               },
             }
           : {}),
@@ -224,7 +212,6 @@ export function generateMockCharacterData(): FullCharacter {
       placeable_movable: {
         eyes: {
           asset_id: generateShapeId(),
-          eye_color: randomChoice(eyeColors),
           offset_x: parseFloat(randomFloat(0, 1).toFixed(1)),
           offset_y: generateOffset(),
           scale: parseFloat(randomFloat(0.5, 1.5).toFixed(1)),

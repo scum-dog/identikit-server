@@ -88,6 +88,7 @@ describe("Validation Middleware (Logic Tests)", () => {
               name: "", // should fail
               sex: "invalid",
               height_in: 0, // too small
+              race: "invalid",
               location: {
                 country: "", // should fail
               },
@@ -95,7 +96,6 @@ describe("Validation Middleware (Logic Tests)", () => {
             static: {
               head: {
                 asset_id: "INVALID_FORMAT",
-                skin_color: "invalid",
               },
             },
           },

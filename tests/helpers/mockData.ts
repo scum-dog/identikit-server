@@ -57,6 +57,9 @@ export const invalidCharacterData = {
       date_of_birth: "invalid-date",
       height_in: 0,
       weight_lb: 1000,
+      eye_color: "invalid" as any,
+      hair_color: "invalid" as any,
+      race: "invalid" as any,
       location: {
         country: "",
       },
@@ -64,7 +67,6 @@ export const invalidCharacterData = {
     static: {
       head: {
         asset_id: "INVALID_FORMAT",
-        skin_color: "invalid" as any,
       },
     },
   },
