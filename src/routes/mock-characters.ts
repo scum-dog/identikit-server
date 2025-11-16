@@ -16,8 +16,6 @@ import {
 import { log } from "../utils/logger";
 import { mockRouteUser, canUserEditCharacter } from "../utils/testMockData";
 import {
-  successResponse,
-  createdResponse,
   notFoundResponse,
   conflictResponse,
   forbiddenResponse,
@@ -52,7 +50,7 @@ router.get("/me", (_req: Request, res: Response) => {
 
     const canEdit = mockCanUserEditCharacter(character);
 
-    successResponse(res, {
+    res.json({
       character_data: character.character_data,
       metadata: {
         upload_id: character.upload_id,
@@ -106,7 +104,7 @@ router.post(
 
       mockDataStore.addCharacter(newCharacter);
 
-      createdResponse(res, {
+      res.status(201).json({
         message: "Character created successfully",
         character_data: newCharacter.character_data,
         metadata: {
@@ -178,7 +176,7 @@ router.put(
         return internalServerErrorResponse(res, "Failed to update character");
       }
 
-      successResponse(res, {
+      res.json({
         message: "Character updated successfully",
         character_data: updatedCharacter.character_data,
         metadata: {
@@ -285,7 +283,7 @@ router.get("/:id", (req: Request, res: Response) => {
       character_data: character.character_data,
     };
 
-    successResponse(res, publicCharacter);
+    res.json(publicCharacter);
   } catch (error) {
     log.error("Mock get character by ID error", { error });
     internalServerErrorResponse(res, "Failed to retrieve character");

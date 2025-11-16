@@ -5,8 +5,6 @@ import { z } from "zod";
 import { log } from "../utils/logger";
 import { mockRouteAdmin } from "../utils/testMockData";
 import {
-  successResponse,
-  collectionResponse,
   notFoundResponse,
   conflictResponse,
   internalServerErrorResponse,
@@ -59,11 +57,14 @@ router.get("/characters", (req: Request, res: Response) => {
       };
     });
 
-    collectionResponse(res, charactersWithUsers, {
-      page,
-      limit,
-      total,
-      totalPages: Math.ceil(total / limit),
+    res.json({
+      characters: charactersWithUsers,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
+      },
     });
   } catch (error) {
     log.error("Mock admin get characters error", { error });
@@ -83,7 +84,7 @@ router.get("/characters/:id", (req: Request, res: Response) => {
 
     const user = mockDataStore.getUser(character.user_id);
 
-    successResponse(res, {
+    res.json({
       character_data: character.character_data,
       metadata: {
         upload_id: character.upload_id,
@@ -140,7 +141,7 @@ router.delete(
         return internalServerErrorResponse(res, "Failed to delete character");
       }
 
-      successResponse(res, {
+      res.json({
         success: true,
         message: `Character has been deleted`,
         deletedCharacter: {
@@ -184,11 +185,14 @@ router.get("/users", (req: Request, res: Response) => {
       };
     });
 
-    collectionResponse(res, usersWithData, {
-      page,
-      limit,
-      total,
-      totalPages: Math.ceil(total / limit),
+    res.json({
+      users: usersWithData,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
+      },
     });
   } catch (error) {
     log.error("Mock admin get users error", { error });

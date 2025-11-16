@@ -455,19 +455,6 @@ export interface QueueJob {
   priority: JobPriority;
 }
 
-export interface APIResponse<T = unknown> {
-  data?: T;
-  meta?: {
-    pagination?: {
-      page: number;
-      limit: number;
-      total: number;
-      totalPages: number;
-    };
-    [key: string]: unknown;
-  };
-}
-
 export interface APIError {
   error: {
     code: string;

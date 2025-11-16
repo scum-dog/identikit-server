@@ -64,13 +64,13 @@ router.get("/me", authenticateUser, async (req: Request, res: Response) => {
     ).then((result) => result.rows[0]?.can_user_edit_character || false);
 
     res.json({
-      character: {
+      character_data: parsedCharacterData,
+      metadata: {
         upload_id: character.id,
         user_id: character.user_id,
         created_at: character.created_at,
         last_edited_at: character.last_edited_at,
         location: parsedCharacterData.character_data.info.location || {},
-        character_data: parsedCharacterData,
         is_edited: character.is_edited,
         is_deleted: character.is_deleted,
         deleted_at: character.deleted_at,
@@ -249,7 +249,8 @@ router.get("/:id", async (req: Request, res: Response) => {
         : character.character_data;
 
     res.json({
-      character: {
+      character_data: parsedCharacterData,
+      metadata: {
         upload_id: character.id,
         creation_time: character.created_at,
         edit_time:
@@ -257,7 +258,6 @@ router.get("/:id", async (req: Request, res: Response) => {
             ? character.last_edited_at
             : null,
         location: parsedCharacterData.character_data.info.location || {},
-        character_data: parsedCharacterData,
       },
     });
   } catch (error) {
