@@ -75,7 +75,7 @@ export const ethnicityEnum = z.enum([
 export const sortRaces = (
   races: Array<z.infer<typeof raceEnum>>,
 ): Array<z.infer<typeof raceEnum>> => {
-  return [...races].sort().reverse();
+  return [...races].sort();
 };
 
 export const raceArraySchema = z

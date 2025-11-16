@@ -75,7 +75,7 @@ const regions = {
   Australia: ["New South Wales", "Victoria", "Queensland", "Western Australia"],
 };
 
-const races: Race[] = ["ai_an", "asian", "black", "nh_pi", "white", "other"];
+const races: Race[] = ["ai_an", "asian", "black", "nh_pi", "other", "white"];
 
 const ethnicities: Ethnicity[] = [
   "hispanic_latino",
@@ -136,7 +136,7 @@ function generateRandomRaces(): Race[] {
   const remainingRaces = races.filter((race) => race !== firstRace);
   const secondRace = randomChoice(remainingRaces);
 
-  return [firstRace, secondRace];
+  return [firstRace, secondRace].sort();
 }
 
 function generateShapeId(): number {
