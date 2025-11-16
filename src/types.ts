@@ -152,13 +152,7 @@ export interface MockCharacterRouteUpdates {
 
 export type AccessoryType = "glasses" | "mustache" | "misc";
 
-export type Race =
-  | "ai_an"
-  | "asian"
-  | "black"
-  | "nh_pi"
-  | "white"
-  | "other";
+export type Race = "ai_an" | "asian" | "black" | "nh_pi" | "white" | "other";
 
 export type Ethnicity =
   | "hispanic_latino"

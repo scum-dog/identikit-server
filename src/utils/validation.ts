@@ -72,6 +72,12 @@ export const ethnicityEnum = z.enum([
   "prefer_not_to_say",
 ]);
 
+export const sortRaces = (
+  races: Array<z.infer<typeof raceEnum>>,
+): Array<z.infer<typeof raceEnum>> => {
+  return [...races].sort();
+};
+
 export const raceArraySchema = z
   .array(raceEnum)
   .min(1, "At least one race must be selected")
@@ -79,7 +85,8 @@ export const raceArraySchema = z
   .refine(
     (races) => new Set(races).size === races.length,
     "Duplicate races not allowed",
-  );
+  )
+  .transform(sortRaces);
 
 export const sexEnum = z.enum(["male", "female", "other"]);
 
