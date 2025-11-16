@@ -136,7 +136,12 @@ function generateRandomRaces(): Race[] {
   const remainingRaces = races.filter((race) => race !== firstRace);
   const secondRace = randomChoice(remainingRaces);
 
-  return [firstRace, secondRace].sort();
+  return [firstRace, secondRace].sort((a, b) => {
+    if (a === "other") return 1;
+    if (b === "other") return -1;
+
+    return a.localeCompare(b);
+  });
 }
 
 function generateShapeId(): number {

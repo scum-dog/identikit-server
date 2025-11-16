@@ -75,7 +75,12 @@ export const ethnicityEnum = z.enum([
 export const sortRaces = (
   races: Array<z.infer<typeof raceEnum>>,
 ): Array<z.infer<typeof raceEnum>> => {
-  return [...races].sort();
+  return [...races].sort((a, b) => {
+    if (a === "other") return 1;
+    if (b === "other") return -1;
+
+    return a.localeCompare(b);
+  });
 };
 
 export const raceArraySchema = z
