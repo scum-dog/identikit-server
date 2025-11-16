@@ -4,9 +4,17 @@ import {
   eyeColorEnum,
   hairColorEnum,
   raceEnum,
+  ethnicityEnum,
   sexEnum,
 } from "../../src/utils/validation";
-import { Race, EyeColor, HairColor, Sex, AccessoryType } from "../../src/types";
+import {
+  Race,
+  EyeColor,
+  HairColor,
+  Sex,
+  Ethnicity,
+  AccessoryType,
+} from "../../src/types";
 
 const extractZodEnumValues = (zodEnum: z.ZodEnum<any>) => {
   return zodEnum.options;
@@ -17,11 +25,12 @@ describe("Value Consistency Tests", () => {
     it("should have matching Race values between types and validation", () => {
       const validationValues = extractZodEnumValues(raceEnum);
       const typeValues: Race[] = [
-        "native",
+        "ai_an",
         "asian",
         "black",
-        "pacific_islander",
+        "nh_pi",
         "white",
+        "other",
       ];
 
       expect(validationValues.sort()).toEqual(typeValues.sort());
@@ -62,6 +71,17 @@ describe("Value Consistency Tests", () => {
     it("should have matching Sex values between types and validation", () => {
       const validationValues = extractZodEnumValues(sexEnum);
       const typeValues: Sex[] = ["male", "female", "other"];
+
+      expect(validationValues.sort()).toEqual(typeValues.sort());
+    });
+
+    it("should have matching Ethnicity values between types and validation", () => {
+      const validationValues = extractZodEnumValues(ethnicityEnum);
+      const typeValues: Ethnicity[] = [
+        "hispanic_latino",
+        "not_hispanic_latino",
+        "prefer_not_to_say",
+      ];
 
       expect(validationValues.sort()).toEqual(typeValues.sort());
     });
@@ -107,7 +127,8 @@ describe("Value Consistency Tests", () => {
             weight_lb: 150,
             eye_color: "brown" as const,
             hair_color: "brown" as const,
-            race: "white" as const,
+            race: ["white"] as const,
+            ethnicity: "not_hispanic_latino" as const,
             location: {
               country: "United States",
               region: "California",
@@ -198,7 +219,8 @@ describe("Value Consistency Tests", () => {
               weight_lb: 150,
               eye_color: "brown" as const,
               hair_color: "brown" as const,
-              race: "white" as const,
+              race: ["white"] as const,
+              ethnicity: "not_hispanic_latino" as const,
               location: { country: "United States" },
             },
             static: {
@@ -264,7 +286,8 @@ describe("Value Consistency Tests", () => {
               weight_lb: weight,
               eye_color: "brown" as const,
               hair_color: "brown" as const,
-              race: "white" as const,
+              race: ["white"] as const,
+              ethnicity: "not_hispanic_latino" as const,
               location: { country: "United States" },
             },
             static: {
@@ -330,7 +353,8 @@ describe("Value Consistency Tests", () => {
               weight_lb: 150,
               eye_color: "brown" as const,
               hair_color: "brown" as const,
-              race: "white" as const,
+              race: ["white"] as const,
+              ethnicity: "not_hispanic_latino" as const,
               location: { country: "United States" },
             },
             static: {
@@ -397,7 +421,8 @@ describe("Value Consistency Tests", () => {
               weight_lb: 150,
               eye_color: "brown" as const,
               hair_color: "brown" as const,
-              race: "white" as const,
+              race: ["white"] as const,
+              ethnicity: "not_hispanic_latino" as const,
               location: { country: "United States" },
             },
             static: {

@@ -5,6 +5,7 @@ import {
   EyeColor,
   HairColor,
   Sex,
+  Ethnicity,
   MockUser,
   MockCharacter,
 } from "../types";
@@ -74,7 +75,13 @@ const regions = {
   Australia: ["New South Wales", "Victoria", "Queensland", "Western Australia"],
 };
 
-const races: Race[] = ["native", "asian", "black", "pacific_islander", "white"];
+const races: Race[] = ["ai_an", "asian", "black", "nh_pi", "white", "other"];
+
+const ethnicities: Ethnicity[] = [
+  "hispanic_latino",
+  "not_hispanic_latino",
+  "prefer_not_to_say",
+];
 
 const eyeColors: EyeColor[] = [
   "black",
@@ -122,6 +129,14 @@ function randomDate(start: Date, end: Date): Date {
   return new Date(
     start.getTime() + Math.random() * (end.getTime() - start.getTime()),
   );
+}
+
+function generateRandomRaces(): Race[] {
+  const firstRace = randomChoice(races);
+  const remainingRaces = races.filter((race) => race !== firstRace);
+  const secondRace = randomChoice(remainingRaces);
+
+  return [firstRace, secondRace];
 }
 
 function generateShapeId(): number {
@@ -187,7 +202,8 @@ export function generateMockCharacterData(): FullCharacter {
         weight_lb: randomInt(120, 220),
         eye_color: randomChoice(eyeColors),
         hair_color: randomChoice(hairColors),
-        race: randomChoice(races),
+        race: generateRandomRaces(),
+        ethnicity: randomChoice(ethnicities),
         location: {
           country,
           region,

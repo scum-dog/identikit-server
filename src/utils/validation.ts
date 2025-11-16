@@ -58,12 +58,28 @@ export const hairColorEnum = z.enum([
 ]);
 
 export const raceEnum = z.enum([
-  "native",
+  "ai_an",
   "asian",
   "black",
-  "pacific_islander",
+  "nh_pi",
   "white",
+  "other",
 ]);
+
+export const ethnicityEnum = z.enum([
+  "hispanic_latino",
+  "not_hispanic_latino",
+  "prefer_not_to_say",
+]);
+
+export const raceArraySchema = z
+  .array(raceEnum)
+  .min(1, "At least one race must be selected")
+  .max(2, "Maximum of two races allowed")
+  .refine(
+    (races) => new Set(races).size === races.length,
+    "Duplicate races not allowed",
+  );
 
 export const sexEnum = z.enum(["male", "female", "other"]);
 
@@ -102,7 +118,8 @@ export const characterDataSchema = z.object({
       weight_lb: z.number().int().min(50).max(500), // pounds
       eye_color: eyeColorEnum,
       hair_color: hairColorEnum,
-      race: raceEnum,
+      race: raceArraySchema,
+      ethnicity: ethnicityEnum,
       location: z.object({
         country: z.string().min(1).max(100),
         region: z.string().min(1).max(100).optional(),
@@ -196,7 +213,8 @@ export const characterDataUpdateSchema = z.object({
           weight_lb: z.number().int().min(50).max(500).optional(),
           eye_color: eyeColorEnum.optional(),
           hair_color: hairColorEnum.optional(),
-          race: raceEnum.optional(),
+          race: raceArraySchema.optional(),
+          ethnicity: ethnicityEnum.optional(),
           location: z
             .object({
               country: z.string().min(1).max(100).optional(),

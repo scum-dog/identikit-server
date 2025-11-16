@@ -22,7 +22,8 @@ describe("Rotation Range Validation", () => {
         weight_lb: 150,
         eye_color: "brown" as const,
         hair_color: "brown" as const,
-        race: "white" as const,
+        race: ["white"] as const,
+        ethnicity: "not_hispanic_latino" as const,
         location: { country: "United States" },
       },
       static: {

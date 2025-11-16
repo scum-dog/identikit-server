@@ -60,6 +60,7 @@ export const invalidCharacterData = {
       eye_color: "invalid" as any,
       hair_color: "invalid" as any,
       race: "invalid" as any,
+      ethnicity: "invalid" as any,
       location: {
         country: "",
       },

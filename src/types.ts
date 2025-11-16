@@ -48,7 +48,8 @@ export interface CharacterPersonalInfo {
   weight_lb: number;
   eye_color: EyeColor;
   hair_color: HairColor;
-  race: Race;
+  race: Race[];
+  ethnicity: Ethnicity;
   location: {
     country: string;
     region?: string;
@@ -151,7 +152,18 @@ export interface MockCharacterRouteUpdates {
 
 export type AccessoryType = "glasses" | "mustache" | "misc";
 
-export type Race = "native" | "asian" | "black" | "pacific_islander" | "white";
+export type Race =
+  | "ai_an"
+  | "asian"
+  | "black"
+  | "nh_pi"
+  | "white"
+  | "other";
+
+export type Ethnicity =
+  | "hispanic_latino"
+  | "not_hispanic_latino"
+  | "prefer_not_to_say";
 
 export type EyeColor =
   | "black"

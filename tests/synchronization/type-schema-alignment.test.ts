@@ -29,7 +29,8 @@ describe("Type-Schema Alignment Tests", () => {
             weight_lb: 180,
             eye_color: "brown",
             hair_color: "brown",
-            race: "white",
+            race: ["white"],
+            ethnicity: "not_hispanic_latino",
             location: {
               country: "United States",
               region: "California",
@@ -152,7 +153,8 @@ describe("Type-Schema Alignment Tests", () => {
             weight_lb: 150,
             eye_color: "brown" as const,
             hair_color: "brown" as const,
-            race: "white" as const,
+            race: ["white"] as const,
+            ethnicity: "not_hispanic_latino" as const,
             location: {
               country: "United States",
             },
@@ -250,7 +252,8 @@ describe("Type-Schema Alignment Tests", () => {
             weight_lb: 150,
             eye_color: "brown" as const,
             hair_color: "brown" as const,
-            race: "white" as const,
+            race: ["white"] as const,
+            ethnicity: "not_hispanic_latino" as const,
             location: {
               country: "United States",
             },
@@ -324,7 +327,8 @@ describe("Type-Schema Alignment Tests", () => {
             weight_lb: 150,
             eye_color: "brown" as const,
             hair_color: "brown" as const,
-            race: "white" as const,
+            race: ["white"] as const,
+            ethnicity: "not_hispanic_latino" as const,
             location: {
               country: "United States",
             },
