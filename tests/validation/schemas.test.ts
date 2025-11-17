@@ -161,6 +161,46 @@ describe("Validation Schemas", () => {
         expect(assetError).toBeDefined();
       }
     });
+
+    it("should validate hair asset ID 0 with bald hair color", () => {
+      const data = generateMockCharacterData();
+      data.character_data.info.hair_color = "bald";
+      data.character_data.static.hair.asset_id = 0;
+
+      const result = fullCharacterSchema.safeParse(data);
+
+      expect(result.success).toBe(true);
+    });
+
+    it("should validate hair asset ID 0 with non-bald hair color", () => {
+      const data = generateMockCharacterData();
+      data.character_data.info.hair_color = "brown";
+      data.character_data.static.hair.asset_id = 0;
+
+      const result = fullCharacterSchema.safeParse(data);
+
+      expect(result.success).toBe(true);
+    });
+
+    it("should reject bald hair color with non-zero asset ID", () => {
+      const data = generateMockCharacterData();
+      data.character_data.info.hair_color = "bald";
+      data.character_data.static.hair.asset_id = 123;
+
+      const result = fullCharacterSchema.safeParse(data);
+
+      expect(result.success).toBe(false);
+    });
+
+    it("should validate non-bald hair color with non-zero asset ID", () => {
+      const data = generateMockCharacterData();
+      data.character_data.info.hair_color = "brown";
+      data.character_data.static.hair.asset_id = 123;
+
+      const result = fullCharacterSchema.safeParse(data);
+
+      expect(result.success).toBe(true);
+    });
   });
 
   describe("characterUpdateSchema", () => {
@@ -216,6 +256,74 @@ describe("Validation Schemas", () => {
           "Ontario",
         );
       }
+    });
+
+    it("should validate updating hair color only", () => {
+      const updateData = {
+        character_data: {
+          info: {
+            hair_color: "brown",
+          },
+        },
+      };
+
+      const result = characterUpdateSchema.safeParse(updateData);
+
+      expect(result.success).toBe(true);
+    });
+
+    it("should validate updating hair asset ID only", () => {
+      const updateData = {
+        character_data: {
+          static: {
+            hair: {
+              asset_id: 0,
+            },
+          },
+        },
+      };
+
+      const result = characterUpdateSchema.safeParse(updateData);
+
+      expect(result.success).toBe(true);
+    });
+
+    it("should validate updating both hair color and asset ID with valid combination", () => {
+      const updateData = {
+        character_data: {
+          info: {
+            hair_color: "brown",
+          },
+          static: {
+            hair: {
+              asset_id: 0,
+            },
+          },
+        },
+      };
+
+      const result = characterUpdateSchema.safeParse(updateData);
+
+      expect(result.success).toBe(true);
+    });
+
+    it("should reject bald hair color with non-zero asset ID in updates", () => {
+      const updateData = {
+        character_data: {
+          info: {
+            hair_color: "bald",
+          },
+          static: {
+            hair: {
+              asset_id: 123,
+            },
+          },
+        },
+      };
+
+      const result = characterUpdateSchema.safeParse(updateData);
+
+      expect(result.success).toBe(false);
     });
   });
 

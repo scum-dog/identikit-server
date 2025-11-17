@@ -114,80 +114,91 @@ const miscSchema = z.object({
   scale: scaleSchema.default(1.0).optional(),
 });
 
-export const characterDataSchema = z.object({
-  info: z
-    .object({
-      name: z.string().min(1).max(100),
-      sex: sexEnum,
-      date_of_birth: z
-        .string()
-        .regex(/^\d{4}-\d{2}-\d{2}$/, "Date must be in YYYY-MM-DD format")
-        .refine((date) => {
-          const d = new Date(date);
-          return d >= new Date("1900-01-01") && d <= new Date();
-        }, "Date must be between 1900-01-01 and today"),
-      height_in: z.number().int().min(24).max(96), // 2-8 feet
-      weight_lb: z.number().int().min(50).max(500), // pounds
-      eye_color: eyeColorEnum,
-      hair_color: hairColorEnum,
-      race: raceArraySchema,
-      ethnicity: ethnicityEnum,
-      location: z.object({
-        country: z.string().min(1).max(100),
-        region: z.string().min(1).max(100).optional(),
-      }),
-    })
-    .strict(),
-  static: z
-    .object({
-      head: z.object({
-        asset_id: assetIdSchema(),
-      }),
-      hair: z.object({
-        asset_id: assetIdSchema(),
-      }),
-      beard: z
-        .object({
+export const characterDataSchema = z
+  .object({
+    info: z
+      .object({
+        name: z.string().min(1).max(100),
+        sex: sexEnum,
+        date_of_birth: z
+          .string()
+          .regex(/^\d{4}-\d{2}-\d{2}$/, "Date must be in YYYY-MM-DD format")
+          .refine((date) => {
+            const d = new Date(date);
+            return d >= new Date("1900-01-01") && d <= new Date();
+          }, "Date must be between 1900-01-01 and today"),
+        height_in: z.number().int().min(24).max(96), // 2-8 feet
+        weight_lb: z.number().int().min(50).max(500), // pounds
+        eye_color: eyeColorEnum,
+        hair_color: hairColorEnum,
+        race: raceArraySchema,
+        ethnicity: ethnicityEnum,
+        location: z.object({
+          country: z.string().min(1).max(100),
+          region: z.string().min(1).max(100).optional(),
+        }),
+      })
+      .strict(),
+    static: z
+      .object({
+        head: z.object({
           asset_id: assetIdSchema(),
-        })
-        .optional(),
-      age_lines: z
-        .object({
+        }),
+        hair: z.object({
           asset_id: assetIdSchema(),
-        })
-        .optional(),
-    })
-    .strict(),
-  placeable_movable: z.object({
-    eyes: z.object({
-      asset_id: assetIdSchema(),
-      offset_x: offsetXSchema.default(0),
-      offset_y: offsetSchema.default(0),
-      scale: scaleSchema.default(1.0),
-      rotation: eyeRotationSchema.default(0),
+        }),
+        beard: z
+          .object({
+            asset_id: assetIdSchema(),
+          })
+          .optional(),
+        age_lines: z
+          .object({
+            asset_id: assetIdSchema(),
+          })
+          .optional(),
+      })
+      .strict(),
+    placeable_movable: z.object({
+      eyes: z.object({
+        asset_id: assetIdSchema(),
+        offset_x: offsetXSchema.default(0),
+        offset_y: offsetSchema.default(0),
+        scale: scaleSchema.default(1.0),
+        rotation: eyeRotationSchema.default(0),
+      }),
+      eyebrows: z.object({
+        asset_id: assetIdSchema(),
+        offset_x: offsetXSchema.default(0),
+        offset_y: offsetSchema.default(0),
+        scale: scaleSchema.default(1.0),
+        rotation: eyebrowRotationSchema.default(0),
+      }),
+      nose: z.object({
+        asset_id: assetIdSchema(),
+        offset_y: offsetSchema.default(0),
+        scale: scaleSchema.default(1.0),
+      }),
+      lips: z.object({
+        asset_id: assetIdSchema(),
+        offset_y: offsetSchema.default(0),
+        scale: scaleSchema.default(1.0),
+      }),
+      glasses: glassesSchema.optional(),
+      mustache: mustacheSchema.optional(),
+      misc: miscSchema.optional(),
     }),
-    eyebrows: z.object({
-      asset_id: assetIdSchema(),
-      offset_x: offsetXSchema.default(0),
-      offset_y: offsetSchema.default(0),
-      scale: scaleSchema.default(1.0),
-      rotation: eyebrowRotationSchema.default(0),
-    }),
-    nose: z.object({
-      asset_id: assetIdSchema(),
-      offset_y: offsetSchema.default(0),
-      scale: scaleSchema.default(1.0),
-    }),
-    lips: z.object({
-      asset_id: assetIdSchema(),
-      offset_y: offsetSchema.default(0),
-      scale: scaleSchema.default(1.0),
-    }),
-    glasses: glassesSchema.optional(),
-    mustache: mustacheSchema.optional(),
-    misc: miscSchema.optional(),
-  }),
-});
+  })
+  .refine((data) => {
+    const hairAssetId = data.static.hair.asset_id;
+    const hairColor = data.info.hair_color;
+
+    if (hairAssetId === 0) {
+      return true;
+    } else {
+      return hairColor !== "bald";
+    }
+  });
 
 export const characterMetadataSchema = z.object({
   upload_id: z.string().uuid(),
@@ -305,12 +316,24 @@ export const characterDataUpdateSchema = z.object({
 
 export const characterUploadSchema = fullCharacterSchema;
 
-export const characterUpdateSchema = characterDataUpdateSchema.refine(
-  (data) => Object.keys(data).length > 0,
-  {
+export const characterUpdateSchema = characterDataUpdateSchema
+  .refine((data) => Object.keys(data).length > 0, {
     message: "At least one field must be provided for update",
-  },
-);
+  })
+  .refine((data) => {
+    const hairColor = data.character_data?.info?.hair_color;
+    const hairAssetId = data.character_data?.static?.hair?.asset_id;
+
+    if (hairColor === undefined || hairAssetId === undefined) {
+      return true;
+    }
+
+    if (hairAssetId === 0) {
+      return true;
+    } else {
+      return hairColor !== "bald";
+    }
+  });
 
 export const plazaSearchSchema = z
   .object({
