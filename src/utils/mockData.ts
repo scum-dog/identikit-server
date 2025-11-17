@@ -73,6 +73,18 @@ const regions = {
   ],
   Japan: ["Tokyo", "Osaka", "Kyoto", "Hokkaido", "Okinawa"],
   Australia: ["New South Wales", "Victoria", "Queensland", "Western Australia"],
+  Brazil: ["São Paulo", "Rio de Janeiro", "Minas Gerais", "Bahia"],
+  Mexico: ["Mexico City", "Jalisco", "Nuevo León", "Puebla"],
+  Spain: ["Madrid", "Catalonia", "Andalusia", "Valencia"],
+  Italy: ["Lombardy", "Lazio", "Campania", "Sicily"],
+  Netherlands: ["North Holland", "South Holland", "Utrecht", "Noord-Brabant"],
+  Sweden: ["Stockholm", "Västra Götaland", "Skåne", "Uppsala"],
+  Norway: ["Oslo", "Viken", "Vestland", "Trøndelag"],
+  Denmark: ["Capital Region", "Central Jutland", "Southern Denmark", "Zealand"],
+  Finland: ["Uusimaa", "Pirkanmaa", "Varsinais-Suomi", "North Ostrobothnia"],
+  "South Korea": ["Seoul", "Busan", "Gyeonggi", "Incheon"],
+  "New Zealand": ["Auckland", "Canterbury", "Wellington", "Waikato"],
+  Switzerland: ["Zurich", "Bern", "Vaud", "Aargau"],
 };
 
 const races: Race[] = ["ai_an", "asian", "black", "nh_pi", "other", "white"];
@@ -197,7 +209,8 @@ function generateHairData(): { hairColor: HairColor; hairAssetId: number } {
 export function generateMockCharacterData(): FullCharacter {
   const country = randomChoice(countries);
   const regionList = regions[country as keyof typeof regions] || [];
-  const region = regionList.length > 0 ? randomChoice(regionList) : undefined;
+  const region =
+    regionList.length > 0 ? randomChoice(regionList) : "Unknown Region";
 
   const sex = randomChoice(sexOptions);
   const shouldHaveBeard = sex !== "female";

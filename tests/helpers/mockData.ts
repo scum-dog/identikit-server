@@ -63,6 +63,7 @@ export const invalidCharacterData = {
       ethnicity: "invalid" as any,
       location: {
         country: "",
+        region: "",
       },
     },
     static: {

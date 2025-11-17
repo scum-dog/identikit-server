@@ -24,7 +24,7 @@ describe("Rotation Range Validation", () => {
         hair_color: "brown" as const,
         race: ["white"] as const,
         ethnicity: "not_hispanic_latino" as const,
-        location: { country: "United States" },
+        location: { country: "United States", region: "California" },
       },
       static: {
         head: { asset_id: 1 },
