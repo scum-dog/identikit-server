@@ -2,7 +2,7 @@ import { z } from "zod";
 import { Request, Response, NextFunction } from "express";
 import { log } from "./logger";
 
-const assetIdSchema = () => z.number().int().min(1).max(999);
+const assetIdSchema = () => z.number().int().min(0).max(999);
 
 const offsetSchema = z
   .number()
@@ -96,19 +96,19 @@ export const raceArraySchema = z
 export const sexEnum = z.enum(["male", "female", "other"]);
 
 const glassesSchema = z.object({
-  asset_id: z.number().int().min(1).max(999),
+  asset_id: assetIdSchema(),
   offset_y: offsetSchema.default(0),
   scale: scaleSchema.default(1.0),
 });
 
 const mustacheSchema = z.object({
-  asset_id: z.number().int().min(1).max(999),
+  asset_id: assetIdSchema(),
   offset_y: offsetSchema.default(0),
   scale: scaleSchema.default(1.0),
 });
 
 const miscSchema = z.object({
-  asset_id: z.number().int().min(1).max(999),
+  asset_id: assetIdSchema(),
   offset_x: offsetSchema.default(0).optional(),
   offset_y: offsetSchema.default(0),
   scale: scaleSchema.default(1.0).optional(),

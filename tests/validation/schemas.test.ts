@@ -53,7 +53,7 @@ describe("Validation Schemas", () => {
 
     it("should reject invalid shape ID values", () => {
       const data = generateMockCharacterData();
-      data.character_data.static.head.asset_id = 0; // below minimum
+      data.character_data.static.head.asset_id = -1; // below minimum
 
       const result = fullCharacterSchema.safeParse(data);
 
@@ -146,7 +146,7 @@ describe("Validation Schemas", () => {
     it("should reject invalid accessory asset IDs", () => {
       const data = generateMockCharacterData();
       data.character_data.placeable_movable.glasses = {
-        asset_id: 0, // below minimum
+        asset_id: -1, // below minimum
         offset_y: 0,
         scale: 1.0,
       };

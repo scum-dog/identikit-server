@@ -145,7 +145,7 @@ function generateRandomRaces(): Race[] {
 }
 
 function generateShapeId(): number {
-  return randomInt(1, 999);
+  return randomInt(0, 999);
 }
 
 function generateOffset(): number {
@@ -186,6 +186,13 @@ function generateAccessories() {
   return accessories;
 }
 
+function generateHairData(): { hairColor: HairColor; hairAssetId: number } {
+  const hairColor = randomChoice(hairColors);
+  const hairAssetId = hairColor === "bald" ? 0 : randomInt(1, 999);
+
+  return { hairColor, hairAssetId };
+}
+
 // mock data generators
 export function generateMockCharacterData(): FullCharacter {
   const country = randomChoice(countries);
@@ -194,6 +201,7 @@ export function generateMockCharacterData(): FullCharacter {
 
   const sex = randomChoice(sexOptions);
   const shouldHaveBeard = sex !== "female";
+  const { hairColor, hairAssetId } = generateHairData();
 
   return {
     character_data: {
@@ -206,7 +214,7 @@ export function generateMockCharacterData(): FullCharacter {
         height_in: randomInt(60, 80),
         weight_lb: randomInt(120, 220),
         eye_color: randomChoice(eyeColors),
-        hair_color: randomChoice(hairColors),
+        hair_color: hairColor,
         race: generateRandomRaces(),
         ethnicity: randomChoice(ethnicities),
         location: {
@@ -219,7 +227,7 @@ export function generateMockCharacterData(): FullCharacter {
           asset_id: generateShapeId(),
         },
         hair: {
-          asset_id: generateShapeId(),
+          asset_id: hairAssetId,
         },
         ...(shouldHaveBeard
           ? {
