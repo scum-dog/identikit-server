@@ -128,10 +128,7 @@ describe("Value Consistency Tests", () => {
             hair_color: "brown" as const,
             race: ["white"] as const,
             ethnicity: "not_hispanic_latino" as const,
-            location: {
-              country: "United States",
-              region: "California",
-            },
+            location: "United States",
           },
           static: {
             head: {
@@ -220,7 +217,7 @@ describe("Value Consistency Tests", () => {
               hair_color: "brown" as const,
               race: ["white"] as const,
               ethnicity: "not_hispanic_latino" as const,
-              location: { country: "United States", region: "California" },
+              location: "United States",
             },
             static: {
               head: { asset_id: 1 },
@@ -287,7 +284,7 @@ describe("Value Consistency Tests", () => {
               hair_color: "brown" as const,
               race: ["white"] as const,
               ethnicity: "not_hispanic_latino" as const,
-              location: { country: "United States", region: "California" },
+              location: "United States",
             },
             static: {
               head: { asset_id: 1 },
@@ -354,7 +351,7 @@ describe("Value Consistency Tests", () => {
               hair_color: "brown" as const,
               race: ["white"] as const,
               ethnicity: "not_hispanic_latino" as const,
-              location: { country: "United States", region: "California" },
+              location: "United States",
             },
             static: {
               head: { asset_id: 1 },
@@ -422,7 +419,7 @@ describe("Value Consistency Tests", () => {
               hair_color: "brown" as const,
               race: ["white"] as const,
               ethnicity: "not_hispanic_latino" as const,
-              location: { country: "United States", region: "California" },
+              location: "United States",
             },
             static: {
               head: { asset_id: 1 },

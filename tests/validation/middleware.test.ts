@@ -139,7 +139,6 @@ describe("Validation Middleware (Logic Tests)", () => {
       expect(res.status).not.toHaveBeenCalled();
       expect(req.query).toEqual({
         country: "United States",
-        region: undefined,
         limit: 50,
         random: true,
       });
@@ -156,7 +155,6 @@ describe("Validation Middleware (Logic Tests)", () => {
       expect(mockNext).toHaveBeenCalled();
       expect(req.query).toEqual({
         country: undefined,
-        region: undefined,
         limit: 100,
         random: true,
       });
@@ -198,7 +196,6 @@ describe("Validation Middleware (Logic Tests)", () => {
       const req = createMockRequest({
         query: {
           country: "Canada",
-          region: "Ontario",
           limit: "25",
         },
       }) as any;
@@ -210,7 +207,6 @@ describe("Validation Middleware (Logic Tests)", () => {
       expect(res.status).not.toHaveBeenCalled();
       expect(req.validatedQuery).toEqual({
         country: "Canada",
-        region: "Ontario",
         limit: 25,
         random: true,
       });
@@ -227,7 +223,6 @@ describe("Validation Middleware (Logic Tests)", () => {
       expect(mockNext).toHaveBeenCalled();
       expect(req.validatedQuery).toEqual({
         country: undefined,
-        region: undefined,
         limit: 100,
         random: true,
       });
@@ -265,7 +260,6 @@ describe("Validation Middleware (Logic Tests)", () => {
       const req = createMockRequest({
         query: {
           country: "",
-          region: "",
         },
       }) as any;
       const res = createMockResponse();
@@ -274,7 +268,6 @@ describe("Validation Middleware (Logic Tests)", () => {
 
       expect(mockNext).toHaveBeenCalled();
       expect(req.validatedQuery.country).toBeUndefined();
-      expect(req.validatedQuery.region).toBeUndefined();
     });
   });
 

@@ -237,10 +237,7 @@ describe("Validation Schemas", () => {
       const updateData = {
         character_data: {
           info: {
-            location: {
-              country: "Canada",
-              region: "Ontario",
-            },
+            location: "Canada",
           },
         },
       };
@@ -249,12 +246,7 @@ describe("Validation Schemas", () => {
 
       expect(result.success).toBe(true);
       if (result.success) {
-        expect(result.data.character_data?.info?.location?.country).toBe(
-          "Canada",
-        );
-        expect(result.data.character_data?.info?.location?.region).toBe(
-          "Ontario",
-        );
+        expect(result.data.character_data?.info?.location).toBe("Canada");
       }
     });
 
@@ -361,7 +353,6 @@ describe("Validation Schemas", () => {
     it("should handle empty strings as undefined", () => {
       const searchData = {
         country: "",
-        region: "",
       };
 
       const result = plazaSearchSchema.safeParse(searchData);
@@ -369,7 +360,6 @@ describe("Validation Schemas", () => {
       expect(result.success).toBe(true);
       if (result.success) {
         expect(result.data.country).toBeUndefined();
-        expect(result.data.region).toBeUndefined();
       }
     });
   });

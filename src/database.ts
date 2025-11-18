@@ -144,25 +144,15 @@ export const characterQueries = {
     return result.rows;
   },
 
-  searchByLocation: async (
-    country?: string,
-    region?: string,
-    limit: number = 100,
-  ) => {
+  searchByLocation: async (country?: string, limit: number = 100) => {
     let whereClause = "WHERE is_deleted = false";
     const params: SearchParams = [];
     let paramCount = 0;
 
     if (country) {
       paramCount++;
-      whereClause += ` AND character_data -> 'info' -> 'location' ->> 'country' ILIKE $${paramCount}`;
+      whereClause += ` AND character_data -> 'info' ->> 'location' ILIKE $${paramCount}`;
       params.push(`%${country}%`);
-    }
-
-    if (region) {
-      paramCount++;
-      whereClause += ` AND character_data -> 'info' -> 'location' ->> 'region' ILIKE $${paramCount}`;
-      params.push(`%${region}%`);
     }
 
     paramCount++;

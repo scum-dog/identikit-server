@@ -61,10 +61,7 @@ export const invalidCharacterData = {
       hair_color: "invalid" as any,
       race: "invalid" as any,
       ethnicity: "invalid" as any,
-      location: {
-        country: "",
-        region: "",
-      },
+      location: "",
     },
     static: {
       head: {

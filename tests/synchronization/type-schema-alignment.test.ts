@@ -31,10 +31,7 @@ describe("Type-Schema Alignment Tests", () => {
             hair_color: "brown",
             race: ["white"],
             ethnicity: "not_hispanic_latino",
-            location: {
-              country: "United States",
-              region: "California",
-            },
+            location: "United States",
           },
           static: {
             head: {
@@ -155,9 +152,7 @@ describe("Type-Schema Alignment Tests", () => {
             hair_color: "brown" as const,
             race: ["white"] as const,
             ethnicity: "not_hispanic_latino" as const,
-            location: {
-              country: "United States",
-            },
+            location: "United States",
           },
           static: {
             head: {
@@ -254,9 +249,7 @@ describe("Type-Schema Alignment Tests", () => {
             hair_color: "brown" as const,
             race: ["white"] as const,
             ethnicity: "not_hispanic_latino" as const,
-            location: {
-              country: "United States",
-            },
+            location: "United States",
           },
           static: {
             head: {
@@ -329,9 +322,7 @@ describe("Type-Schema Alignment Tests", () => {
             hair_color: "brown" as const,
             race: ["white"] as const,
             ethnicity: "not_hispanic_latino" as const,
-            location: {
-              country: "United States",
-            },
+            location: "United States",
           },
           static: {
             head: {
@@ -407,9 +398,7 @@ describe("Type-Schema Alignment Tests", () => {
             date_of_birth: "1990-01-01",
             height_in: 70,
             weight_lb: 150,
-            location: {
-              country: "United States",
-            },
+            location: "United States",
             head: {
               asset_id: 1,
             },

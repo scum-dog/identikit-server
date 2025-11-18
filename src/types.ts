@@ -50,10 +50,7 @@ export interface CharacterPersonalInfo {
   hair_color: HairColor;
   race: Race[];
   ethnicity: Ethnicity;
-  location: {
-    country: string;
-    region?: string;
-  };
+  location: string;
 }
 
 export interface CharacterStatic {
@@ -133,7 +130,6 @@ export interface CharacterRouteUpdates {
 export interface PlazaQueryRequest {
   validatedQuery?: {
     country?: string;
-    region?: string;
     limit?: number;
   };
 }

@@ -55,21 +55,11 @@ CREATE INDEX idx_characters_active ON characters (is_deleted)
 WHERE
   is_deleted = FALSE;
 
-CREATE INDEX idx_characters_location_country ON characters USING gin (
-  (
-    character_data -> 'info' -> 'location' ->> 'country'
-  ) gin_trgm_ops
+CREATE INDEX idx_characters_location ON characters USING gin (
+  (character_data -> 'info' ->> 'location') gin_trgm_ops
 )
 WHERE
-  character_data -> 'info' -> 'location' ->> 'country' IS NOT NULL;
-
-CREATE INDEX idx_characters_location_region ON characters USING gin (
-  (
-    character_data -> 'info' -> 'location' ->> 'region'
-  ) gin_trgm_ops
-)
-WHERE
-  character_data -> 'info' -> 'location' ->> 'region' IS NOT NULL;
+  character_data -> 'info' ->> 'location' IS NOT NULL;
 
 CREATE INDEX idx_characters_sex ON characters USING gin (
   (character_data -> 'static' ->> 'sex') gin_trgm_ops

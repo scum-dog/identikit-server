@@ -129,10 +129,7 @@ export const characterDataSchema = z
         hair_color: hairColorEnum,
         race: raceArraySchema,
         ethnicity: ethnicityEnum,
-        location: z.object({
-          country: z.string().min(1).max(100),
-          region: z.string().min(1).max(100).optional(),
-        }),
+        location: z.string().min(1).max(100),
       })
       .strict(),
     static: z
@@ -234,12 +231,7 @@ export const characterDataUpdateSchema = z.object({
           hair_color: hairColorEnum.optional(),
           race: raceArraySchema.optional(),
           ethnicity: ethnicityEnum.optional(),
-          location: z
-            .object({
-              country: z.string().min(1).max(100).optional(),
-              region: z.string().min(1).max(100).or(z.literal("")).optional(),
-            })
-            .optional(),
+          location: z.string().min(1).max(100).optional(),
         })
         .optional(),
       static: z
@@ -334,7 +326,6 @@ export const characterUpdateSchema = characterDataUpdateSchema
 export const plazaSearchSchema = z
   .object({
     country: z.union([z.string(), z.undefined()]).optional(),
-    region: z.union([z.string(), z.undefined()]).optional(),
     limit: z.union([z.string(), z.number(), z.undefined()]).optional(),
     random: z.union([z.string(), z.boolean(), z.undefined()]).optional(),
   })
@@ -363,7 +354,6 @@ export const plazaSearchSchema = z
 
     return {
       country: data.country && data.country !== "" ? data.country : undefined,
-      region: data.region && data.region !== "" ? data.region : undefined,
       limit,
       random,
     };
@@ -401,14 +391,12 @@ export type CharacterUpload = z.infer<typeof characterUploadSchema>;
 export type CharacterUpdate = z.infer<typeof characterUpdateSchema>;
 export type PlazaSearchInput = {
   country?: string;
-  region?: string;
   limit?: string;
   random?: string;
 };
 
 export type PlazaSearch = {
   country: string | undefined;
-  region: string | undefined;
   limit: number;
   random: boolean;
 };

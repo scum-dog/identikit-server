@@ -204,11 +204,8 @@ router.get("/", validatePlazaQuery, (req: Request, res: Response) => {
     return res.status(404).json({ error: "Route not found" });
   }
   try {
-    const {
-      country,
-      region,
-      limit = 100,
-    } = (req as PlazaQueryRequest).validatedQuery || req.query;
+    const { country, limit = 100 } =
+      (req as PlazaQueryRequest).validatedQuery || req.query;
     let characters = mockDataStore
       .getCharacters()
       .filter((char) => !char.is_deleted);
@@ -216,21 +213,10 @@ router.get("/", validatePlazaQuery, (req: Request, res: Response) => {
     if (country) {
       characters = characters.filter((char) => {
         return (
-          char.character_data.info.location.country &&
-          char.character_data.info.location.country
+          char.character_data.info.location &&
+          char.character_data.info.location
             .toLowerCase()
             .includes((country as string).toLowerCase())
-        );
-      });
-    }
-
-    if (region) {
-      characters = characters.filter((char) => {
-        return (
-          char.character_data.info.location.region &&
-          char.character_data.info.location.region
-            .toLowerCase()
-            .includes((region as string).toLowerCase())
         );
       });
     }
@@ -244,10 +230,7 @@ router.get("/", validatePlazaQuery, (req: Request, res: Response) => {
         creation_time: char.created_at,
         edit_time:
           char.last_edited_at !== char.created_at ? char.last_edited_at : null,
-        location: {
-          country: char.character_data.info.location.country,
-          region: char.character_data.info.location.region || null,
-        },
+        location: char.character_data.info.location || "",
         character_data: char.character_data,
       };
     });
@@ -255,7 +238,7 @@ router.get("/", validatePlazaQuery, (req: Request, res: Response) => {
     res.json({
       characters: plazaCharacters,
       count: plazaCharacters.length,
-      filters: { country, region },
+      filters: { country },
     });
   } catch (error) {
     log.error("Mock plaza fetch error", { error });
