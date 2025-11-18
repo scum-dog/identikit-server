@@ -70,7 +70,7 @@ router.get("/me", authenticateUser, async (req: Request, res: Response) => {
         user_id: character.user_id,
         created_at: character.created_at,
         last_edited_at: character.last_edited_at,
-        location: parsedCharacterData.character_data.info.location || "",
+        location: parsedCharacterData.info.location || "",
         is_edited: character.is_edited,
         is_deleted: character.is_deleted,
         deleted_at: character.deleted_at,
@@ -211,7 +211,7 @@ router.get("/", validatePlazaQuery, async (req: Request, res: Response) => {
         creation_time: char.created_at,
         edit_time:
           char.last_edited_at !== char.created_at ? char.last_edited_at : null,
-        location: parsedCharacterData.character_data.info.location || "",
+        location: parsedCharacterData.info.location || "",
         character_data: parsedCharacterData,
       };
     });
@@ -256,7 +256,7 @@ router.get("/:id", async (req: Request, res: Response) => {
           character.last_edited_at !== character.created_at
             ? character.last_edited_at
             : null,
-        location: parsedCharacterData.character_data.info.location || "",
+        location: parsedCharacterData.info.location || "",
       },
     });
   } catch (error) {
