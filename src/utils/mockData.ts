@@ -89,11 +89,7 @@ const regions = {
 
 const races: Race[] = ["ai_an", "asian", "black", "nh_pi", "other", "white"];
 
-const ethnicities: Ethnicity[] = [
-  "hispanic_latino",
-  "not_hispanic_latino",
-  "prefer_not_to_say",
-];
+const ethnicities: Ethnicity[] = ["hispanic_latino", "not_hispanic_latino"];
 
 const eyeColors: EyeColor[] = [
   "black",

@@ -66,11 +66,7 @@ export const raceEnum = z.enum([
   "other",
 ]);
 
-export const ethnicityEnum = z.enum([
-  "hispanic_latino",
-  "not_hispanic_latino",
-  "prefer_not_to_say",
-]);
+export const ethnicityEnum = z.enum(["hispanic_latino", "not_hispanic_latino"]);
 
 export const sortRaces = (
   races: Array<z.infer<typeof raceEnum>>,

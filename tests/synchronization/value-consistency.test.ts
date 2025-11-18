@@ -80,7 +80,6 @@ describe("Value Consistency Tests", () => {
       const typeValues: Ethnicity[] = [
         "hispanic_latino",
         "not_hispanic_latino",
-        "prefer_not_to_say",
       ];
 
       expect(validationValues.sort()).toEqual(typeValues.sort());

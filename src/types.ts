@@ -154,10 +154,7 @@ export type AccessoryType = "glasses" | "mustache" | "misc";
 
 export type Race = "ai_an" | "asian" | "black" | "nh_pi" | "white" | "other";
 
-export type Ethnicity =
-  | "hispanic_latino"
-  | "not_hispanic_latino"
-  | "prefer_not_to_say";
+export type Ethnicity = "hispanic_latino" | "not_hispanic_latino";
 
 export type EyeColor =
   | "black"
