@@ -250,6 +250,26 @@ describe("Validation Schemas", () => {
       }
     });
 
+    it("should reject invalid country in updates", () => {
+      const updateData = {
+        character_data: {
+          info: {
+            location: "Invalid Country Name",
+          },
+        },
+      };
+
+      const result = characterUpdateSchema.safeParse(updateData);
+
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        const locationError = result.error.errors.find((e) =>
+          e.path.includes("location"),
+        );
+        expect(locationError).toBeDefined();
+      }
+    });
+
     it("should validate updating hair color only", () => {
       const updateData = {
         character_data: {
@@ -316,6 +336,33 @@ describe("Validation Schemas", () => {
       const result = characterUpdateSchema.safeParse(updateData);
 
       expect(result.success).toBe(false);
+    });
+
+    it("should reject invalid country in character creation", () => {
+      const data = generateMockCharacterData();
+      data.character_data.info.location = "Invalid Country" as any;
+
+      const result = fullCharacterSchema.safeParse(data);
+
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        const locationError = result.error.errors.find((e) =>
+          e.path.includes("location"),
+        );
+        expect(locationError).toBeDefined();
+      }
+    });
+
+    it("should accept valid countries", () => {
+      const data = generateMockCharacterData();
+      data.character_data.info.location = "United States";
+
+      const result = fullCharacterSchema.safeParse(data);
+
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data.character_data.info.location).toBe("United States");
+      }
     });
   });
 

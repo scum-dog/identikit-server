@@ -9,6 +9,7 @@ import {
   MockUser,
   MockCharacter,
 } from "../types";
+import { COUNTRIES, Country } from "./constants";
 
 const firstNames = [
   "John",
@@ -36,28 +37,6 @@ const firstNames = [
   "Sava",
   "Drew",
   "Elliot",
-];
-
-const countries = [
-  "United States",
-  "Canada",
-  "United Kingdom",
-  "Germany",
-  "France",
-  "Japan",
-  "Australia",
-  "Brazil",
-  "Mexico",
-  "Spain",
-  "Italy",
-  "Netherlands",
-  "Sweden",
-  "Norway",
-  "Denmark",
-  "Finland",
-  "South Korea",
-  "New Zealand",
-  "Switzerland",
 ];
 
 const races: Race[] = ["ai_an", "asian", "black", "nh_pi", "other", "white"];
@@ -88,7 +67,7 @@ const hairColors: HairColor[] = [
 
 const sexOptions: Sex[] = ["male", "female", "other"];
 
-function randomChoice<T>(array: T[]): T {
+function randomChoice<T>(array: readonly T[]): T {
   return array[Math.floor(Math.random() * array.length)];
 }
 
@@ -176,7 +155,7 @@ function generateHairData(): { hairColor: HairColor; hairAssetId: number } {
 
 // mock data generators
 export function generateMockCharacterData(): FullCharacter {
-  const country = randomChoice(countries);
+  const country: Country = randomChoice(COUNTRIES);
 
   const sex = randomChoice(sexOptions);
   const shouldHaveBeard = sex !== "female";

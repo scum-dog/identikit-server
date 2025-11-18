@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { Request, Response, NextFunction } from "express";
 import { log } from "./logger";
+import { COUNTRIES } from "./constants";
 
 const assetIdSchema = () => z.number().int().min(0).max(999);
 
@@ -68,6 +69,8 @@ export const raceEnum = z.enum([
 
 export const ethnicityEnum = z.enum(["hispanic_latino", "not_hispanic_latino"]);
 
+export const countryEnum = z.enum(COUNTRIES);
+
 export const sortRaces = (
   races: Array<z.infer<typeof raceEnum>>,
 ): Array<z.infer<typeof raceEnum>> => {
@@ -129,7 +132,7 @@ export const characterDataSchema = z
         hair_color: hairColorEnum,
         race: raceArraySchema,
         ethnicity: ethnicityEnum,
-        location: z.string().min(1).max(100),
+        location: countryEnum,
       })
       .strict(),
     static: z
@@ -231,7 +234,7 @@ export const characterDataUpdateSchema = z.object({
           hair_color: hairColorEnum.optional(),
           race: raceArraySchema.optional(),
           ethnicity: ethnicityEnum.optional(),
-          location: z.string().min(1).max(100).optional(),
+          location: countryEnum.optional(),
         })
         .optional(),
       static: z
