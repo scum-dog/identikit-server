@@ -124,9 +124,15 @@ export const characterDataSchema = z
           .regex(/^\d{4}-\d{2}-\d{2}$/, "Date must be in YYYY-MM-DD format")
           .refine((date) => {
             const d = new Date(date);
-            return d >= new Date("1900-01-01") && d <= new Date();
-          }, "Date must be between 1900-01-01 and today"),
-        height_in: z.number().int().min(24).max(96), // 2-8 feet
+            const today = new Date();
+            const maxDate = new Date(
+              today.getFullYear() - 13,
+              today.getMonth(),
+              today.getDate(),
+            );
+            return d >= new Date("1900-01-01") && d <= maxDate;
+          }, "Character must be at least 13 years old"),
+        height_in: z.number().int().min(48).max(96), // 4-8 feet
         weight_lb: z.number().int().min(50).max(500), // pounds
         eye_color: eyeColorEnum,
         hair_color: hairColorEnum,
@@ -225,10 +231,16 @@ export const characterDataUpdateSchema = z.object({
             .regex(/^\d{4}-\d{2}-\d{2}$/, "Date must be in YYYY-MM-DD format")
             .refine((date) => {
               const d = new Date(date);
-              return d >= new Date("1900-01-01") && d <= new Date();
-            }, "Date must be between 1900-01-01 and today")
+              const today = new Date();
+              const maxDate = new Date(
+                today.getFullYear() - 13,
+                today.getMonth(),
+                today.getDate(),
+              );
+              return d >= new Date("1900-01-01") && d <= maxDate;
+            }, "Character must be at least 13 years old")
             .optional(),
-          height_in: z.number().int().min(24).max(96).optional(),
+          height_in: z.number().int().min(48).max(96).optional(),
           weight_lb: z.number().int().min(50).max(500).optional(),
           eye_color: eyeColorEnum.optional(),
           hair_color: hairColorEnum.optional(),

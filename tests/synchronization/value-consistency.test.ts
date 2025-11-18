@@ -190,7 +190,7 @@ describe("Value Consistency Tests", () => {
 
   describe("Numeric Range Consistency", () => {
     it("should have consistent height validation ranges", () => {
-      const minHeight = 24; // 2 feet
+      const minHeight = 48; // 4 feet
       const maxHeight = 96; // 8 feet
 
       const testCharacter = (height: number) => {

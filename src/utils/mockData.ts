@@ -166,10 +166,10 @@ export function generateMockCharacterData(): FullCharacter {
       info: {
         name: randomChoice(firstNames),
         sex: sex,
-        date_of_birth: randomDate(new Date(1950, 0, 1), new Date(2005, 11, 31))
+        date_of_birth: randomDate(new Date(1950, 0, 1), new Date(2011, 11, 31))
           .toISOString()
           .split("T")[0],
-        height_in: randomInt(60, 80),
+        height_in: randomInt(48, 96),
         weight_lb: randomInt(120, 220),
         eye_color: randomChoice(eyeColors),
         hair_color: hairColor,
