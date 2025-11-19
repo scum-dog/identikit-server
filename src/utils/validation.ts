@@ -117,7 +117,14 @@ export const characterDataSchema = z
   .object({
     info: z
       .object({
-        name: z.string().min(1).max(100),
+        name: z
+          .string()
+          .min(1)
+          .max(32)
+          .regex(
+            /^(?=.*[A-Za-z])[A-Za-z]+(?:[' -][A-Za-z]+)*$/,
+            "Name must start with a letter, contain only letters/spaces/hyphens/apostrophes, and have no consecutive punctuation or leading/trailing spaces",
+          ),
         sex: sexEnum,
         date_of_birth: z
           .string()
@@ -224,7 +231,15 @@ export const characterDataUpdateSchema = z.object({
     .object({
       info: z
         .object({
-          name: z.string().min(1).max(100).optional(),
+          name: z
+            .string()
+            .min(1)
+            .max(32)
+            .regex(
+              /^(?=.*[A-Za-z])[A-Za-z]+(?:[' -][A-Za-z]+)*$/,
+              "Name must start with a letter, contain only letters/spaces/hyphens/apostrophes, and have no consecutive punctuation or leading/trailing spaces",
+            )
+            .optional(),
           sex: sexEnum.optional(),
           date_of_birth: z
             .string()

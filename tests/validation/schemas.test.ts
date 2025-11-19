@@ -51,6 +51,278 @@ describe("Validation Schemas", () => {
       }
     });
 
+    it("should reject character name longer than 32 characters", () => {
+      const data = generateMockCharacterData();
+      data.character_data.info.name =
+        "ThisNameIsWayTooLongAndExceedsThirtyTwoCharacterLimit";
+
+      const result = fullCharacterSchema.safeParse(data);
+
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        const nameError = result.error.errors.find(
+          (e) => e.path.includes("name") && e.message.includes("32"),
+        );
+        expect(nameError).toBeDefined();
+      }
+    });
+
+    it("should accept valid character names with letters, spaces, hyphens, and apostrophes", () => {
+      const validNames = [
+        "John",
+        "Mary Jane",
+        "O'Connor",
+        "Jean-Pierre",
+        "Mary-Jane O'Sullivan",
+        "Anna-Maria",
+        "D'Angelo",
+      ];
+
+      validNames.forEach((name) => {
+        const data = generateMockCharacterData();
+        data.character_data.info.name = name;
+
+        const result = fullCharacterSchema.safeParse(data);
+
+        expect(result.success).toBe(true);
+        if (result.success) {
+          expect(result.data.character_data.info.name).toBe(name);
+        }
+      });
+    });
+
+    it("should reject character names with invalid characters", () => {
+      const invalidNames = [
+        "John123",
+        "Test@User",
+        "名前",
+        "Test_User",
+        "John.Doe",
+        "User#1",
+        "Test*Name",
+        "John+Mary",
+        "Test/Name",
+        "User\\Name",
+        "Test=Name",
+        "User%Name",
+        "Test&Name",
+        "John(Doe)",
+        "Test[Name]",
+        "User{Name}",
+        "Test<Name>",
+        "User|Name",
+        "Test?Name",
+        "User!Name",
+        "Test;Name",
+        "User:Name",
+        "Test,Name",
+        "User$Name",
+        "John🙂",
+      ];
+
+      invalidNames.forEach((name) => {
+        const data = generateMockCharacterData();
+        data.character_data.info.name = name;
+
+        const result = fullCharacterSchema.safeParse(data);
+
+        expect(result.success).toBe(false);
+        if (!result.success) {
+          const nameError = result.error.errors.find(
+            (e) =>
+              e.path.includes("name") &&
+              e.message.includes("must start with a letter"),
+          );
+          expect(nameError).toBeDefined();
+        }
+      });
+    });
+
+    it("should reject character names with only spaces, hyphens, or apostrophes", () => {
+      const invalidNames = [
+        "   ",
+        "---",
+        "'''",
+        " - ",
+        " ' ",
+        "- '",
+        "  -  '  ",
+        "-'-",
+        " ' - ' ",
+      ];
+
+      invalidNames.forEach((name) => {
+        const data = generateMockCharacterData();
+        data.character_data.info.name = name;
+
+        const result = fullCharacterSchema.safeParse(data);
+
+        expect(result.success).toBe(false);
+        if (!result.success) {
+          const nameError = result.error.errors.find(
+            (e) =>
+              e.path.includes("name") &&
+              e.message.includes("must start with a letter"),
+          );
+          expect(nameError).toBeDefined();
+        }
+      });
+    });
+
+    it("should reject character names with leading or trailing whitespace", () => {
+      const invalidNames = [
+        " John",
+        "Mary ",
+        "  Jane",
+        "Robert  ",
+        " O'Connor ",
+        "  Jean-Pierre  ",
+        "\tJohn",
+        "Mary\n",
+      ];
+
+      invalidNames.forEach((name) => {
+        const data = generateMockCharacterData();
+        data.character_data.info.name = name;
+
+        const result = fullCharacterSchema.safeParse(data);
+
+        expect(result.success).toBe(false);
+        if (!result.success) {
+          const nameError = result.error.errors.find(
+            (e) =>
+              e.path.includes("name") &&
+              e.message.includes("must start with a letter"),
+          );
+          expect(nameError).toBeDefined();
+        }
+      });
+    });
+
+    it("should reject character names with multiple consecutive spaces", () => {
+      const invalidNames = [
+        "John  Mary",
+        "Anne   Smith",
+        "Mary    Jane",
+        "O'Connor  O'Sullivan",
+        "Jean  Pierre  Marie",
+      ];
+
+      invalidNames.forEach((name) => {
+        const data = generateMockCharacterData();
+        data.character_data.info.name = name;
+
+        const result = fullCharacterSchema.safeParse(data);
+
+        expect(result.success).toBe(false);
+        if (!result.success) {
+          const nameError = result.error.errors.find(
+            (e) =>
+              e.path.includes("name") &&
+              e.message.includes("must start with a letter"),
+          );
+          expect(nameError).toBeDefined();
+        }
+      });
+    });
+
+    it("should reject character names with multiple consecutive hyphens", () => {
+      const invalidNames = [
+        "Mary--Jane",
+        "Jean---Pierre",
+        "Anne----Marie",
+        "O'Connor--Smith",
+      ];
+
+      invalidNames.forEach((name) => {
+        const data = generateMockCharacterData();
+        data.character_data.info.name = name;
+
+        const result = fullCharacterSchema.safeParse(data);
+
+        expect(result.success).toBe(false);
+        if (!result.success) {
+          const nameError = result.error.errors.find(
+            (e) =>
+              e.path.includes("name") &&
+              e.message.includes("must start with a letter"),
+          );
+          expect(nameError).toBeDefined();
+        }
+      });
+    });
+
+    it("should reject character names with multiple consecutive apostrophes", () => {
+      const invalidNames = [
+        "O''Connor",
+        "D'''Angelo",
+        "Mary''Jane",
+        "L''''Amour",
+      ];
+
+      invalidNames.forEach((name) => {
+        const data = generateMockCharacterData();
+        data.character_data.info.name = name;
+
+        const result = fullCharacterSchema.safeParse(data);
+
+        expect(result.success).toBe(false);
+        if (!result.success) {
+          const nameError = result.error.errors.find(
+            (e) =>
+              e.path.includes("name") &&
+              e.message.includes("must start with a letter"),
+          );
+          expect(nameError).toBeDefined();
+        }
+      });
+    });
+
+    it("should reject character names with invalid punctuation placement", () => {
+      const invalidNames = [
+        "-John",
+        "Mary-",
+        "'Connor",
+        "John'",
+        " -Mary",
+        "Jane- ",
+        "Mary - Jane",
+        "O' Connor",
+        "Jean - Pierre",
+      ];
+
+      invalidNames.forEach((name) => {
+        const data = generateMockCharacterData();
+        data.character_data.info.name = name;
+
+        const result = fullCharacterSchema.safeParse(data);
+
+        expect(result.success).toBe(false);
+        if (!result.success) {
+          const nameError = result.error.errors.find(
+            (e) =>
+              e.path.includes("name") &&
+              e.message.includes("must start with a letter"),
+          );
+          expect(nameError).toBeDefined();
+        }
+      });
+    });
+
+    it("should accept character name exactly 32 characters long", () => {
+      const data = generateMockCharacterData();
+      data.character_data.info.name = "Jean-Pierre Alexandre O'Sullivan"; // exactly 32 characters
+
+      const result = fullCharacterSchema.safeParse(data);
+
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data.character_data.info.name).toBe(
+          "Jean-Pierre Alexandre O'Sullivan",
+        );
+      }
+    });
+
     it("should reject invalid shape ID values", () => {
       const data = generateMockCharacterData();
       data.character_data.static.head.asset_id = -1; // below minimum
@@ -219,6 +491,133 @@ describe("Validation Schemas", () => {
       if (result.success) {
         expect(result.data.character_data?.info?.name).toBe("Updated Name");
       }
+    });
+
+    it("should reject name updates longer than 32 characters", () => {
+      const updateData = {
+        character_data: {
+          info: {
+            name: "ThisUpdatedNameIsWayTooLongAndExceedsThirtyTwoCharacterLimit",
+          },
+        },
+      };
+
+      const result = characterUpdateSchema.safeParse(updateData);
+
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        const nameError = result.error.errors.find(
+          (e) => e.path.includes("name") && e.message.includes("32"),
+        );
+        expect(nameError).toBeDefined();
+      }
+    });
+
+    it("should reject name updates with invalid characters", () => {
+      const updateData = {
+        character_data: {
+          info: {
+            name: "Updated@Name123",
+          },
+        },
+      };
+
+      const result = characterUpdateSchema.safeParse(updateData);
+
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        const nameError = result.error.errors.find(
+          (e) =>
+            e.path.includes("name") &&
+            e.message.includes("must start with a letter"),
+        );
+        expect(nameError).toBeDefined();
+      }
+    });
+
+    it("should reject name updates with only spaces, hyphens, or apostrophes", () => {
+      const invalidNames = ["   ", "---", "'''", " - '"];
+
+      invalidNames.forEach((name) => {
+        const updateData = {
+          character_data: {
+            info: {
+              name: name,
+            },
+          },
+        };
+
+        const result = characterUpdateSchema.safeParse(updateData);
+
+        expect(result.success).toBe(false);
+        if (!result.success) {
+          const nameError = result.error.errors.find(
+            (e) =>
+              e.path.includes("name") &&
+              e.message.includes("must start with a letter"),
+          );
+          expect(nameError).toBeDefined();
+        }
+      });
+    });
+
+    it("should reject name updates with whitespace and formatting issues", () => {
+      const invalidNames = [
+        " UpdatedName", // leading space
+        "UpdatedName ", // trailing space
+        "Updated  Name", // multiple spaces
+        "Updated--Name", // multiple hyphens
+        "Updated''Name", // multiple apostrophes
+        "-UpdatedName", // leading hyphen
+        "UpdatedName-", // trailing hyphen
+        "'UpdatedName", // leading apostrophe
+        "UpdatedName'", // trailing apostrophe
+        "Updated - Name", // spaces around hyphen
+        "Updated ' Name", // spaces around apostrophe
+      ];
+
+      invalidNames.forEach((name) => {
+        const updateData = {
+          character_data: {
+            info: {
+              name: name,
+            },
+          },
+        };
+
+        const result = characterUpdateSchema.safeParse(updateData);
+
+        expect(result.success).toBe(false);
+        if (!result.success) {
+          const nameError = result.error.errors.find(
+            (e) =>
+              e.path.includes("name") &&
+              e.message.includes("must start with a letter"),
+          );
+          expect(nameError).toBeDefined();
+        }
+      });
+    });
+
+    it("should accept valid name updates", () => {
+      const validNames = ["O'Brien", "Jean-Luc", "Mary Ann", "D'Artagnan"];
+
+      validNames.forEach((name) => {
+        const updateData = {
+          character_data: {
+            info: {
+              name: name,
+            },
+          },
+        };
+
+        const result = characterUpdateSchema.safeParse(updateData);
+
+        expect(result.success).toBe(true);
+        if (result.success) {
+          expect(result.data.character_data?.info?.name).toBe(name);
+        }
+      });
     });
 
     it("should reject empty update objects", () => {
