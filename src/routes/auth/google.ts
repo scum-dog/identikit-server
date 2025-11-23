@@ -12,7 +12,7 @@ const router = Router();
 
 router.get("/authorization-url", async (req: Request, res: Response) => {
   try {
-    const { authUrl, state, expiresAt } = googleAuth.generateAuthUrl();
+    const { authUrl, state, expiresAt } = await googleAuth.generateAuthUrl();
     res.json({ authUrl, state, expiresAt });
   } catch (error) {
     log.error("Google auth URL error", { error });
@@ -27,10 +27,9 @@ router.get("/authorization-url", async (req: Request, res: Response) => {
   }
 });
 
-// GET /auth/google/callback - OAuth callback endpoint
-router.get("/callback", async (req: Request, res: Response) => {
+const handleGoogleCallback = async (req: Request, res: Response) => {
   try {
-    const { code, state } = req.query;
+    const { code, state } = req.body;
 
     if (!code || !state) {
       return res
@@ -118,6 +117,8 @@ router.get("/callback", async (req: Request, res: Response) => {
         ),
       );
   }
-});
+};
+
+router.post("/callback", handleGoogleCallback);
 
 export default router;

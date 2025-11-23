@@ -177,4 +177,45 @@ export const characterQueries = {
   },
 };
 
+export const oauthStateQueries = {
+  create: async (state: string, platform: string, expiresAt: Date) => {
+    await query(
+      "INSERT INTO oauth_states (state, platform, expires_at) VALUES ($1, $2, $3)",
+      [state, platform, expiresAt],
+    );
+  },
+
+  validate: async (state: string, platform: string) => {
+    const result = await query<{ state: string; expires_at: Date }>(
+      "SELECT state, expires_at FROM oauth_states WHERE state = $1 AND platform = $2",
+      [state, platform],
+    );
+
+    if (result.rows.length === 0) {
+      return null;
+    }
+
+    const stateData = result.rows[0];
+    const now = new Date();
+
+    if (now > stateData.expires_at) {
+      await query("DELETE FROM oauth_states WHERE state = $1", [state]);
+      return null;
+    }
+
+    return stateData;
+  },
+
+  delete: async (state: string) => {
+    await query("DELETE FROM oauth_states WHERE state = $1", [state]);
+  },
+
+  cleanup: async () => {
+    const result = await query<{ cleanup_expired_oauth_states: number }>(
+      "SELECT cleanup_expired_oauth_states()",
+    );
+    return result.rows[0].cleanup_expired_oauth_states;
+  },
+};
+
 export default pool;

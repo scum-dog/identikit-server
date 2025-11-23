@@ -9,23 +9,28 @@ import {
   ItchOAuthParams,
 } from "../types";
 import { SessionManager } from "./sessions";
-import { userQueries } from "../database";
+import { userQueries, oauthStateQueries } from "../database";
 import { log } from "../utils/logger";
 import { handleConstraints } from "../utils/errorHandler";
 
 export class ItchOAuth implements OAuthProvider<PlatformUser> {
   public readonly platform = "itch" as const;
 
-  generateAuthUrl(): AuthUrlResult {
+  async generateAuthUrl(): Promise<AuthUrlResult> {
     const clientId = process.env.ITCH_IO_CLIENT_ID!;
     const redirectUri = process.env.ITCH_IO_REDIRECT_URI!;
 
+    const callbackUri = redirectUri + "?provider=itch";
+
     const state = crypto.randomBytes(32).toString("hex");
+
+    const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+    await oauthStateQueries.create(state, this.platform, expiresAt);
 
     const oauthParams: ItchOAuthParams = {
       client_id: clientId,
       scope: "profile:me",
-      redirect_uri: redirectUri,
+      redirect_uri: callbackUri,
       response_type: "token",
       state,
     };
@@ -35,18 +40,32 @@ export class ItchOAuth implements OAuthProvider<PlatformUser> {
     return {
       authUrl: `https://itch.io/user/oauth?${params.toString()}`,
       state,
-      expiresAt: new Date(Date.now() + 10 * 60 * 1000), // 10 minutes
+      expiresAt,
     };
   }
 
   async authenticateWithCode(
     accessToken: string,
-    _state?: string,
+    state?: string,
     _codeVerifier?: string,
   ): Promise<{ sessionId: string; user: PlatformUser }> {
     if (!accessToken) {
       throw new AuthError("Access token is required", this.platform);
     }
+
+    if (!state) {
+      throw new AuthError(
+        "Missing state parameter",
+        this.platform,
+      );
+    }
+
+    const stateData = await oauthStateQueries.validate(state, this.platform);
+    if (!stateData) {
+      throw new AuthError("Invalid or expired state parameter", this.platform);
+    }
+
+    await oauthStateQueries.delete(state);
 
     try {
       const response = await axios.get(

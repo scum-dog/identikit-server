@@ -44,6 +44,14 @@ CREATE TABLE user_sessions (
   UNIQUE (user_id)
 );
 
+-- oauth state table
+CREATE TABLE oauth_states (
+  state VARCHAR(64) PRIMARY KEY,
+  platform VARCHAR(20) NOT NULL CHECK (platform IN ('google', 'itch')),
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT now(),
+  expires_at TIMESTAMP WITH TIME ZONE NOT NULL
+);
+
 -- character indexes
 CREATE INDEX idx_characters_user_id ON characters (user_id);
 
@@ -70,6 +78,8 @@ CREATE INDEX idx_users_platform ON users (platform, platform_user_id);
 CREATE INDEX idx_user_sessions_user_id ON user_sessions (user_id);
 
 CREATE INDEX idx_user_sessions_expires_at ON user_sessions (expires_at);
+
+CREATE INDEX idx_oauth_states_expires_at ON oauth_states (expires_at);
 
 -- business logic
 CREATE OR REPLACE FUNCTION can_user_edit_character (character_uuid UUID, user_uuid UUID) returns BOOLEAN AS $$
@@ -164,6 +174,16 @@ DECLARE
     deleted_count integer;
 BEGIN
     DELETE FROM user_sessions WHERE expires_at < NOW();
+    GET DIAGNOSTICS deleted_count = ROW_COUNT;
+    RETURN deleted_count;
+END;
+$$ language plpgsql;
+
+CREATE OR REPLACE FUNCTION cleanup_expired_oauth_states () returns INTEGER AS $$
+DECLARE
+    deleted_count integer;
+BEGIN
+    DELETE FROM oauth_states WHERE expires_at < NOW();
     GET DIAGNOSTICS deleted_count = ROW_COUNT;
     RETURN deleted_count;
 END;

@@ -247,7 +247,7 @@ export type Platform = "newgrounds" | "itch" | "google";
 
 export interface OAuthProvider<T extends PlatformUser> {
   platform: Platform;
-  generateAuthUrl(): AuthUrlResult;
+  generateAuthUrl(): Promise<AuthUrlResult>;
   authenticateWithCode(
     code: string,
     state?: string,

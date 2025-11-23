@@ -12,9 +12,9 @@ import {
 const router = Router();
 
 // GET /auth/itchio/authorization-url - get itch.io OAuth authorization URL
-router.get("/authorization-url", (req: Request, res: Response) => {
+router.get("/authorization-url", async (req: Request, res: Response) => {
   try {
-    const { authUrl, state, expiresAt } = itchAuth.generateAuthUrl();
+    const { authUrl, state, expiresAt } = await itchAuth.generateAuthUrl();
 
     res.json({
       authUrl,

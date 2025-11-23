@@ -10,7 +10,7 @@ import {
   GoogleOAuthParams,
 } from "../types";
 import { SessionManager } from "./sessions";
-import { userQueries } from "../database";
+import { userQueries, oauthStateQueries } from "../database";
 import { log } from "../utils/logger";
 import { handleConstraints } from "../utils/errorHandler";
 
@@ -20,12 +20,17 @@ export class GoogleAuth implements OAuthProvider<PlatformUser> {
   private readonly clientSecret = process.env.GOOGLE_CLIENT_SECRET;
   private readonly redirectUri = process.env.GOOGLE_REDIRECT_URI;
 
-  generateAuthUrl(): AuthUrlResult {
+  async generateAuthUrl(): Promise<AuthUrlResult> {
     const state = crypto.randomBytes(32).toString("hex");
+
+    const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+    await oauthStateQueries.create(state, this.platform, expiresAt);
+
+    const callbackUri = this.redirectUri! + "?provider=google";
 
     const oauthParams: GoogleOAuthParams = {
       client_id: this.clientId!,
-      redirect_uri: this.redirectUri!,
+      redirect_uri: callbackUri,
       scope: "openid email profile",
       response_type: "code",
       state,
@@ -38,15 +43,29 @@ export class GoogleAuth implements OAuthProvider<PlatformUser> {
     return {
       authUrl,
       state,
-      expiresAt: new Date(Date.now() + 10 * 60 * 1000), // 10 minutes
+      expiresAt,
     };
   }
 
   async authenticateWithCode(
     code: string,
-    _state?: string,
+    state?: string,
     _codeVerifier?: string,
   ): Promise<{ sessionId: string; user: PlatformUser }> {
+    if (!state) {
+      throw new AuthError(
+        "Missing state parameter",
+        this.platform,
+      );
+    }
+
+    const stateData = await oauthStateQueries.validate(state, this.platform);
+    if (!stateData) {
+      throw new AuthError("Invalid or expired state parameter", this.platform);
+    }
+
+    await oauthStateQueries.delete(state);
+
     try {
       const tokens = await this.exchangeCodeForTokens(code);
       const googleUser = await this.fetchUserProfile(tokens.access_token);
