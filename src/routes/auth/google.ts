@@ -29,7 +29,7 @@ router.get("/authorization-url", async (req: Request, res: Response) => {
 
 const handleGoogleCallback = async (req: Request, res: Response) => {
   try {
-    const { code, state } = req.body;
+    const { code, state } = req.query;
 
     if (!code || !state) {
       return res
@@ -119,6 +119,6 @@ const handleGoogleCallback = async (req: Request, res: Response) => {
   }
 };
 
-router.post("/callback", handleGoogleCallback);
+router.get("/callback", handleGoogleCallback);
 
 export default router;

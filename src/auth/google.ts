@@ -26,7 +26,7 @@ export class GoogleAuth implements OAuthProvider<PlatformUser> {
     const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
     await oauthStateQueries.create(state, this.platform, expiresAt);
 
-    const callbackUri = this.redirectUri! + "?provider=google";
+    const callbackUri = this.redirectUri!;
 
     const oauthParams: GoogleOAuthParams = {
       client_id: this.clientId!,
@@ -53,10 +53,7 @@ export class GoogleAuth implements OAuthProvider<PlatformUser> {
     _codeVerifier?: string,
   ): Promise<{ sessionId: string; user: PlatformUser }> {
     if (!state) {
-      throw new AuthError(
-        "Missing state parameter",
-        this.platform,
-      );
+      throw new AuthError("Missing state parameter", this.platform);
     }
 
     const stateData = await oauthStateQueries.validate(state, this.platform);

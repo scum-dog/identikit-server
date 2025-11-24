@@ -20,7 +20,7 @@ export class ItchOAuth implements OAuthProvider<PlatformUser> {
     const clientId = process.env.ITCH_IO_CLIENT_ID!;
     const redirectUri = process.env.ITCH_IO_REDIRECT_URI!;
 
-    const callbackUri = redirectUri + "?provider=itch";
+    const callbackUri = redirectUri;
 
     const state = crypto.randomBytes(32).toString("hex");
 
@@ -54,10 +54,7 @@ export class ItchOAuth implements OAuthProvider<PlatformUser> {
     }
 
     if (!state) {
-      throw new AuthError(
-        "Missing state parameter",
-        this.platform,
-      );
+      throw new AuthError("Missing state parameter", this.platform);
     }
 
     const stateData = await oauthStateQueries.validate(state, this.platform);
