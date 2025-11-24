@@ -147,7 +147,9 @@ router.get("/callback", (req: Request, res: Response) => {
 
             const message = {
                 success: true,
-                data: authData,
+                sessionId: authData.sessionId,
+                user: authData.user,
+                message: authData.message,
                 timestamp: Date.now()
             };
 
