@@ -95,9 +95,6 @@ router.get("/callback", (req: Request, res: Response) => {
     (function() {
         'use strict';
 
-        const parentWindow = window.opener;
-        const parentFrame = window.parent;
-
         const statusElement = document.getElementById('status');
         const messageElement = document.getElementById('message');
 
@@ -122,41 +119,75 @@ router.get("/callback", (req: Request, res: Response) => {
             return Object.fromEntries(urlParams.entries());
         }
 
-        function sendMessageAndClose(data) {
-            console.log('Sending message to parent window:', data);
-
+        function cleanupOldOAuthResults() {
             try {
-                let messageSent = false;
+                const fifteenMinutesAgo = Date.now() - (15 * 60 * 1000);
+                let cleanedCount = 0;
 
-                if (parentWindow && !parentWindow.closed) {
-                    console.log('Sending message via stored window.opener');
-                    parentWindow.postMessage(data, '*');
-                    messageSent = true;
-                } else if (window.opener && !window.opener.closed) {
-                    console.log('Sending message via current window.opener');
-                    window.opener.postMessage(data, '*');
-                    messageSent = true;
-                } else if (parentFrame && parentFrame !== window) {
-                    console.log('Sending message via stored window.parent');
-                    parentFrame.postMessage(data, '*');
-                    messageSent = true;
-                } else if (window.parent && window.parent !== window) {
-                    console.log('Sending message via current window.parent');
-                    window.parent.postMessage(data, '*');
-                    messageSent = true;
-                } else {
-                    console.warn('No valid parent window found', {
-                        hasStoredOpener: !!parentWindow,
-                        storedOpenerClosed: parentWindow?.closed,
-                        hasCurrentOpener: !!window.opener,
-                        currentOpenerClosed: window.opener?.closed,
-                        hasStoredParent: !!parentFrame,
-                        hasCurrentParent: !!window.parent,
-                        isParentSelf: window.parent === window
-                    });
+                for (let i = localStorage.length - 1; i >= 0; i--) {
+                    const key = localStorage.key(i);
+                    if (key && key.startsWith('oauth_result_')) {
+                        try {
+                            const data = JSON.parse(localStorage.getItem(key) || '{}');
+                            const resultTime = data.completedAt || data.timestamp || 0;
+
+                            if (resultTime < fifteenMinutesAgo || (data.expiresAt && Date.now() > data.expiresAt)) {
+                                localStorage.removeItem(key);
+                                cleanedCount++;
+                            }
+                        } catch (e) {
+                            localStorage.removeItem(key);
+                            cleanedCount++;
+                        }
+                    }
                 }
 
-                console.log('Message send attempt completed:', { messageSent, data });
+                if (cleanedCount > 0) {
+                    console.log(\`Cleaned up \${cleanedCount} old OAuth results from localStorage\`);
+                }
+            } catch (error) {
+                console.error('Error during OAuth cleanup:', error);
+            }
+        }
+
+        function writeToLocalStorageBridge(data) {
+            try {
+                cleanupOldOAuthResults();
+
+                const params = getUrlParams();
+                const sessionId = params.state || 'google_auth_' + Date.now();
+
+                const storageKey = \`oauth_result_\${sessionId}\`;
+                const expiresAt = Date.now() + (15 * 60 * 1000);
+                const storageData = {
+                    ...data,
+                    provider: 'google',
+                    completedAt: Date.now(),
+                    expiresAt: expiresAt,
+                    url: window.location.href
+                };
+
+                localStorage.setItem(storageKey, JSON.stringify(storageData));
+                console.log('Auth result written to localStorage:', { key: storageKey, expiresAt, data: storageData });
+
+                localStorage.setItem('oauth_latest_result', JSON.stringify({
+                    sessionId: sessionId,
+                    provider: 'google',
+                    timestamp: Date.now(),
+                    expiresAt: expiresAt
+                }));
+
+            } catch (error) {
+                console.error('Failed to write to localStorage:', error);
+            }
+        }
+
+        function sendResultAndClose(data) {
+            console.log('Storing OAuth result in localStorage:', data);
+
+            try {
+                writeToLocalStorageBridge(data);
+                console.log('OAuth result successfully stored');
 
                 setTimeout(() => {
                     try {
@@ -166,7 +197,7 @@ router.get("/callback", (req: Request, res: Response) => {
                     }
                 }, 100);
             } catch (error) {
-                console.error('Error sending message to parent:', error);
+                console.error('Error storing OAuth result:', error);
                 updateMessage('Please close this window manually');
             }
         }
@@ -184,7 +215,7 @@ router.get("/callback", (req: Request, res: Response) => {
                 timestamp: Date.now()
             };
 
-            sendMessageAndClose(message);
+            sendResultAndClose(message);
         }
 
         function handleError(error, description = '') {
@@ -199,7 +230,7 @@ router.get("/callback", (req: Request, res: Response) => {
                 timestamp: Date.now()
             };
 
-            sendMessageAndClose(message);
+            sendResultAndClose(message);
         }
 
         async function exchangeCodeForSession(code, state) {
@@ -298,6 +329,11 @@ router.get("/callback", (req: Request, res: Response) => {
         }
 
         function initialize() {
+            console.log('Google OAuth callback initialized - using localStorage communication', {
+                url: window.location.href,
+                timestamp: Date.now()
+            });
+
             const params = getUrlParams();
 
             if (params.code || params.error) {
