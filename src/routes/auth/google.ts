@@ -127,13 +127,11 @@ router.get("/callback", (req: Request, res: Response) => {
                     window.parent.postMessage(data, '*');
                 }
 
-                setTimeout(() => {
-                    try {
-                        window.close();
-                    } catch (e) {
-                        console.log('Could not auto-close window, user must close manually');
-                    }
-                }, 1500);
+                try {
+                    window.close();
+                } catch (e) {
+                    console.log('Could not auto-close window, user must close manually');
+                }
             } catch (error) {
                 console.error('Error sending message to parent:', error);
                 updateMessage('Please close this window manually');
