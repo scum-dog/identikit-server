@@ -127,11 +127,13 @@ router.get("/callback", (req: Request, res: Response) => {
                     window.parent.postMessage(data, '*');
                 }
 
-                try {
-                    window.close();
-                } catch (e) {
-                    console.log('Could not auto-close window, user must close manually');
-                }
+                setTimeout(() => {
+                    try {
+                        window.close();
+                    } catch (e) {
+                        console.log('Could not auto-close window, user must close manually');
+                    }
+                }, 100);
             } catch (error) {
                 console.error('Error sending message to parent:', error);
                 updateMessage('Please close this window manually');
@@ -196,10 +198,11 @@ router.get("/callback", (req: Request, res: Response) => {
         async function processCallback() {
             try {
                 const params = getUrlParams();
-                console.log('Google callback params:', params);
+                console.log('Google callback processing started:', params);
 
                 if (params.error) {
                     const errorDescription = params.error_description || params.error;
+                    console.error('OAuth error received:', { error: params.error, description: errorDescription });
                     throw new Error('OAuth Error: ' + errorDescription);
                 }
 
@@ -214,13 +217,21 @@ router.get("/callback", (req: Request, res: Response) => {
                 }
 
                 updateStatus('Exchanging code for session...', 'loading');
+                console.log('Exchanging authorization code for session...');
 
                 const authData = await exchangeCodeForSession(code, state);
+                console.log('Authentication exchange completed:', {
+                    hasSessionId: !!(authData?.sessionId),
+                    hasUser: !!(authData?.user),
+                    success: !!(authData?.success)
+                });
 
                 if (!authData || !authData.sessionId) {
+                    console.error('Invalid auth response:', authData);
                     throw new Error('Invalid response from authentication server');
                 }
 
+                console.log('Google authentication successful, sending to parent window');
                 handleSuccess(authData);
 
             } catch (error) {
@@ -253,7 +264,7 @@ router.get("/callback", (req: Request, res: Response) => {
             }, 2000);
         }
 
-        document.addEventListener('DOMContentLoaded', function() {
+        function initialize() {
             const params = getUrlParams();
 
             if (params.code || params.error) {
@@ -261,17 +272,12 @@ router.get("/callback", (req: Request, res: Response) => {
             } else {
                 handleDirectNavigation();
             }
-        });
+        }
 
         if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', arguments.callee);
+            document.addEventListener('DOMContentLoaded', initialize);
         } else {
-            const params = getUrlParams();
-            if (params.code || params.error) {
-                processCallback();
-            } else {
-                handleDirectNavigation();
-            }
+            initialize();
         }
 
     })();
