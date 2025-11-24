@@ -120,12 +120,29 @@ router.get("/callback", (req: Request, res: Response) => {
         }
 
         function sendMessageAndClose(data) {
+            console.log('Sending message to parent window:', data);
+
             try {
+                let messageSent = false;
+
                 if (window.opener && !window.opener.closed) {
+                    console.log('Sending message via window.opener');
                     window.opener.postMessage(data, '*');
+                    messageSent = true;
                 } else if (window.parent && window.parent !== window) {
+                    console.log('Sending message via window.parent');
                     window.parent.postMessage(data, '*');
+                    messageSent = true;
+                } else {
+                    console.warn('No valid parent window found', {
+                        hasOpener: !!window.opener,
+                        openerClosed: window.opener?.closed,
+                        hasParent: !!window.parent,
+                        isParentSelf: window.parent === window
+                    });
                 }
+
+                console.log('Message send attempt completed:', { messageSent, data });
 
                 setTimeout(() => {
                     try {
