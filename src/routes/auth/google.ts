@@ -194,11 +194,12 @@ router.get("/callback", (req: Request, res: Response) => {
                         window.close();
                     } catch (e) {
                         console.log('Could not auto-close window, user must close manually');
+                        updateMessage('Authentication complete. You may close this window.');
                     }
-                }, 100);
+                }, 1500);
             } catch (error) {
                 console.error('Error storing OAuth result:', error);
-                updateMessage('Please close this window manually');
+                updateMessage('Authentication complete. Please close this window manually.');
             }
         }
 
