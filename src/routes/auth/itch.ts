@@ -101,6 +101,9 @@ router.get("/callback", (req: Request, res: Response) => {
     (function() {
         'use strict';
 
+        const parentWindow = window.opener;
+        const parentFrame = window.parent;
+
         const statusElement = document.getElementById('status');
         const messageElement = document.getElementById('message');
 
@@ -142,19 +145,30 @@ router.get("/callback", (req: Request, res: Response) => {
             try {
                 let messageSent = false;
 
-                if (window.opener && !window.opener.closed) {
-                    console.log('Sending message via window.opener');
+                if (parentWindow && !parentWindow.closed) {
+                    console.log('Sending message via stored window.opener');
+                    parentWindow.postMessage(data, '*');
+                    messageSent = true;
+                } else if (window.opener && !window.opener.closed) {
+                    console.log('Sending message via current window.opener');
                     window.opener.postMessage(data, '*');
                     messageSent = true;
+                } else if (parentFrame && parentFrame !== window) {
+                    console.log('Sending message via stored window.parent');
+                    parentFrame.postMessage(data, '*');
+                    messageSent = true;
                 } else if (window.parent && window.parent !== window) {
-                    console.log('Sending message via window.parent');
+                    console.log('Sending message via current window.parent');
                     window.parent.postMessage(data, '*');
                     messageSent = true;
                 } else {
                     console.warn('No valid parent window found', {
-                        hasOpener: !!window.opener,
-                        openerClosed: window.opener?.closed,
-                        hasParent: !!window.parent,
+                        hasStoredOpener: !!parentWindow,
+                        storedOpenerClosed: parentWindow?.closed,
+                        hasCurrentOpener: !!window.opener,
+                        currentOpenerClosed: window.opener?.closed,
+                        hasStoredParent: !!parentFrame,
+                        hasCurrentParent: !!window.parent,
                         isParentSelf: window.parent === window
                     });
                 }
