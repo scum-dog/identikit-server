@@ -170,8 +170,7 @@ router.get("/callback", (req: Request, res: Response) => {
             try {
                 cleanupOldOAuthResults();
 
-                const params = getUrlParams();
-                const sessionId = params.state || 'itch_auth_' + Date.now();
+                const sessionId = data.sessionId || 'itch_auth_' + Date.now();
 
                 const storageKey = \`oauth_result_\${sessionId}\`;
                 const expiresAt = Date.now() + (15 * 60 * 1000);
@@ -184,7 +183,7 @@ router.get("/callback", (req: Request, res: Response) => {
                 };
 
                 localStorage.setItem(storageKey, JSON.stringify(storageData));
-                console.log('Auth result written to localStorage:', { key: storageKey, expiresAt, data: storageData });
+                console.log('Auth result written to localStorage:', { key: storageKey, sessionId, data: storageData });
 
                 localStorage.setItem('oauth_latest_result', JSON.stringify({
                     sessionId: sessionId,
