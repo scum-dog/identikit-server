@@ -152,7 +152,6 @@ router.get("/callback", (req: Request, res: Response) => {
                     throw new Error(\`HTTP \${response.status}: \${response.statusText}\`);
                 }
 
-                const result = await response.json();
                 return true;
             } catch (error) {
                 console.error('Failed to store OAuth result on server:', error);
@@ -188,8 +187,7 @@ router.get("/callback", (req: Request, res: Response) => {
                 success: true,
                 sessionId: authData.sessionId,
                 user: authData.user,
-                message: authData.message,
-                timestamp: Date.now()
+                message: authData.message
             };
 
             sendResultAndClose(message);
@@ -203,8 +201,7 @@ router.get("/callback", (req: Request, res: Response) => {
             const message = {
                 success: false,
                 error: error,
-                message: description,
-                timestamp: Date.now()
+                message: description
             };
 
             sendResultAndClose(message);
