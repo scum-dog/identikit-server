@@ -198,12 +198,48 @@ router.get("/callback", (req: Request, res: Response) => {
         }
 
 
-        function sendResultAndClose(data) {
-            console.log('Storing OAuth result in localStorage:', data);
-
+        async function storeOAuthResultOnServer(data) {
             try {
-                writeToLocalStorageBridge(data);
-                console.log('OAuth result successfully stored');
+                const params = getUrlParams();
+                const pollId = params.poll_id;
+
+                if (!pollId) {
+                    console.error('No poll_id found in URL parameters');
+                    return false;
+                }
+
+                console.log('Storing OAuth result on server with pollId:', pollId);
+
+                const response = await fetch(\`/auth/oauth/store/\${pollId}\`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                if (!response.ok) {
+                    throw new Error(\`HTTP \${response.status}: \${response.statusText}\`);
+                }
+
+                const result = await response.json();
+                console.log('OAuth result stored successfully:', result);
+                return true;
+            } catch (error) {
+                console.error('Failed to store OAuth result on server:', error);
+                return false;
+            }
+        }
+
+        function sendResultAndClose(data) {
+            console.log('Storing OAuth result on server:', data);
+
+            storeOAuthResultOnServer(data).then(success => {
+                if (success) {
+                    console.log('OAuth result successfully stored on server');
+                } else {
+                    console.error('Failed to store OAuth result on server');
+                }
 
                 setTimeout(() => {
                     try {
@@ -212,11 +248,11 @@ router.get("/callback", (req: Request, res: Response) => {
                         console.log('Could not auto-close window, user must close manually');
                         updateMessage('Authentication complete. You may close this window.');
                     }
-                }, 1500);
-            } catch (error) {
-                console.error('Error storing OAuth result:', error);
+                }, 1000);
+            }).catch(error => {
+                console.error('Error in OAuth result storage:', error);
                 updateMessage('Authentication complete. Please close this window manually.');
-            }
+            });
         }
 
         function handleSuccess(authData) {

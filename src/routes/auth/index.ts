@@ -8,12 +8,14 @@ import { SessionManager } from "../../auth/sessions";
 import newgroundsRoutes from "./newgrounds";
 import itchRoutes from "./itch";
 import googleRoutes from "./google";
+import pollingRoutes from "./polling";
 
 const router = Router();
 
 router.use("/newgrounds", newgroundsRoutes);
 router.use("/itchio", itchRoutes);
 router.use("/google", googleRoutes);
+router.use("/oauth", pollingRoutes);
 
 // GET /auth/session - verify current session
 router.get("/session", authenticateUser, (req: Request, res: Response) => {
