@@ -4,6 +4,9 @@ import { JobPriority, CharacterProcessingJobData, QueueJob } from "./types";
 
 const queuePool = new Pool({
   connectionString: process.env.DATABASE_URL,
+  ssl: {
+    rejectUnauthorized: false,
+  },
   max: 20,
   idleTimeoutMillis: 30 * 1000,
   connectionTimeoutMillis: 2000,
