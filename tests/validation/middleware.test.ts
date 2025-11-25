@@ -24,7 +24,7 @@ describe("Validation Middleware (Logic Tests)", () => {
     it("should validate and transform valid request body", () => {
       const validCharacterData = generateMockCharacterData();
       const req = createMockRequest({
-        body: validCharacterData,
+        body: { character_data: validCharacterData.character_data },
       });
       const res = createMockResponse();
 
@@ -37,7 +37,7 @@ describe("Validation Middleware (Logic Tests)", () => {
 
     it("should reject invalid request body", () => {
       const req = createMockRequest({
-        body: { character: { invalid: "data" } },
+        body: { character_data: { invalid: "data" } },
       });
       const res = createMockResponse();
 
@@ -78,20 +78,13 @@ describe("Validation Middleware (Logic Tests)", () => {
     it("should provide detailed validation error messages", () => {
       const req = createMockRequest({
         body: {
-          metadata: {
-            upload_id: "invalid-uuid",
-            user_id: "invalid-uuid",
-            created_at: "invalid-date",
-          },
           character_data: {
             info: {
               name: "", // should fail
               sex: "invalid",
               height_in: 0, // too small
               race: "invalid",
-              location: {
-                country: "", // should fail
-              },
+              location: "INVALID_COUNTRY",
             },
             static: {
               head: {
@@ -111,8 +104,8 @@ describe("Validation Middleware (Logic Tests)", () => {
           error: "Validation failed",
           details: expect.arrayContaining([
             expect.objectContaining({
-              field: expect.stringContaining("upload_id"),
-              message: expect.stringContaining("uuid"),
+              field: expect.stringContaining("character_data.info.name"),
+              message: expect.stringContaining("character"),
             }),
           ]),
         }),
@@ -294,9 +287,9 @@ describe("Validation Middleware (Logic Tests)", () => {
       const validator = validateRequest(characterUploadSchema);
       const req = createMockRequest({
         body: {
-          character: {
-            metadata: {
-              upload_id: "not-a-uuid",
+          character_data: {
+            info: {
+              name: "Invalid123", // should fail due to regex
             },
           },
         },
