@@ -43,11 +43,11 @@ export function handleDatabaseConstraintError(
         field: "platform_user_id",
       };
 
-    case "users_username_key":
+    case "users_platform_username_key":
       return {
         error: "username_taken",
         message:
-          "This username is already taken. Please choose a different username",
+          "This username is already taken on this platform. Please choose a different username",
         field: "username",
       };
 

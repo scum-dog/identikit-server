@@ -13,7 +13,7 @@ CREATE TABLE users (
   created_at TIMESTAMP WITH TIME ZONE DEFAULT now(),
   last_login TIMESTAMP WITH TIME ZONE DEFAULT now(),
   UNIQUE (platform, platform_user_id),
-  UNIQUE (username)
+  UNIQUE (platform, username)
 );
 
 -- character uploads table
