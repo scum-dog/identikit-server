@@ -46,7 +46,7 @@ CREATE TABLE user_sessions (
 
 -- oauth state table
 CREATE TABLE oauth_states (
-  state VARCHAR(64) PRIMARY KEY,
+  state VARCHAR(200) PRIMARY KEY,
   platform VARCHAR(20) NOT NULL CHECK (platform IN ('google', 'itch')),
   created_at TIMESTAMP WITH TIME ZONE DEFAULT now(),
   expires_at TIMESTAMP WITH TIME ZONE NOT NULL
