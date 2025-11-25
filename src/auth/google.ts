@@ -20,8 +20,9 @@ export class GoogleAuth implements OAuthProvider<PlatformUser> {
   private readonly clientSecret = process.env.GOOGLE_CLIENT_SECRET;
   private readonly redirectUri = process.env.GOOGLE_REDIRECT_URI;
 
-  async generateAuthUrl(): Promise<AuthUrlResult> {
-    const state = crypto.randomBytes(32).toString("hex");
+  async generateAuthUrl(pollId?: string): Promise<AuthUrlResult> {
+    const baseState = crypto.randomBytes(32).toString("hex");
+    const state = pollId ? `${baseState}_pollid_${pollId}` : baseState;
 
     const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
     await oauthStateQueries.create(state, this.platform, expiresAt);

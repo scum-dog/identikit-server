@@ -12,7 +12,10 @@ const router = Router();
 
 router.get("/authorization-url", async (req: Request, res: Response) => {
   try {
-    const { authUrl, state, expiresAt } = await googleAuth.generateAuthUrl();
+    const pollId = req.query.poll_id as string;
+    const { authUrl, state, expiresAt } =
+      await googleAuth.generateAuthUrl(pollId);
+      
     res.json({ authUrl, state, expiresAt });
   } catch (error) {
     log.error("Google auth URL error", { error });
@@ -184,10 +187,15 @@ router.get("/callback", (req: Request, res: Response) => {
         async function storeOAuthResultOnServer(data) {
             try {
                 const params = getUrlParams();
-                const pollId = params.poll_id;
+                const state = params.state;
+                let pollId = null;
+
+                if (state && state.includes('_pollid_')) {
+                    pollId = state.split('_pollid_')[1];
+                }
 
                 if (!pollId) {
-                    console.error('No poll_id found in URL parameters');
+                    console.error('No poll_id found in state parameter. State:', state);
                     return false;
                 }
 

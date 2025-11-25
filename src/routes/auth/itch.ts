@@ -13,7 +13,9 @@ const router = Router();
 // GET /auth/itchio/authorization-url - get itch.io OAuth authorization URL
 router.get("/authorization-url", async (req: Request, res: Response) => {
   try {
-    const { authUrl, state, expiresAt } = await itchAuth.generateAuthUrl();
+    const pollId = req.query.poll_id as string;
+    const { authUrl, state, expiresAt } =
+      await itchAuth.generateAuthUrl(pollId);
 
     res.json({
       authUrl,
@@ -201,10 +203,15 @@ router.get("/callback", (req: Request, res: Response) => {
         async function storeOAuthResultOnServer(data) {
             try {
                 const params = getUrlParams();
-                const pollId = params.poll_id;
+                const state = params.state;
+                let pollId = null;
+
+                if (state && state.includes('_pollid_')) {
+                    pollId = state.split('_pollid_')[1];
+                }
 
                 if (!pollId) {
-                    console.error('No poll_id found in URL parameters');
+                    console.error('No poll_id found in state parameter. State:', state);
                     return false;
                 }
 

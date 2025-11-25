@@ -16,13 +16,14 @@ import { handleConstraints } from "../utils/errorHandler";
 export class ItchOAuth implements OAuthProvider<PlatformUser> {
   public readonly platform = "itch" as const;
 
-  async generateAuthUrl(): Promise<AuthUrlResult> {
+  async generateAuthUrl(pollId?: string): Promise<AuthUrlResult> {
     const clientId = process.env.ITCH_IO_CLIENT_ID!;
     const redirectUri = process.env.ITCH_IO_REDIRECT_URI!;
 
     const callbackUri = redirectUri;
 
-    const state = crypto.randomBytes(32).toString("hex");
+    const baseState = crypto.randomBytes(32).toString("hex");
+    const state = pollId ? `${baseState}_pollid_${pollId}` : baseState;
 
     const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
     await oauthStateQueries.create(state, this.platform, expiresAt);
