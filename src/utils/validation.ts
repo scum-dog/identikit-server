@@ -332,7 +332,9 @@ export const characterDataUpdateSchema = z.object({
   metadata: z.object({}).optional(),
 });
 
-export const characterUploadSchema = fullCharacterSchema;
+export const characterUploadSchema = z.object({
+  character_data: characterDataSchema,
+});
 
 export const characterUpdateSchema = characterDataUpdateSchema
   .refine((data) => Object.keys(data).length > 0, {

@@ -107,7 +107,7 @@ router.post(
         {
           userId: req.user!.id,
           action: "create",
-          characterData: req.body.character,
+          characterData: req.body.character_data,
           metadata: {
             userAgent: req.get("User-Agent"),
             ipAddress: req.ip,

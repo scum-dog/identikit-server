@@ -15,7 +15,7 @@ router.get("/authorization-url", async (req: Request, res: Response) => {
     const pollId = req.query.poll_id as string;
     const { authUrl, state, expiresAt } =
       await googleAuth.generateAuthUrl(pollId);
-      
+
     res.json({ authUrl, state, expiresAt });
   } catch (error) {
     log.error("Google auth URL error", { error });
