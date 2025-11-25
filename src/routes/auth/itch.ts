@@ -137,67 +137,7 @@ router.get("/callback", (req: Request, res: Response) => {
             return params;
         }
 
-        function cleanupOldOAuthResults() {
-            try {
-                const fifteenMinutesAgo = Date.now() - (15 * 60 * 1000);
-                let cleanedCount = 0;
 
-                for (let i = localStorage.length - 1; i >= 0; i--) {
-                    const key = localStorage.key(i);
-                    if (key && key.startsWith('oauth_result_')) {
-                        try {
-                            const data = JSON.parse(localStorage.getItem(key) || '{}');
-                            const resultTime = data.completedAt || data.timestamp || 0;
-
-                            if (resultTime < fifteenMinutesAgo || (data.expiresAt && Date.now() > data.expiresAt)) {
-                                localStorage.removeItem(key);
-                                cleanedCount++;
-                            }
-                        } catch (e) {
-                            localStorage.removeItem(key);
-                            cleanedCount++;
-                        }
-                    }
-                }
-
-                if (cleanedCount > 0) {
-                    console.log(\`Cleaned up \${cleanedCount} old OAuth results from localStorage\`);
-                }
-            } catch (error) {
-                console.error('Error during OAuth cleanup:', error);
-            }
-        }
-
-        function writeToLocalStorageBridge(data) {
-            try {
-                cleanupOldOAuthResults();
-
-                const sessionId = data.sessionId || 'itch_auth_' + Date.now();
-
-                const storageKey = \`oauth_result_\${sessionId}\`;
-                const expiresAt = Date.now() + (15 * 60 * 1000);
-                const storageData = {
-                    ...data,
-                    provider: 'itch',
-                    completedAt: Date.now(),
-                    expiresAt: expiresAt,
-                    url: window.location.href
-                };
-
-                localStorage.setItem(storageKey, JSON.stringify(storageData));
-                console.log('Auth result written to localStorage:', { key: storageKey, sessionId, data: storageData });
-
-                localStorage.setItem('oauth_latest_result', JSON.stringify({
-                    sessionId: sessionId,
-                    provider: 'itch',
-                    timestamp: Date.now(),
-                    expiresAt: expiresAt
-                }));
-
-            } catch (error) {
-                console.error('Failed to write to localStorage:', error);
-            }
-        }
 
 
         async function storeOAuthResultOnServer(data) {
@@ -215,7 +155,6 @@ router.get("/callback", (req: Request, res: Response) => {
                     return false;
                 }
 
-                console.log('Storing OAuth result on server with pollId:', pollId);
 
                 const response = await fetch(\`/auth/oauth/store/\${pollId}\`, {
                     method: 'POST',
@@ -230,7 +169,6 @@ router.get("/callback", (req: Request, res: Response) => {
                 }
 
                 const result = await response.json();
-                console.log('OAuth result stored successfully:', result);
                 return true;
             } catch (error) {
                 console.error('Failed to store OAuth result on server:', error);
@@ -239,12 +177,8 @@ router.get("/callback", (req: Request, res: Response) => {
         }
 
         function sendResultAndClose(data) {
-            console.log('Storing OAuth result on server:', data);
-
             storeOAuthResultOnServer(data).then(success => {
-                if (success) {
-                    console.log('OAuth result successfully stored on server');
-                } else {
+                if (!success) {
                     console.error('Failed to store OAuth result on server');
                 }
 
@@ -252,7 +186,6 @@ router.get("/callback", (req: Request, res: Response) => {
                     try {
                         window.close();
                     } catch (e) {
-                        console.log('Could not auto-close window, user must close manually');
                         updateMessage('Authentication complete. You may close this window.');
                     }
                 }, 1000);
@@ -322,7 +255,6 @@ router.get("/callback", (req: Request, res: Response) => {
         async function processCallback() {
             try {
                 const params = getUrlParams();
-                console.log('Itch.io callback processing started:', params);
 
                 if (params.error) {
                     const errorDescription = params.error_description || params.error;
@@ -342,21 +274,14 @@ router.get("/callback", (req: Request, res: Response) => {
 
 
                 updateStatus('Exchanging token for session...', 'loading');
-                console.log('Exchanging access token for session...');
 
                 const authData = await exchangeTokenForSession(accessToken, state);
-                console.log('Authentication exchange completed:', {
-                    hasSessionId: !!(authData?.sessionId),
-                    hasUser: !!(authData?.user),
-                    success: !!(authData?.success)
-                });
 
                 if (!authData || !authData.sessionId) {
                     console.error('Invalid auth response:', authData);
                     throw new Error('Invalid response from authentication server');
                 }
 
-                console.log('Itch.io authentication successful, sending to parent window');
                 handleSuccess(authData);
 
             } catch (error) {
@@ -390,10 +315,6 @@ router.get("/callback", (req: Request, res: Response) => {
         }
 
         function initialize() {
-            console.log('Itch OAuth callback initialized - using localStorage communication', {
-                url: window.location.href,
-                timestamp: Date.now()
-            });
 
             const params = getUrlParams();
             if (params.access_token || params.error) {

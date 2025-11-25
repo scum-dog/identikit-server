@@ -40,12 +40,6 @@ export function storeOAuthResult(
     timestamp: now,
     expires,
   });
-
-  console.log(`Stored OAuth result for pollId: ${pollId}`, {
-    success: result.success,
-    hasSessionId: !!result.sessionId,
-    expires: new Date(expires).toISOString(),
-  });
 }
 
 export function getOAuthResult(pollId: string): OAuthResult | null {

@@ -20,7 +20,7 @@ router.get("/poll-id", (req: Request, res: Response) => {
     res.json({
       success: true,
       pollId,
-      expiresAt: Date.now() + 10 * 60 * 1000, // 10 min
+      expiresAt: Date.now() + 10 * 60 * 1000, // 10 minutes
     });
   } catch (error) {
     log.error("Failed to generate polling ID", { error });
