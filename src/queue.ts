@@ -158,7 +158,7 @@ class CharacterProcessingQueue {
 
     if (!canEdit.rows[0]?.can_edit) {
       throw new Error(
-        "Cannot edit character: edit window expired or character already edited",
+        "Cannot edit character: either in freeze period or weekly limit exceeded",
       );
     }
 
