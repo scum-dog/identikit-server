@@ -8,7 +8,6 @@ import {
   newgroundsAuthSchema,
   itchTokenSchema,
 } from "../../src/utils/validation";
-import { invalidCharacterData } from "../helpers/mockData";
 import { generateMockCharacterData } from "../../src/utils/mockData";
 
 describe("Validation Schemas", () => {
@@ -26,7 +25,11 @@ describe("Validation Schemas", () => {
     });
 
     it("should reject invalid UUIDs", () => {
-      const result = fullCharacterSchema.safeParse(invalidCharacterData);
+      const invalidData = generateMockCharacterData();
+      invalidData.metadata.upload_id = "invalid-uuid";
+      invalidData.metadata.user_id = "also-invalid";
+
+      const result = fullCharacterSchema.safeParse(invalidData);
 
       expect(result.success).toBe(false);
       if (!result.success) {

@@ -1,9 +1,10 @@
 import { randomBytes } from "crypto";
+import { PlatformUser } from "../types";
 
 interface OAuthResult {
   success: boolean;
   sessionId?: string;
-  user?: any;
+  user?: PlatformUser;
   message?: string;
   error?: string;
   timestamp: number;
@@ -12,17 +13,23 @@ interface OAuthResult {
 
 const oauthResults = new Map<string, OAuthResult>();
 
-setInterval(
-  () => {
-    const now = Date.now();
-    for (const [pollId, result] of oauthResults.entries()) {
-      if (result.expires < now) {
-        oauthResults.delete(pollId);
+let cleanupInterval: ReturnType<typeof setInterval> | null = null;
+
+if (process.env.NODE_ENV !== "test") {
+  cleanupInterval = setInterval(
+    () => {
+      const now = Date.now();
+      for (const [pollId, result] of oauthResults.entries()) {
+        if (result.expires < now) {
+          oauthResults.delete(pollId);
+        }
       }
-    }
-  },
-  5 * 60 * 1000,
-);
+    },
+    5 * 60 * 1000,
+  );
+
+  cleanupInterval.unref();
+}
 
 export function generatePollId(): string {
   return randomBytes(32).toString("hex");
@@ -73,4 +80,12 @@ export function getPollingStats() {
     active: total - expired,
     expired,
   };
+}
+
+export function cleanup(): void {
+  if (cleanupInterval) {
+    clearInterval(cleanupInterval);
+    cleanupInterval = null;
+  }
+  oauthResults.clear();
 }
