@@ -122,7 +122,7 @@ export const characterDataSchema = z
           .min(1)
           .max(32)
           .regex(
-            /^(?=.*[A-Za-z])[A-Za-z]+(?:\.[A-Za-z])*(?:\. [A-Za-z]+|[' -][A-Za-z]+)*$/,
+            /^(?=.*[A-Za-z])[A-Za-z]+(?:\.[A-Za-z])*(?:\. [A-Za-z]+|[A-Za-z]\. [A-Za-z]+|[' -][A-Za-z]+)*$/,
             "Name must start with a letter, contain only letters/spaces/hyphens/apostrophes/periods, and have no consecutive punctuation or leading/trailing spaces",
           )
           .refine(
@@ -254,7 +254,7 @@ export const characterDataUpdateSchema = z.object({
             .min(1)
             .max(32)
             .regex(
-              /^(?=.*[A-Za-z])[A-Za-z]+(?:\.[A-Za-z])*(?:\. [A-Za-z]+|[' -][A-Za-z]+)*$/,
+              /^(?=.*[A-Za-z])[A-Za-z]+(?:\.[A-Za-z])*(?:\. [A-Za-z]+|[A-Za-z]\. [A-Za-z]+|[' -][A-Za-z]+)*$/,
               "Name must start with a letter, contain only letters/spaces/hyphens/apostrophes/periods, and have no consecutive punctuation or leading/trailing spaces",
             )
             .refine(
