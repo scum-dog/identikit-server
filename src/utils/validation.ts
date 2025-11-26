@@ -122,9 +122,27 @@ export const characterDataSchema = z
           .min(1)
           .max(32)
           .regex(
-            /^(?=.*[A-Za-z])[A-Za-z]+(?:[' -][A-Za-z]+)*$/,
-            "Name must start with a letter, contain only letters/spaces/hyphens/apostrophes, and have no consecutive punctuation or leading/trailing spaces",
-          ),
+            /^(?=.*[A-Za-z])[A-Za-z]+(?:\.[A-Za-z])*(?:\. [A-Za-z]+|[' -][A-Za-z]+)*$/,
+            "Name must start with a letter, contain only letters/spaces/hyphens/apostrophes/periods, and have no consecutive punctuation or leading/trailing spaces",
+          )
+          .refine(
+            (name) =>
+              !/[ ]{2,}|[-]{2,}|['][ ']/.test(name) &&
+              !(
+                name.includes("..") ||
+                name.includes("--") ||
+                name.includes("''") ||
+                /[ ]{2,}/.test(name)
+              ),
+            "Name cannot have consecutive punctuation or spaces",
+          )
+          .refine((name) => {
+            const periodPattern = /\./;
+            if (!periodPattern.test(name)) return true;
+
+            const invalidPeriodPattern = /[a-z]{2,}\.[a-z]/;
+            return !invalidPeriodPattern.test(name);
+          }, "Periods can only be used for abbreviations (e.g., 'H. W.' or 'J.K.')"),
         sex: sexEnum,
         date_of_birth: z
           .string()
@@ -236,9 +254,27 @@ export const characterDataUpdateSchema = z.object({
             .min(1)
             .max(32)
             .regex(
-              /^(?=.*[A-Za-z])[A-Za-z]+(?:[' -][A-Za-z]+)*$/,
-              "Name must start with a letter, contain only letters/spaces/hyphens/apostrophes, and have no consecutive punctuation or leading/trailing spaces",
+              /^(?=.*[A-Za-z])[A-Za-z]+(?:\.[A-Za-z])*(?:\. [A-Za-z]+|[' -][A-Za-z]+)*$/,
+              "Name must start with a letter, contain only letters/spaces/hyphens/apostrophes/periods, and have no consecutive punctuation or leading/trailing spaces",
             )
+            .refine(
+              (name) =>
+                !/[ ]{2,}|[-]{2,}|['][ ']/.test(name) &&
+                !(
+                  name.includes("..") ||
+                  name.includes("--") ||
+                  name.includes("''") ||
+                  /[ ]{2,}/.test(name)
+                ),
+              "Name cannot have consecutive punctuation or spaces",
+            )
+            .refine((name) => {
+              const periodPattern = /\./;
+              if (!periodPattern.test(name)) return true;
+
+              const invalidPeriodPattern = /[a-z]{2,}\.[a-z]/;
+              return !invalidPeriodPattern.test(name);
+            }, "Periods can only be used for abbreviations (e.g., 'H. W.' or 'J.K.')")
             .optional(),
           sex: sexEnum.optional(),
           date_of_birth: z
