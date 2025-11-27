@@ -88,18 +88,11 @@ router.get("/callback", (req: Request, res: Response) => {
 
         function updateStatus(text, className = 'loading') {
             statusElement.textContent = text;
-            statusElement.className = className;
+            statusElement.className = 'dialog-text ' + className;
         }
 
         function updateMessage(text) {
             messageElement.textContent = text;
-        }
-
-        function hideSpinner() {
-            const spinner = document.querySelector('.spinner');
-            if (spinner) {
-                spinner.style.display = 'none';
-            }
         }
 
         function getUrlParams() {
@@ -164,7 +157,6 @@ router.get("/callback", (req: Request, res: Response) => {
         }
 
         function handleSuccess(authData) {
-            hideSpinner();
             updateStatus('Authentication successful!', 'success');
             updateMessage('You may close this window or it will close automatically.');
 
@@ -179,7 +171,6 @@ router.get("/callback", (req: Request, res: Response) => {
         }
 
         function handleError(error, description = '') {
-            hideSpinner();
             updateStatus('Authentication failed', 'error');
             updateMessage(description || 'Please close this window and try again.');
 
@@ -266,7 +257,6 @@ router.get("/callback", (req: Request, res: Response) => {
         }
 
         function handleDirectNavigation() {
-            hideSpinner();
             updateStatus('Authentication completed', 'loading');
             updateMessage('This window can be closed.');
 
@@ -308,7 +298,7 @@ router.get("/callback", (req: Request, res: Response) => {
   res.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");
   res.setHeader(
     "Content-Security-Policy",
-    "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://unpkg.com; img-src 'self'; form-action 'none'; frame-ancestors 'none';",
+    "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://unpkg.com; img-src 'self' data:; font-src 'self' data:; form-action 'none'; frame-ancestors 'none';",
   );
   res.send(html);
 });
