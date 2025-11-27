@@ -298,7 +298,7 @@ router.get("/callback", (req: Request, res: Response) => {
   res.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");
   res.setHeader(
     "Content-Security-Policy",
-    "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://unpkg.com; img-src 'self' data:; font-src 'self' data:; form-action 'none'; frame-ancestors 'none';",
+    "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://unpkg.com; img-src 'self' data:; font-src 'self' data: https://unpkg.com; form-action 'none'; frame-ancestors 'none';",
   );
   res.send(html);
 });
