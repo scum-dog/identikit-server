@@ -40,63 +40,48 @@ router.get("/callback", (req: Request, res: Response) => {
   const html = `
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Itch.io Authentication</title>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="https://unpkg.com/@sakun/system.css" />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="32x32"
+      href="/public/images/favicon-32x32.png"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="16x16"
+      href="/public/images/favicon-16x16.png"
+    />
+    <title>SCUM DOG</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            margin: 0;
-            background-color: #f5f5f5;
-        }
-
-        .container {
-            text-align: center;
-            background: white;
-            padding: 2rem;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            max-width: 400px;
-        }
-
-        .loading {
-            color: #666;
-        }
-
-        .success {
-            color: #28a745;
-        }
-
-        .error {
-            color: #dc3545;
-        }
-
-        .spinner {
-            border: 3px solid #f3f3f3;
-            border-top: 3px solid #666;
-            border-radius: 50%;
-            width: 24px;
-            height: 24px;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 1rem;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
+      body {
+        background: url("/public/images/oauthbackground.png") !important;
+        background-size: cover !important;
+        image-rendering: pixelated;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        margin: 0;
+      }
+      p {
+        font-family:
+          "Gill Sans", "Gill Sans MT", Calibri, "Trebuchet MS", sans-serif;
+        font-weight: bold;
+      }
+      #container {
+        text-align: center;
+      }
     </style>
-</head>
-<body>
-    <div class="container">
-        <div class="spinner"></div>
-        <div id="status" class="loading">Processing authentication...</div>
-        <p id="message"></p>
+  </head>
+  <body>
+    <div class="standard-dialog scale-down" id="container" style="width: 27rem">
+      <h1 id="status" class="dialog-text">Processing authentication...</h1>
+      <p id="message"></p>
     </div>
 
     <script>
