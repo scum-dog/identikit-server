@@ -138,6 +138,9 @@ app.use((error: Error, req: Request, res: Response, next: NextFunction) => {
 });
 
 app.use((req: Request, res: Response) => {
+  if (req.path.startsWith("/public")) {
+    return;
+  }
   res.status(404).json({
     error: "Route not found",
     path: req.path,
