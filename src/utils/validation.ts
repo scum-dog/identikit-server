@@ -3,7 +3,17 @@ import { Request, Response, NextFunction } from "express";
 import { log } from "./logger";
 import { COUNTRIES } from "./constants";
 
-const assetIdSchema = () => z.number().int().min(0).max(999);
+const headAssetIdSchema = () => z.number().int().min(0).max(28);
+const hairAssetIdSchema = () => z.number().int().min(0).max(193);
+const beardAssetIdSchema = () => z.number().int().min(0).max(12);
+const ageLinesAssetIdSchema = () => z.number().int().min(0).max(14);
+const eyesAssetIdSchema = () => z.number().int().min(0).max(99);
+const eyebrowsAssetIdSchema = () => z.number().int().min(0).max(15);
+const noseAssetIdSchema = () => z.number().int().min(0).max(32);
+const lipsAssetIdSchema = () => z.number().int().min(0).max(36);
+const glassesAssetIdSchema = () => z.number().int().min(0).max(17);
+const mustacheAssetIdSchema = () => z.number().int().min(0).max(12);
+const miscAssetIdSchema = () => z.number().int().min(0).max(4);
 
 const offsetSchema = z
   .number()
@@ -95,19 +105,19 @@ export const raceArraySchema = z
 export const sexEnum = z.enum(["male", "female", "other"]);
 
 const glassesSchema = z.object({
-  asset_id: assetIdSchema(),
+  asset_id: glassesAssetIdSchema(),
   offset_y: offsetSchema.default(0),
   scale: scaleSchema.default(1.0),
 });
 
 const mustacheSchema = z.object({
-  asset_id: assetIdSchema(),
+  asset_id: mustacheAssetIdSchema(),
   offset_y: offsetSchema.default(0),
   scale: scaleSchema.default(1.0),
 });
 
 const miscSchema = z.object({
-  asset_id: assetIdSchema(),
+  asset_id: miscAssetIdSchema(),
   offset_x: offsetSchema.default(0).optional(),
   offset_y: offsetSchema.default(0),
   scale: scaleSchema.default(1.0).optional(),
@@ -169,45 +179,45 @@ export const characterDataSchema = z
     static: z
       .object({
         head: z.object({
-          asset_id: assetIdSchema(),
+          asset_id: headAssetIdSchema(),
         }),
         hair: z.object({
-          asset_id: assetIdSchema(),
+          asset_id: hairAssetIdSchema(),
         }),
         beard: z
           .object({
-            asset_id: assetIdSchema(),
+            asset_id: beardAssetIdSchema(),
           })
           .optional(),
         age_lines: z
           .object({
-            asset_id: assetIdSchema(),
+            asset_id: ageLinesAssetIdSchema(),
           })
           .optional(),
       })
       .strict(),
     placeable_movable: z.object({
       eyes: z.object({
-        asset_id: assetIdSchema(),
+        asset_id: eyesAssetIdSchema(),
         offset_x: offsetXSchema.default(0),
         offset_y: offsetSchema.default(0),
         scale: scaleSchema.default(1.0),
         rotation: eyeRotationSchema.default(0),
       }),
       eyebrows: z.object({
-        asset_id: assetIdSchema(),
+        asset_id: eyebrowsAssetIdSchema(),
         offset_x: offsetXSchema.default(0),
         offset_y: offsetSchema.default(0),
         scale: scaleSchema.default(1.0),
         rotation: eyebrowRotationSchema.default(0),
       }),
       nose: z.object({
-        asset_id: assetIdSchema(),
+        asset_id: noseAssetIdSchema(),
         offset_y: offsetSchema.default(0),
         scale: scaleSchema.default(1.0),
       }),
       lips: z.object({
-        asset_id: assetIdSchema(),
+        asset_id: lipsAssetIdSchema(),
         offset_y: offsetSchema.default(0),
         scale: scaleSchema.default(1.0),
       }),
@@ -304,22 +314,22 @@ export const characterDataUpdateSchema = z.object({
         .object({
           head: z
             .object({
-              asset_id: assetIdSchema().optional(),
+              asset_id: headAssetIdSchema().optional(),
             })
             .optional(),
           hair: z
             .object({
-              asset_id: assetIdSchema().optional(),
+              asset_id: hairAssetIdSchema().optional(),
             })
             .optional(),
           beard: z
             .object({
-              asset_id: assetIdSchema(),
+              asset_id: beardAssetIdSchema(),
             })
             .optional(),
           age_lines: z
             .object({
-              asset_id: assetIdSchema(),
+              asset_id: ageLinesAssetIdSchema(),
             })
             .optional(),
         })
@@ -328,7 +338,7 @@ export const characterDataUpdateSchema = z.object({
         .object({
           eyes: z
             .object({
-              asset_id: assetIdSchema().optional(),
+              asset_id: eyesAssetIdSchema().optional(),
               offset_x: offsetXSchema.optional(),
               offset_y: offsetSchema.optional(),
               scale: scaleSchema.optional(),
@@ -337,7 +347,7 @@ export const characterDataUpdateSchema = z.object({
             .optional(),
           eyebrows: z
             .object({
-              asset_id: assetIdSchema().optional(),
+              asset_id: eyebrowsAssetIdSchema().optional(),
               offset_x: offsetXSchema.optional(),
               offset_y: offsetSchema.optional(),
               scale: scaleSchema.optional(),
@@ -346,14 +356,14 @@ export const characterDataUpdateSchema = z.object({
             .optional(),
           nose: z
             .object({
-              asset_id: assetIdSchema().optional(),
+              asset_id: noseAssetIdSchema().optional(),
               offset_y: offsetSchema.optional(),
               scale: scaleSchema.optional(),
             })
             .optional(),
           lips: z
             .object({
-              asset_id: assetIdSchema().optional(),
+              asset_id: lipsAssetIdSchema().optional(),
               offset_y: offsetSchema.optional(),
               scale: scaleSchema.optional(),
             })

@@ -92,8 +92,48 @@ function generateRandomRaces(): Race[] {
   });
 }
 
-function generateShapeId(): number {
-  return randomInt(0, 999);
+function generateHeadAssetId(): number {
+  return randomInt(0, 28);
+}
+
+function generateHairAssetId(): number {
+  return randomInt(0, 193);
+}
+
+function generateBeardAssetId(): number {
+  return randomInt(0, 12);
+}
+
+function generateAgeLinesAssetId(): number {
+  return randomInt(0, 14);
+}
+
+function generateEyesAssetId(): number {
+  return randomInt(0, 99);
+}
+
+function generateEyebrowsAssetId(): number {
+  return randomInt(0, 15);
+}
+
+function generateNoseAssetId(): number {
+  return randomInt(0, 32);
+}
+
+function generateLipsAssetId(): number {
+  return randomInt(0, 36);
+}
+
+function generateGlassesAssetId(): number {
+  return randomInt(0, 17);
+}
+
+function generateMustacheAssetId(): number {
+  return randomInt(0, 12);
+}
+
+function generateMiscAssetId(): number {
+  return randomInt(0, 4);
 }
 
 function generateOffset(): number {
@@ -113,19 +153,19 @@ function generateAccessories() {
   } = {};
 
   accessories.glasses = {
-    asset_id: generateShapeId(),
+    asset_id: generateGlassesAssetId(),
     offset_y: generateOffset(),
     scale: parseFloat(randomFloat(0.5, 1.5).toFixed(1)),
   };
 
   accessories.mustache = {
-    asset_id: generateShapeId(),
+    asset_id: generateMustacheAssetId(),
     offset_y: generateOffset(),
     scale: parseFloat(randomFloat(0.5, 1.5).toFixed(1)),
   };
 
   accessories.misc = {
-    asset_id: generateShapeId(),
+    asset_id: generateMiscAssetId(),
     offset_x: generateOffset(),
     offset_y: generateOffset(),
     scale: parseFloat(randomFloat(0.5, 1.5).toFixed(1)),
@@ -136,7 +176,7 @@ function generateAccessories() {
 
 function generateHairData(): { hairColor: HairColor; hairAssetId: number } {
   const hairColor = randomChoice(hairColors);
-  const hairAssetId = hairColor === "bald" ? 0 : randomInt(1, 999);
+  const hairAssetId = hairColor === "bald" ? 0 : generateHairAssetId();
   return { hairColor, hairAssetId };
 }
 
@@ -164,7 +204,7 @@ export function generateMockCharacterData(): FullCharacter {
       },
       static: {
         head: {
-          asset_id: generateShapeId(),
+          asset_id: generateHeadAssetId(),
         },
         hair: {
           asset_id: hairAssetId,
@@ -172,34 +212,34 @@ export function generateMockCharacterData(): FullCharacter {
         ...(shouldHaveBeard
           ? {
               beard: {
-                asset_id: generateShapeId(),
+                asset_id: generateBeardAssetId(),
               },
             }
           : {}),
-        age_lines: { asset_id: generateShapeId() },
+        age_lines: { asset_id: generateAgeLinesAssetId() },
       },
       placeable_movable: {
         eyes: {
-          asset_id: generateShapeId(),
+          asset_id: generateEyesAssetId(),
           offset_x: parseFloat(randomFloat(0, 1).toFixed(1)),
           offset_y: generateOffset(),
           scale: parseFloat(randomFloat(0.5, 1.5).toFixed(1)),
           rotation: randomRotation(-35, 35),
         },
         eyebrows: {
-          asset_id: generateShapeId(),
+          asset_id: generateEyebrowsAssetId(),
           offset_x: parseFloat(randomFloat(0, 1).toFixed(1)),
           offset_y: generateOffset(),
           scale: parseFloat(randomFloat(0.5, 1.5).toFixed(1)),
           rotation: randomRotation(-45, 45),
         },
         nose: {
-          asset_id: generateShapeId(),
+          asset_id: generateNoseAssetId(),
           offset_y: generateOffset(),
           scale: parseFloat(randomFloat(0.5, 1.5).toFixed(1)),
         },
         lips: {
-          asset_id: generateShapeId(),
+          asset_id: generateLipsAssetId(),
           offset_y: generateOffset(),
           scale: parseFloat(randomFloat(0.5, 1.5).toFixed(1)),
         },

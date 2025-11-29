@@ -403,7 +403,7 @@ describe("Validation Schemas", () => {
       const data = generateMockCharacterData();
 
       data.character_data.placeable_movable.glasses = {
-        asset_id: 123,
+        asset_id: 15,
         offset_y: 0.5,
         scale: 1.0,
       };
@@ -414,7 +414,7 @@ describe("Validation Schemas", () => {
       if (result.success) {
         const glasses = result.data.character_data.placeable_movable.glasses;
         expect(glasses).toBeDefined();
-        expect(glasses!.asset_id).toBe(123);
+        expect(glasses!.asset_id).toBe(15);
       }
     });
 
