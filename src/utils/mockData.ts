@@ -1,48 +1,39 @@
-import { FullCharacter } from "./validation";
 import { randomUUID } from "crypto";
-import {
-  Race,
-  EyeColor,
-  HairColor,
-  Sex,
-  Ethnicity,
-  MockUser,
-  MockCharacter,
-} from "../types";
+import { Race, EyeColor, HairColor, Sex, Ethnicity } from "../types";
 import { COUNTRIES, Country } from "./constants";
+import { FullCharacter } from "./validation";
 
-const firstNames = [
-  "John",
-  "Jacob",
-  "Jingleheimer",
-  "Schmidt",
-  "Riley",
-  "Lukas",
-  "Taylor",
-  "Avery",
-  "Liam",
-  "Sage",
-  "River",
-  "Dakota",
-  "Rowan",
-  "Phoenix",
-  "Skyler",
-  "Cameron",
-  "Emery",
-  "Filippo",
-  "Parker",
-  "Blake",
-  "Geoshua",
-  "Hayden",
-  "Sava",
-  "Drew",
-  "Elliot",
+const characterNames = [
+  "Filippo Meozzi",
+  "Liam Stone",
+  "John Q. Herman",
+  "George H. W. Bush",
+  "J.K. Dobbins",
+  "Mary-Kate Olsen",
+  "Jean-Claude Van Damme",
+  "O'Malley",
+  "D'Angelo Russell",
+  "Alexandra Marie-Claire",
+  "Thomas J. Anderson",
+  "Catherine St. James",
+  "Michael O'Connor",
+  "Sarah-Jane Williams",
+  "Robert E. Lee",
+  "Elizabeth Mary-Ann",
+  "William T. Sherman",
+  "Margaret Rose-Marie",
+  "Jonathan P. Smith",
+  "Katherine Anne-Marie",
+  "Benjamin F. Franklin",
+  "Victoria Rose-Anne",
+  "Theodore R. Roosevelt",
+  "Isabella Marie-Grace",
+  "Alexander Hamilton-James",
+  "Charlotte Rose-Marie",
 ];
 
 const races: Race[] = ["ai_an", "asian", "black", "nh_pi", "other", "white"];
-
 const ethnicities: Ethnicity[] = ["hispanic_latino", "not_hispanic_latino"];
-
 const eyeColors: EyeColor[] = [
   "black",
   "blue",
@@ -53,7 +44,6 @@ const eyeColors: EyeColor[] = [
   "maroon",
   "pink",
 ];
-
 const hairColors: HairColor[] = [
   "bald",
   "black",
@@ -64,7 +54,6 @@ const hairColors: HairColor[] = [
   "sandy",
   "white",
 ];
-
 const sexOptions: Sex[] = ["male", "female", "other"];
 
 function randomChoice<T>(array: readonly T[]): T {
@@ -99,7 +88,6 @@ function generateRandomRaces(): Race[] {
   return [firstRace, secondRace].sort((a, b) => {
     if (a === "other") return 1;
     if (b === "other") return -1;
-
     return a.localeCompare(b);
   });
 }
@@ -149,14 +137,11 @@ function generateAccessories() {
 function generateHairData(): { hairColor: HairColor; hairAssetId: number } {
   const hairColor = randomChoice(hairColors);
   const hairAssetId = hairColor === "bald" ? 0 : randomInt(1, 999);
-
   return { hairColor, hairAssetId };
 }
 
-// mock data generators
 export function generateMockCharacterData(): FullCharacter {
   const country: Country = randomChoice(COUNTRIES);
-
   const sex = randomChoice(sexOptions);
   const shouldHaveBeard = sex !== "female";
   const { hairColor, hairAssetId } = generateHairData();
@@ -164,7 +149,7 @@ export function generateMockCharacterData(): FullCharacter {
   return {
     character_data: {
       info: {
-        name: randomChoice(firstNames),
+        name: randomChoice(characterNames),
         sex: sex,
         date_of_birth: randomDate(new Date(1950, 0, 1), new Date(2011, 11, 31))
           .toISOString()
@@ -234,116 +219,3 @@ export function generateMockCharacterData(): FullCharacter {
     },
   };
 }
-
-export function generateMockCharacter(userId?: string, uploadId?: string) {
-  const creationTime = randomDate(new Date(2023, 0, 1), new Date());
-  const hasBeenEdited = Math.random() < 0.3;
-  const editTime = hasBeenEdited ? randomDate(creationTime, new Date()) : null;
-  const characterData = generateMockCharacterData();
-
-  characterData.metadata.upload_id = uploadId || randomUUID();
-  characterData.metadata.user_id = userId || randomUUID();
-  characterData.metadata.created_at = creationTime.toISOString();
-  characterData.metadata.last_edited_at = editTime?.toISOString() || null;
-  characterData.metadata.is_edited = hasBeenEdited;
-
-  return {
-    upload_id: characterData.metadata.upload_id,
-    user_id: characterData.metadata.user_id,
-    created_at: characterData.metadata.created_at,
-    last_edited_at: characterData.metadata.last_edited_at,
-    character_data: characterData.character_data,
-    is_edited: characterData.metadata.is_edited,
-    is_deleted: characterData.metadata.is_deleted,
-    deleted_at: characterData.metadata.deleted_at,
-    deleted_by: characterData.metadata.deleted_by,
-  };
-}
-
-export function generateMockUser(userId?: string) {
-  const platforms = ["newgrounds", "itch", "google"];
-  const platform = randomChoice(platforms);
-
-  return {
-    id: userId || randomUUID(),
-    username: `${randomChoice(firstNames)}${randomInt(100, 999)}`,
-    platform,
-    platform_user_id: randomInt(10000, 999999).toString(),
-    created_at: randomDate(new Date(2022, 0, 1), new Date()).toISOString(),
-    last_login: randomDate(new Date(2024, 0, 1), new Date()).toISOString(),
-    is_admin: false,
-  };
-}
-
-// persistent mock data store
-export class MockDataStore {
-  private characters: Map<string, MockCharacter> = new Map();
-  private users: Map<string, MockUser> = new Map();
-
-  constructor() {
-    this.initializeData();
-  }
-
-  private initializeData() {
-    // generate 50 mock characters
-    for (let i = 0; i < 50; i++) {
-      const character = generateMockCharacter();
-      this.characters.set(character.upload_id, character);
-    }
-
-    // generate 30 mock users
-    for (let i = 0; i < 30; i++) {
-      const user = generateMockUser();
-      this.users.set(user.id, user);
-    }
-  }
-
-  getCharacters() {
-    return Array.from(this.characters.values());
-  }
-
-  getCharacter(id: string) {
-    return this.characters.get(id);
-  }
-
-  getUsers() {
-    return Array.from(this.users.values());
-  }
-
-  getUser(id: string) {
-    return this.users.get(id);
-  }
-
-  addCharacter(character: MockCharacter) {
-    this.characters.set(character.upload_id, character);
-  }
-
-  updateCharacter(uploadId: string, updates: Partial<MockCharacter>) {
-    const character = this.characters.get(uploadId);
-    if (character) {
-      const updatedCharacter = {
-        ...character,
-        ...updates,
-        last_edited_at: new Date().toISOString(),
-        is_edited: true,
-      };
-      this.characters.set(uploadId, updatedCharacter);
-      return updatedCharacter;
-    }
-    return null;
-  }
-
-  deleteCharacter(uploadId: string, adminUserId: string) {
-    const character = this.characters.get(uploadId);
-    if (character && !character.is_deleted) {
-      character.is_deleted = true;
-      character.deleted_at = new Date().toISOString();
-      character.deleted_by = adminUserId;
-
-      return character;
-    }
-    return null;
-  }
-}
-
-export const mockDataStore = new MockDataStore();

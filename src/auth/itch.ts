@@ -20,8 +20,6 @@ export class ItchOAuth implements OAuthProvider<PlatformUser> {
     const clientId = process.env.ITCH_IO_CLIENT_ID!;
     const redirectUri = process.env.ITCH_IO_REDIRECT_URI!;
 
-    const callbackUri = redirectUri;
-
     const baseState = crypto.randomBytes(32).toString("hex");
     const state = pollId ? `${baseState}_pollid_${pollId}` : baseState;
 
@@ -31,7 +29,7 @@ export class ItchOAuth implements OAuthProvider<PlatformUser> {
     const oauthParams: ItchOAuthParams = {
       client_id: clientId,
       scope: "profile:me",
-      redirect_uri: callbackUri,
+      redirect_uri: redirectUri,
       response_type: "token",
       state,
     };

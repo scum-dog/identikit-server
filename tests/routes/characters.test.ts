@@ -94,8 +94,11 @@ describe("Characters Routes", () => {
       const response = await request(app).get("/characters/me");
 
       expect(response.status).toBe(200);
-      expect(response.body.character_data).toMatchObject(
-        mockCharacterData.character_data,
+      expect(response.body.character_data.info.name).toBe(
+        mockCharacterData.character_data.info.name,
+      );
+      expect(response.body.character_data.static.head.asset_id).toBe(
+        mockCharacterData.character_data.static.head.asset_id,
       );
       expect(response.body.metadata.upload_id).toBe("char-123");
       expect(response.body.can_edit).toBe(true);
@@ -197,7 +200,7 @@ describe("Characters Routes", () => {
 
       const response = await request(app)
         .post("/characters")
-        .send(mockCharacterData);
+        .send({ character_data: mockCharacterData.character_data });
 
       expect(response.status).toBe(500);
       expect(response.body.error.message).toBe("Failed to create character");

@@ -42,7 +42,7 @@ export interface CharacterMetadata {
 
 export interface CharacterPersonalInfo {
   name: string;
-  sex: "male" | "female" | "other";
+  sex: Sex;
   date_of_birth: string;
   height_in: number;
   weight_lb: number;
@@ -122,11 +122,6 @@ export interface FullCharacterData {
   metadata: CharacterMetadata;
 }
 
-export interface CharacterRouteUpdates {
-  character_data?: object;
-  characterJson?: object;
-}
-
 export interface PlazaQueryRequest {
   validatedQuery?: {
     country?: string;
@@ -140,13 +135,6 @@ export interface PlazaCharacterData {
   last_edited_at: string | null;
   character_data: string | CharacterDataStructure;
 }
-
-export interface MockCharacterRouteUpdates {
-  character_data?: object;
-  metadata?: object;
-}
-
-export type AccessoryType = "glasses" | "mustache" | "misc";
 
 export type Race = "ai_an" | "asian" | "black" | "nh_pi" | "white" | "other";
 
@@ -173,28 +161,6 @@ export type HairColor =
   | "white";
 
 export type Sex = "male" | "female" | "other";
-
-export interface MockUser {
-  id: string;
-  username: string;
-  platform: string;
-  platform_user_id: string;
-  created_at: string;
-  last_login: string;
-  is_admin: boolean;
-}
-
-export interface MockCharacter {
-  upload_id: string;
-  user_id: string;
-  created_at: string;
-  last_edited_at: string | null;
-  character_data: CharacterDataStructure;
-  is_edited: boolean;
-  is_deleted: boolean;
-  deleted_at: string | null;
-  deleted_by: string | null;
-}
 
 export interface QueryValidationRequest extends Request {
   query: ParsedQs;
@@ -416,7 +382,7 @@ export interface ItchOAuthParams extends Record<string, string> {
 export interface GoogleOAuthParams extends Record<string, string> {
   client_id: string;
   redirect_uri: string;
-  scope: "openid email profile";
+  scope: "openid email";
   response_type: "code";
   state: string;
 }

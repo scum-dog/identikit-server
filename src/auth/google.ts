@@ -27,12 +27,10 @@ export class GoogleAuth implements OAuthProvider<PlatformUser> {
     const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
     await oauthStateQueries.create(state, this.platform, expiresAt);
 
-    const callbackUri = this.redirectUri!;
-
     const oauthParams: GoogleOAuthParams = {
       client_id: this.clientId!,
-      redirect_uri: callbackUri,
-      scope: "openid email profile",
+      redirect_uri: this.redirectUri!,
+      scope: "openid email",
       response_type: "code",
       state,
     };

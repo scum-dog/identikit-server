@@ -6,6 +6,14 @@ jest.setTimeout(10 * 1000);
 const originalConsoleLog = console.log;
 console.log = jest.fn();
 
+beforeEach(() => {
+  jest.clearAllMocks();
+});
+
+afterEach(() => {
+  jest.clearAllMocks();
+});
+
 afterAll(async () => {
   console.log = originalConsoleLog;
 
