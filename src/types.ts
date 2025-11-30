@@ -126,6 +126,7 @@ export interface PlazaQueryRequest {
   validatedQuery?: {
     country?: string;
     limit?: number;
+    offset?: number;
   };
 }
 

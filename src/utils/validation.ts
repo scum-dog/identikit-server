@@ -405,6 +405,9 @@ export const plazaSearchSchema = z
   .object({
     country: z.union([z.string(), z.undefined()]).optional(),
     limit: z.union([z.string(), z.number(), z.undefined()]).optional(),
+    offset: z.union([z.string(), z.number(), z.undefined()]).optional(),
+    page: z.union([z.string(), z.number(), z.undefined()]).optional(),
+    view: z.union([z.string(), z.undefined()]).optional(),
     random: z.union([z.string(), z.boolean(), z.undefined()]).optional(),
   })
   .transform((data) => {
@@ -430,9 +433,38 @@ export const plazaSearchSchema = z
       }
     }
 
+    let offset = 0;
+    if (data.offset !== undefined) {
+      if (typeof data.offset === "number") {
+        offset = data.offset;
+      } else if (typeof data.offset === "string" && data.offset !== "") {
+        const parsed = parseInt(data.offset, 10);
+        if (!isNaN(parsed)) {
+          offset = parsed;
+        }
+      }
+    }
+    offset = Math.max(offset, 0);
+
+    if (data.page !== undefined) {
+      let page = 1;
+      if (typeof data.page === "number") {
+        page = data.page;
+      } else if (typeof data.page === "string" && data.page !== "") {
+        const parsed = parseInt(data.page, 10);
+        if (!isNaN(parsed)) {
+          page = parsed;
+        }
+      }
+      page = Math.max(page, 1);
+      offset = (page - 1) * limit;
+    }
+
     return {
       country: data.country && data.country !== "" ? data.country : undefined,
       limit,
+      offset,
+      view: data.view,
       random,
     };
   });
@@ -507,7 +539,7 @@ export const validateRequest = <T>(schema: z.ZodSchema<T>) => {
   };
 };
 
-export const validateQuery = <T>(schema: z.ZodSchema<T>) => {
+export const validateQuery = <T>(schema: z.ZodType<T>) => {
   return (req: Request, res: Response, next: NextFunction) => {
     try {
       const validatedData = schema.parse(req.query);

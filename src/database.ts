@@ -135,15 +135,19 @@ export const characterQueries = {
     return result.rows[0];
   },
 
-  getRandomCharacters: async (limit: number = 100) => {
+  getRandomCharacters: async (limit: number = 100, offset: number = 0) => {
     const result = await query<PlazaCharacterResult>(
-      "SELECT * FROM get_random_characters($1)",
-      [limit],
+      "SELECT * FROM get_random_characters($1, $2)",
+      [limit, offset],
     );
     return result.rows;
   },
 
-  searchByLocation: async (country?: string, limit: number = 100) => {
+  searchByLocation: async (
+    country?: string,
+    limit: number = 100,
+    offset: number = 0,
+  ) => {
     let whereClause = "WHERE is_deleted = false";
     const params: SearchParams = [];
     let paramCount = 0;
@@ -160,12 +164,33 @@ export const characterQueries = {
       FROM characters
       ${whereClause}
       ORDER BY RANDOM()
-      LIMIT $${paramCount}
+      LIMIT $${paramCount} OFFSET $${paramCount + 1}
     `;
-    params.push(limit);
+    params.push(limit, offset);
 
     const result = await query<PlazaCharacterResult>(query_text, params);
     return result.rows;
+  },
+
+  getTotalCount: async (country?: string) => {
+    let whereClause = "WHERE is_deleted = false";
+    const params: SearchParams = [];
+    let paramCount = 0;
+
+    if (country) {
+      paramCount++;
+      whereClause += ` AND character_data -> 'info' ->> 'location' ILIKE $${paramCount}`;
+      params.push(`%${country}%`);
+    }
+
+    const query_text = `
+      SELECT COUNT(*) as total_count
+      FROM characters
+      ${whereClause}
+    `;
+
+    const result = await query<{ total_count: string }>(query_text, params);
+    return parseInt(result.rows[0].total_count, 10);
   },
 
   adminDelete: async (characterId: string, adminUserId: string) => {

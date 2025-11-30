@@ -114,7 +114,7 @@ describe("Validation Middleware (Logic Tests)", () => {
   });
 
   describe("validateQuery", () => {
-    const validatePlaza = validateQuery(plazaSearchSchema);
+    const validatePlaza = validatePlazaQuery;
 
     it("should validate and transform valid query parameters", () => {
       const req = createMockRequest({
@@ -130,9 +130,11 @@ describe("Validation Middleware (Logic Tests)", () => {
 
       expect(mockNext).toHaveBeenCalled();
       expect(res.status).not.toHaveBeenCalled();
-      expect(req.query).toEqual({
+      expect((req as any).validatedQuery).toEqual({
         country: "United States",
         limit: 50,
+        offset: 0,
+        view: undefined,
         random: true,
       });
     });
@@ -146,9 +148,11 @@ describe("Validation Middleware (Logic Tests)", () => {
       validatePlaza(req as any, res as any, mockNext);
 
       expect(mockNext).toHaveBeenCalled();
-      expect(req.query).toEqual({
+      expect((req as any).validatedQuery).toEqual({
         country: undefined,
         limit: 100,
+        offset: 0,
+        view: undefined,
         random: true,
       });
     });
@@ -164,8 +168,8 @@ describe("Validation Middleware (Logic Tests)", () => {
       validatePlaza(req as any, res as any, mockNext);
 
       expect(mockNext).toHaveBeenCalled();
-      expect((req.query as any).limit).toBe(25);
-      expect(typeof (req.query as any).limit).toBe("number");
+      expect((req as any).validatedQuery.limit).toBe(25);
+      expect(typeof (req as any).validatedQuery.limit).toBe("number");
     });
 
     it("should transform string booleans to actual booleans", () => {
@@ -179,8 +183,8 @@ describe("Validation Middleware (Logic Tests)", () => {
       validatePlaza(req as any, res as any, mockNext);
 
       expect(mockNext).toHaveBeenCalled();
-      expect((req.query as any).random).toBe(false);
-      expect(typeof (req.query as any).random).toBe("boolean");
+      expect((req as any).validatedQuery.random).toBe(false);
+      expect(typeof (req as any).validatedQuery.random).toBe("boolean");
     });
   });
 
@@ -201,6 +205,8 @@ describe("Validation Middleware (Logic Tests)", () => {
       expect(req.validatedQuery).toEqual({
         country: "Canada",
         limit: 25,
+        offset: 0,
+        view: undefined,
         random: true,
       });
     });
@@ -217,6 +223,8 @@ describe("Validation Middleware (Logic Tests)", () => {
       expect(req.validatedQuery).toEqual({
         country: undefined,
         limit: 100,
+        offset: 0,
+        view: undefined,
         random: true,
       });
     });

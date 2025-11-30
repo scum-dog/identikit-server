@@ -184,7 +184,7 @@ router.get("/", validatePlazaQuery, async (req: Request, res: Response) => {
     return res.status(404).json({ error: "Route not found" });
   }
   try {
-    const { country, limit } =
+    const { country, limit, offset } =
       (req as PlazaQueryRequest).validatedQuery || req.query;
 
     let characters;
@@ -193,10 +193,12 @@ router.get("/", validatePlazaQuery, async (req: Request, res: Response) => {
       characters = await characterQueries.searchByLocation(
         country as string,
         Number(limit) || 100,
+        Number(offset) || 0,
       );
     } else {
       characters = await characterQueries.getRandomCharacters(
         Number(limit) || 100,
+        Number(offset) || 0,
       );
     }
 
@@ -216,9 +218,12 @@ router.get("/", validatePlazaQuery, async (req: Request, res: Response) => {
       };
     });
 
+    const totalCount = await characterQueries.getTotalCount(country as string);
+
     res.json({
       characters: formattedCharacters,
       count: formattedCharacters.length,
+      total: totalCount,
       filters: { country },
     });
   } catch (error) {

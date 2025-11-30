@@ -30,6 +30,7 @@ const mockCharacterQueries = {
   update: jest.fn(),
   searchByLocation: jest.fn(),
   getRandomCharacters: jest.fn(),
+  getTotalCount: jest.fn(),
   adminDelete: jest.fn(),
 } as any;
 
@@ -319,6 +320,7 @@ describe("Characters Routes", () => {
       mockCharacterQueries.getRandomCharacters.mockResolvedValue(
         mockCharacters as any,
       );
+      mockCharacterQueries.getTotalCount.mockResolvedValue(2);
 
       const response = await request(app).get(
         "/characters?view=plaza&limit=100",
@@ -344,6 +346,7 @@ describe("Characters Routes", () => {
       mockCharacterQueries.searchByLocation.mockResolvedValue(
         mockCharacters as any,
       );
+      mockCharacterQueries.getTotalCount.mockResolvedValue(1);
 
       const response = await request(app).get(
         "/characters?view=plaza&country=Canada&limit=50",
@@ -355,6 +358,7 @@ describe("Characters Routes", () => {
       expect(mockCharacterQueries.searchByLocation).toHaveBeenCalledWith(
         "Canada",
         50,
+        0,
       );
     });
 
