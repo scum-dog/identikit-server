@@ -103,11 +103,6 @@ BEGIN
         RETURN false;
     END IF;
 
-    IF char_created_at + INTERVAL '30 days' > NOW() THEN
-        RAISE INFO 'can_user_edit_character: Character % still in 30-day freeze period', character_uuid;
-        RETURN false;
-    END IF;
-
     IF last_edit_at IS NOT NULL AND last_edit_at > NOW() - INTERVAL '7 days' THEN
         RAISE INFO 'can_user_edit_character: Character % has recent edit at %, weekly limit exceeded', character_uuid, last_edit_at;
         RETURN false;

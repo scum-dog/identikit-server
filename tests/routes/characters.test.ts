@@ -276,9 +276,7 @@ describe("Characters Routes", () => {
         existingCharacter as any,
       );
       mockAddCharacterProcessingJob.mockRejectedValue(
-        new Error(
-          "Cannot edit character: either in freeze period or weekly limit exceeded",
-        ),
+        new Error("Cannot edit character: weekly limit exceeded"),
       );
 
       const updateData = {
