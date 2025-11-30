@@ -34,12 +34,6 @@ const eyebrowRotationSchema = z
   .int()
   .refine((val) => val % 5 === 0, "Rotation must be in 5-degree increments");
 
-const offsetXSchema = z
-  .number()
-  .min(0)
-  .max(1)
-  .transform((val) => Math.round(val * 10) / 10);
-
 const scaleSchema = z
   .number()
   .min(0.5)
@@ -199,14 +193,14 @@ export const characterDataSchema = z
     placeable_movable: z.object({
       eyes: z.object({
         asset_id: eyesAssetIdSchema(),
-        offset_x: offsetXSchema.default(0),
+        offset_x: offsetSchema.default(0),
         offset_y: offsetSchema.default(0),
         scale: scaleSchema.default(1.0),
         rotation: eyeRotationSchema.default(0),
       }),
       eyebrows: z.object({
         asset_id: eyebrowsAssetIdSchema(),
-        offset_x: offsetXSchema.default(0),
+        offset_x: offsetSchema.default(0),
         offset_y: offsetSchema.default(0),
         scale: scaleSchema.default(1.0),
         rotation: eyebrowRotationSchema.default(0),
@@ -339,7 +333,7 @@ export const characterDataUpdateSchema = z.object({
           eyes: z
             .object({
               asset_id: eyesAssetIdSchema().optional(),
-              offset_x: offsetXSchema.optional(),
+              offset_x: offsetSchema.optional(),
               offset_y: offsetSchema.optional(),
               scale: scaleSchema.optional(),
               rotation: eyeRotationSchema.optional(),
@@ -348,7 +342,7 @@ export const characterDataUpdateSchema = z.object({
           eyebrows: z
             .object({
               asset_id: eyebrowsAssetIdSchema().optional(),
-              offset_x: offsetXSchema.optional(),
+              offset_x: offsetSchema.optional(),
               offset_y: offsetSchema.optional(),
               scale: scaleSchema.optional(),
               rotation: eyebrowRotationSchema.optional(),
