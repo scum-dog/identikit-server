@@ -117,7 +117,10 @@ EXCEPTION
 END;
 $$ language plpgsql;
 
-CREATE OR REPLACE FUNCTION get_random_characters (limit_count INTEGER DEFAULT 100) returns TABLE (
+CREATE OR REPLACE FUNCTION get_random_characters (
+  limit_count INTEGER DEFAULT 100,
+  offset_count INTEGER DEFAULT 0
+) returns TABLE (
   id UUID,
   character_data JSONB,
   created_at TIMESTAMP WITH TIME ZONE,
@@ -133,7 +136,8 @@ BEGIN
     FROM characters c
     WHERE c.is_deleted = false
     ORDER BY RANDOM()
-    LIMIT limit_count;
+    LIMIT limit_count
+    OFFSET offset_count;
 END;
 $$ language plpgsql;
 

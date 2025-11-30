@@ -12,7 +12,7 @@ import { log } from "../utils/logger";
 const router = Router();
 const adminRateLimit = rateLimit({
   windowMs: 5 * 60 * 1000,
-  max: 20,
+  max: 50,
   message: { error: "Too many admin actions, please slow down!!!" },
   standardHeaders: "draft-7",
   legacyHeaders: false,

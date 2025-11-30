@@ -44,6 +44,14 @@ const uploadRateLimit = rateLimit({
   },
 });
 
+const plazaRateLimit = rateLimit({
+  windowMs: 60 * 1000,
+  max: 30,
+  message: { error: "Too many plaza requests, please slow down" },
+  standardHeaders: "draft-7",
+  legacyHeaders: false,
+});
+
 // GET /characters/me - get current user's character
 router.get("/me", authenticateUser, async (req: Request, res: Response) => {
   try {
@@ -179,58 +187,69 @@ router.put(
 );
 
 // GET /characters?view=plaza - get characters for plaza display
-router.get("/", validatePlazaQuery, async (req: Request, res: Response) => {
-  if (req.query.view !== "plaza") {
-    return res.status(404).json({ error: "Route not found" });
-  }
-  try {
-    const { country, limit, offset } =
-      (req as PlazaQueryRequest).validatedQuery || req.query;
-
-    let characters;
-
-    if (country) {
-      characters = await characterQueries.searchByLocation(
-        country as string,
-        Number(limit) || 100,
-        Number(offset) || 0,
-      );
-    } else {
-      characters = await characterQueries.getRandomCharacters(
-        Number(limit) || 100,
-        Number(offset) || 0,
-      );
+router.get(
+  "/",
+  plazaRateLimit,
+  validatePlazaQuery,
+  async (req: Request, res: Response) => {
+    if (req.query.view !== "plaza") {
+      return res.status(404).json({ error: "Route not found" });
     }
+    try {
+      const { country, limit, offset } =
+        (req as PlazaQueryRequest).validatedQuery || req.query;
 
-    const formattedCharacters = characters.map((char: PlazaCharacterResult) => {
-      const parsedCharacterData =
-        typeof char.character_data === "string"
-          ? JSON.parse(char.character_data)
-          : char.character_data;
+      let characters;
 
-      return {
-        upload_id: char.id,
-        creation_time: char.created_at,
-        edit_time:
-          char.last_edited_at !== char.created_at ? char.last_edited_at : null,
-        location: parsedCharacterData.info.location || "",
-        character_data: parsedCharacterData,
-      };
-    });
+      if (country) {
+        characters = await characterQueries.searchByLocation(
+          country as string,
+          Number(limit) || 100,
+          Number(offset) || 0,
+        );
+      } else {
+        characters = await characterQueries.getRandomCharacters(
+          Number(limit) || 100,
+          Number(offset) || 0,
+        );
+      }
 
-    const totalCount = await characterQueries.getTotalCount(country as string);
+      const formattedCharacters = characters.map(
+        (char: PlazaCharacterResult) => {
+          const parsedCharacterData =
+            typeof char.character_data === "string"
+              ? JSON.parse(char.character_data)
+              : char.character_data;
 
-    res.json({
-      characters: formattedCharacters,
-      count: formattedCharacters.length,
-      total: totalCount,
-      filters: { country },
-    });
-  } catch (error) {
-    log.error("Plaza fetch error:", { error });
-    res.status(500).json({ error: "Failed to fetch plaza characters" });
-  }
-});
+          return {
+            upload_id: char.id,
+            creation_time: char.created_at,
+            edit_time:
+              char.last_edited_at !== char.created_at
+                ? char.last_edited_at
+                : null,
+            location: parsedCharacterData.info.location || "",
+            character_data: parsedCharacterData,
+          };
+        },
+      );
+
+      const totalCount = await characterQueries.getTotalCount(
+        country as string,
+      );
+
+      res.json({
+        characters: formattedCharacters,
+        count: formattedCharacters.length,
+        total: totalCount,
+        filters: { country },
+      });
+    } catch (error) {
+      log.error("Plaza fetch error:", { error });
+      res.status(500).json({ error: "Failed to fetch plaza characters" });
+    }
+  },
+);
 
 // GET /characters/:id - get specific character by ID
 router.get("/:id", async (req: Request, res: Response) => {
