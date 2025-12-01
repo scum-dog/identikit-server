@@ -2,7 +2,6 @@ import { Router, Request, Response } from "express";
 import {
   getOAuthResult,
   removeOAuthResult,
-  getPollingStats,
   generatePollId,
   storeOAuthResult,
 } from "../../utils/oauthPolling";
@@ -14,8 +13,6 @@ const router = Router();
 router.get("/poll-id", (req: Request, res: Response) => {
   try {
     const pollId = generatePollId();
-
-    log.debug("Generated OAuth polling ID", { pollId });
 
     res.json({
       success: true,
@@ -127,25 +124,6 @@ router.post("/store/:pollId", (req: Request, res: Response) => {
       success: false,
       error: "internal_error",
       message: "Failed to store OAuth result",
-    });
-  }
-});
-
-// GET /auth/oauth/stats - polling statistics (debug)
-router.get("/stats", (req: Request, res: Response) => {
-  try {
-    const stats = getPollingStats();
-
-    res.json({
-      success: true,
-      stats,
-    });
-  } catch (error) {
-    log.error("Failed to get polling stats", { error });
-    res.status(500).json({
-      success: false,
-      error: "internal_error",
-      message: "Failed to get statistics",
     });
   }
 });

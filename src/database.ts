@@ -35,11 +35,8 @@ export const query = async <T extends QueryResultRow = QueryResultRow>(
   text: string,
   params?: unknown[],
 ): Promise<QueryResult<T>> => {
-  const start = Date.now();
   try {
     const res = await pool.query(text, params);
-    const duration = Date.now() - start;
-    log.debug("Executed query", { text, duration, rows: res.rowCount });
     return res;
   } catch (error) {
     log.error("Database query error:", { error });

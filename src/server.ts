@@ -14,6 +14,7 @@ import { validateConfig } from "./utils/configValidation";
 import "./database";
 import { DatabaseScheduler } from "./scheduler";
 import { initializeQueue, shutdownQueue } from "./queue";
+import { cleanup } from "./utils/oauthPolling";
 
 dotenv.config({ quiet: true });
 validateConfig();
@@ -102,6 +103,7 @@ process.on("SIGTERM", async () => {
   log.info("SIGTERM received. Shutting down gracefully...");
   scheduler.stop();
   await shutdownQueue();
+  cleanup();
   process.exit(0);
 });
 
@@ -109,5 +111,6 @@ process.on("SIGINT", async () => {
   log.info("SIGINT received. Shutting down gracefully...");
   scheduler.stop();
   await shutdownQueue();
+  cleanup();
   process.exit(0);
 });

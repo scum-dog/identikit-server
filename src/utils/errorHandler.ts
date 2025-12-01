@@ -32,8 +32,6 @@ export function handleDatabaseConstraintError(
 ): UserFriendlyError {
   const { constraint, detail } = error;
 
-  log.debug("Handling database constraint violation", { constraint, detail });
-
   switch (constraint) {
     case "users_platform_platform_user_id_key":
       return {

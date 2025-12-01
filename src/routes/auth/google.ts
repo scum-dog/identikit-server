@@ -113,7 +113,6 @@ router.get("/callback", (req: Request, res: Response) => {
                 }
 
                 if (!pollId) {
-                    console.error('No poll_id found in state parameter. State:', state);
                     return false;
                 }
 
@@ -132,7 +131,6 @@ router.get("/callback", (req: Request, res: Response) => {
 
                 return true;
             } catch (error) {
-                console.error('Failed to store OAuth result on server:', error);
                 return false;
             }
         }
@@ -151,7 +149,6 @@ router.get("/callback", (req: Request, res: Response) => {
                     }
                 }, 1000);
             }).catch(error => {
-                console.error('Error in OAuth result storage:', error);
                 updateMessage('Authentication complete. Please close this window manually.');
             });
         }
@@ -204,7 +201,6 @@ router.get("/callback", (req: Request, res: Response) => {
                 const data = await response.json();
                 return data;
             } catch (error) {
-                console.error('Code exchange error:', error);
                 throw error;
             }
         }
@@ -215,7 +211,6 @@ router.get("/callback", (req: Request, res: Response) => {
 
                 if (params.error) {
                     const errorDescription = params.error_description || params.error;
-                    console.error('OAuth error received:', { error: params.error, description: errorDescription });
                     throw new Error('OAuth Error: ' + errorDescription);
                 }
 
@@ -234,14 +229,12 @@ router.get("/callback", (req: Request, res: Response) => {
                 const authData = await exchangeCodeForSession(code, state);
 
                 if (!authData || !authData.sessionId) {
-                    console.error('Invalid auth response:', authData);
                     throw new Error('Invalid response from authentication server');
                 }
 
                 handleSuccess(authData);
 
             } catch (error) {
-                console.error('Callback processing error:', error);
                 let errorMessage = error.message;
                 if (error.message.includes('account_exists')) {
                     errorMessage = 'An account with this Google profile already exists. Try logging in instead.';

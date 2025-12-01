@@ -2,7 +2,6 @@ import {
   requireAdmin,
   requirePlatform,
   authenticateUser,
-  optionalAuth,
 } from "../../src/auth/middleware";
 import { SessionManager } from "../../src/auth/sessions";
 import {
@@ -337,105 +336,6 @@ describe("Auth Middleware (Logic Tests)", () => {
       await authenticateUser(req as any, res as any, mockNext);
 
       expect(req.user?.isAdmin).toBe(true);
-      expect(mockNext).toHaveBeenCalled();
-    });
-  });
-
-  describe("optionalAuth integration", () => {
-    it("should continue without user if no authorization header", async () => {
-      const req = createMockRequest();
-      const res = createMockResponse();
-
-      await optionalAuth(req as any, res as any, mockNext);
-
-      expect(mockSessionManager.validateSession).not.toHaveBeenCalled();
-      expect(req.user).toBeUndefined();
-      expect(mockNext).toHaveBeenCalled();
-      expect(res.status).not.toHaveBeenCalled();
-    });
-
-    it("should continue without user if malformed authorization header", async () => {
-      const req = createMockRequest({
-        headers: {
-          authorization: "InvalidFormat session-123",
-        },
-      });
-      const res = createMockResponse();
-
-      await optionalAuth(req as any, res as any, mockNext);
-
-      expect(mockSessionManager.validateSession).not.toHaveBeenCalled();
-      expect(req.user).toBeUndefined();
-      expect(mockNext).toHaveBeenCalled();
-    });
-
-    it("should set user if valid session provided", async () => {
-      const mockSession = {
-        id: "session-123",
-        userId: "user-456",
-        username: "testuser",
-        platform: "newgrounds" as const,
-        platformUserId: "ng_user",
-        isAdmin: false,
-        createdAt: new Date(),
-        expiresAt: new Date(),
-      };
-
-      mockSessionManager.validateSession.mockResolvedValueOnce(mockSession);
-
-      const req = createMockRequest({
-        headers: {
-          authorization: "Bearer session-123",
-        },
-      });
-      const res = createMockResponse();
-
-      await optionalAuth(req as any, res as any, mockNext);
-
-      expect(mockSessionManager.validateSession).toHaveBeenCalledWith(
-        "session-123",
-      );
-      expect(req.user).toEqual({
-        id: "user-456",
-        username: "testuser",
-        platform: "newgrounds",
-        platformUserId: "ng_user",
-        isAdmin: false,
-      });
-      expect(mockNext).toHaveBeenCalled();
-    });
-
-    it("should continue without user if session validation fails", async () => {
-      mockSessionManager.validateSession.mockResolvedValueOnce(null);
-
-      const req = createMockRequest({
-        headers: {
-          authorization: "Bearer invalid-session",
-        },
-      });
-      const res = createMockResponse();
-
-      await optionalAuth(req as any, res as any, mockNext);
-
-      expect(req.user).toBeUndefined();
-      expect(mockNext).toHaveBeenCalled();
-    });
-
-    it("should continue without user on authentication errors", async () => {
-      mockSessionManager.validateSession.mockRejectedValueOnce(
-        new Error("Database error"),
-      );
-
-      const req = createMockRequest({
-        headers: {
-          authorization: "Bearer session-123",
-        },
-      });
-      const res = createMockResponse();
-
-      await optionalAuth(req as any, res as any, mockNext);
-
-      expect(req.user).toBeUndefined();
       expect(mockNext).toHaveBeenCalled();
     });
   });

@@ -68,20 +68,6 @@ export function removeOAuthResult(pollId: string): void {
   oauthResults.delete(pollId);
 }
 
-export function getPollingStats() {
-  const now = Date.now();
-  const total = oauthResults.size;
-  const expired = Array.from(oauthResults.values()).filter(
-    (r) => r.expires < now,
-  ).length;
-
-  return {
-    total,
-    active: total - expired,
-    expired,
-  };
-}
-
 export function cleanup(): void {
   if (cleanupInterval) {
     clearInterval(cleanupInterval);

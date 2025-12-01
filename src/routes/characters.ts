@@ -195,50 +195,27 @@ router.get(
       return res.status(404).json({ error: "Route not found" });
     }
     try {
-      log.debug("starting request", { query: req.query });
-
       const { country, limit, offset } =
         (req as PlazaQueryRequest).validatedQuery || req.query;
-
-      log.debug("extracted params", { country, limit, offset });
 
       let characters;
 
       if (country) {
-        log.debug("searching by location", { country });
         characters = await characterQueries.searchByLocation(
           country as string,
           Number(limit) || 100,
           Number(offset) || 0,
         );
       } else {
-        log.debug("getting characters by age", {
-          limit: Number(limit) || 100,
-          offset: Number(offset) || 0,
-        });
         characters = await characterQueries.getCharactersByAge(
           Number(limit) || 100,
           Number(offset) || 0,
         );
       }
 
-      log.debug("got characters from DB", {
-        characterCount: characters?.length,
-      });
-
-      log.debug("starting character formatting");
       const formattedCharacters = characters.map(
         (char: PlazaCharacterResult, index: number) => {
           try {
-            log.debug(`Processing character ${index}`, {
-              charId: char.id,
-              dataType: typeof char.character_data,
-              hasInfo:
-                char.character_data &&
-                typeof char.character_data === "object" &&
-                "info" in char.character_data,
-            });
-
             const parsedCharacterData =
               char.character_data as CharacterDataStructure;
 
@@ -264,15 +241,9 @@ router.get(
         },
       );
 
-      log.debug("characters formatted successfully", {
-        count: formattedCharacters.length,
-      });
-
-      log.debug("getting total count");
       const totalCount = await characterQueries.getTotalCount(
         country as string,
       );
-      log.debug("got total count", { totalCount });
 
       res.json({
         characters: formattedCharacters,

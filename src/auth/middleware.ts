@@ -48,37 +48,6 @@ export const requireAdmin = (
   next();
 };
 
-export const optionalAuth = async (
-  req: Request,
-  res: Response,
-  next: NextFunction,
-) => {
-  const authHeader = req.headers.authorization;
-
-  if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    return next();
-  }
-
-  try {
-    const sessionId = authHeader.substring(7);
-    const session = await SessionManager.validateSession(sessionId);
-
-    if (session) {
-      req.user = {
-        id: session.userId,
-        username: session.username,
-        platform: session.platform,
-        platformUserId: session.platformUserId,
-        isAdmin: session.isAdmin,
-      };
-    }
-  } catch (error) {
-    log.debug("Optional auth failed:", { error });
-  }
-
-  next();
-};
-
 export const requirePlatform = (platform: Platform) => {
   return (req: Request, res: Response, next: NextFunction) => {
     if (!req.user) {
