@@ -8,10 +8,11 @@ import { addCharacterProcessingJob } from "../queue";
 import { JobPriority } from "../types";
 import { AdminCharacterWithUser, AdminUser } from "../types";
 import { log } from "../utils/logger";
+import { FIVE_MINUTES } from "../utils/constants";
 
 const router = Router();
 const adminRateLimit = rateLimit({
-  windowMs: 5 * 60 * 1000,
+  windowMs: FIVE_MINUTES,
   max: 50,
   message: { error: "Too many admin actions, please slow down!!!" },
   standardHeaders: "draft-7",

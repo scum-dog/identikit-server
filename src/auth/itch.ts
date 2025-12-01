@@ -8,6 +8,7 @@ import {
   ItchAuthResponse,
   ItchOAuthParams,
 } from "../types";
+import { TEN_MINUTES } from "../utils/constants";
 import { SessionManager } from "./sessions";
 import { userQueries, oauthStateQueries } from "../database";
 import { log } from "../utils/logger";
@@ -23,7 +24,7 @@ export class ItchOAuth implements OAuthProvider<PlatformUser> {
     const baseState = crypto.randomBytes(32).toString("hex");
     const state = pollId ? `${baseState}_pollid_${pollId}` : baseState;
 
-    const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+    const expiresAt = new Date(Date.now() + TEN_MINUTES);
     await oauthStateQueries.create(state, this.platform, expiresAt);
 
     const oauthParams: ItchOAuthParams = {

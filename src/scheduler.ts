@@ -1,12 +1,16 @@
 import { query } from "./database";
 import { log } from "./utils/logger";
+import { ONE_MINUTE, ONE_HOUR } from "./utils/constants";
 
 export class DatabaseScheduler {
   private intervalId: ReturnType<typeof setInterval> | null = null;
   private readonly cleanupIntervalMs: number;
 
   constructor(cleanupIntervalMinutes: number = 60) {
-    this.cleanupIntervalMs = cleanupIntervalMinutes * 60 * 1000;
+    this.cleanupIntervalMs =
+      cleanupIntervalMinutes === 60
+        ? ONE_HOUR
+        : cleanupIntervalMinutes * ONE_MINUTE;
   }
 
   start(): void {
@@ -16,7 +20,7 @@ export class DatabaseScheduler {
     }
 
     log.info("Starting DatabaseScheduler", {
-      cleanupIntervalMinutes: this.cleanupIntervalMs / (60 * 1000),
+      cleanupIntervalMinutes: this.cleanupIntervalMs / ONE_MINUTE,
     });
 
     this.runCleanup();

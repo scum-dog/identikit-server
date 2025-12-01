@@ -9,6 +9,7 @@ import {
   PlazaCharacterResult,
 } from "./types";
 import { log } from "./utils/logger";
+import { THIRTY_SECONDS } from "./utils/constants";
 
 dotenv.config({ quiet: true });
 
@@ -18,7 +19,7 @@ const pool = new Pool({
     rejectUnauthorized: false,
   },
   max: 20,
-  idleTimeoutMillis: 30 * 1000,
+  idleTimeoutMillis: THIRTY_SECONDS,
   connectionTimeoutMillis: 2000,
 });
 

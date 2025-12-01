@@ -23,10 +23,11 @@ import {
   DatabaseQueryResult,
   CharacterDataStructure,
 } from "../types";
+import { ONE_MINUTE, ONE_HOUR } from "../utils/constants";
 
 const router = Router();
 const characterRateLimit = rateLimit({
-  windowMs: 60 * 1000,
+  windowMs: ONE_MINUTE,
   max: 10,
   message: { error: "Too many requests, please try again later" },
   standardHeaders: "draft-7",
@@ -34,7 +35,7 @@ const characterRateLimit = rateLimit({
 });
 
 const uploadRateLimit = rateLimit({
-  windowMs: 60 * 60 * 1000,
+  windowMs: ONE_HOUR,
   max: 5,
   message: { error: "Upload limit exceeded, please try again later" },
   standardHeaders: "draft-7",
@@ -46,7 +47,7 @@ const uploadRateLimit = rateLimit({
 });
 
 const plazaRateLimit = rateLimit({
-  windowMs: 60 * 1000,
+  windowMs: ONE_MINUTE,
   max: 30,
   message: { error: "Too many plaza requests, please slow down" },
   standardHeaders: "draft-7",

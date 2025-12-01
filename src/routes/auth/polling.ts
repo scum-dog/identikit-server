@@ -6,6 +6,7 @@ import {
   storeOAuthResult,
 } from "../../utils/oauthPolling";
 import { log } from "../../utils/logger";
+import { TEN_MINUTES } from "../../utils/constants";
 
 const router = Router();
 
@@ -17,7 +18,7 @@ router.get("/poll-id", (req: Request, res: Response) => {
     res.json({
       success: true,
       pollId,
-      expiresAt: Date.now() + 10 * 60 * 1000, // 10 minutes
+      expiresAt: Date.now() + TEN_MINUTES,
     });
   } catch (error) {
     log.error("Failed to generate polling ID", { error });

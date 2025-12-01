@@ -1,7 +1,8 @@
 process.env.NODE_ENV = "test";
 process.env.LOG_LEVEL = "error";
+import { TEN_SECONDS } from "../../src/utils/constants";
 
-jest.setTimeout(10 * 1000);
+jest.setTimeout(TEN_SECONDS);
 
 const originalConsoleLog = console.log;
 console.log = jest.fn();

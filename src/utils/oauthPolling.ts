@@ -1,5 +1,6 @@
 import { randomBytes } from "crypto";
 import { PlatformUser } from "../types";
+import { FIVE_MINUTES, TEN_MINUTES } from "./constants";
 
 interface OAuthResult {
   success: boolean;
@@ -16,17 +17,14 @@ const oauthResults = new Map<string, OAuthResult>();
 let cleanupInterval: ReturnType<typeof setInterval> | null = null;
 
 if (process.env.NODE_ENV !== "test") {
-  cleanupInterval = setInterval(
-    () => {
-      const now = Date.now();
-      for (const [pollId, result] of oauthResults.entries()) {
-        if (result.expires < now) {
-          oauthResults.delete(pollId);
-        }
+  cleanupInterval = setInterval(() => {
+    const now = Date.now();
+    for (const [pollId, result] of oauthResults.entries()) {
+      if (result.expires < now) {
+        oauthResults.delete(pollId);
       }
-    },
-    5 * 60 * 1000,
-  );
+    }
+  }, FIVE_MINUTES);
 
   cleanupInterval.unref();
 }
@@ -40,7 +38,7 @@ export function storeOAuthResult(
   result: Omit<OAuthResult, "timestamp" | "expires">,
 ): void {
   const now = Date.now();
-  const expires = now + 10 * 60 * 1000; // 10 minutes
+  const expires = now + TEN_MINUTES;
 
   oauthResults.set(pollId, {
     ...result,

@@ -9,6 +9,7 @@ import {
   teardownTestDatabase,
   clearTestDatabase,
 } from "../helpers/database";
+import { ONE_WEEK } from "../../src/utils/constants";
 
 jest.mock("../../src/database");
 jest.mock("../../src/auth/middleware");
@@ -86,7 +87,7 @@ describe("Auth Flow Integration", () => {
         username: mockUser.username,
         isAdmin: mockUser.isAdmin,
         createdAt: new Date(),
-        expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+        expiresAt: new Date(Date.now() + ONE_WEEK),
       } as any);
 
       const response = await request(app)
@@ -362,7 +363,7 @@ describe("Auth Flow Integration", () => {
         username: mockUser.username,
         isAdmin: mockUser.isAdmin,
         createdAt: new Date(),
-        expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+        expiresAt: new Date(Date.now() + ONE_WEEK),
       } as any);
 
       mockQuery.mockResolvedValue({ rows: [] } as any);

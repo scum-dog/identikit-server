@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from "express";
 import { SessionManager } from "./sessions";
 import { Platform } from "../types";
 import { log } from "../utils/logger";
+import { FIFTEEN_MINUTES } from "../utils/constants";
 
 export const authenticateUser = async (
   req: Request,
@@ -65,7 +66,7 @@ export const requirePlatform = (platform: Platform) => {
 };
 
 export const authRateLimit = {
-  windowMs: 15 * 60 * 1000,
+  windowMs: FIFTEEN_MINUTES,
   max: 10,
   message: {
     error: "Too many authentication attempts, please try again later",

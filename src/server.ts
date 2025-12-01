@@ -15,6 +15,7 @@ import "./database";
 import { DatabaseScheduler } from "./scheduler";
 import { initializeQueue, shutdownQueue } from "./queue";
 import { cleanup } from "./utils/oauthPolling";
+import { FIFTEEN_MINUTES } from "./utils/constants";
 
 dotenv.config({ quiet: true });
 validateConfig();
@@ -44,7 +45,7 @@ app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 app.use("/public", express.static("public"));
 
 const globalRateLimit = rateLimit({
-  windowMs: 15 * 60 * 1000,
+  windowMs: FIFTEEN_MINUTES,
   max: 150,
   message: {
     error: "Too many requests from this IP. Please try again later",

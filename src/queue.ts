@@ -1,6 +1,7 @@
 import { Pool } from "pg";
 import { log } from "./utils/logger";
 import { JobPriority, CharacterProcessingJobData, QueueJob } from "./types";
+import { ONE_SECOND, THIRTY_SECONDS } from "./utils/constants";
 
 const queuePool = new Pool({
   connectionString: process.env.DATABASE_URL,
@@ -8,7 +9,7 @@ const queuePool = new Pool({
     rejectUnauthorized: false,
   },
   max: 20,
-  idleTimeoutMillis: 30 * 1000,
+  idleTimeoutMillis: THIRTY_SECONDS,
   connectionTimeoutMillis: 2000,
 });
 
@@ -91,7 +92,7 @@ class CharacterProcessingQueue {
         }
       } catch (error) {
         log.error(`Worker ${workerId} error:`, { error });
-        await new Promise((resolve) => setTimeout(resolve, 1000));
+        await new Promise((resolve) => setTimeout(resolve, ONE_SECOND));
       }
     }
 
