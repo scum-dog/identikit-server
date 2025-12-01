@@ -187,3 +187,58 @@ BEGIN
     RETURN deleted_count;
 END;
 $$ language plpgsql;
+
+CREATE OR REPLACE FUNCTION jsonb_deep_merge (target JSONB, source JSONB) returns JSONB AS $$
+DECLARE
+    key TEXT;
+    value JSONB;
+    result JSONB;
+BEGIN
+    result := target;
+
+    FOR key, value IN SELECT * FROM jsonb_each(source) LOOP
+        IF target ? key AND jsonb_typeof(target -> key) = 'object' AND jsonb_typeof(value) = 'object' THEN
+            result := jsonb_set(result, ARRAY[key], jsonb_deep_merge(target -> key, value));
+        ELSE
+            result := jsonb_set(result, ARRAY[key], value);
+        END IF;
+    END LOOP;
+
+    RETURN result;
+END;
+$$ language plpgsql;
+
+CREATE OR REPLACE FUNCTION update_character_data (
+  p_character_id UUID,
+  p_user_id UUID,
+  p_partial_data JSONB
+) returns void AS $$
+DECLARE
+    current_character_data JSONB;
+    can_edit BOOLEAN;
+BEGIN
+    SELECT can_user_edit_character(p_character_id, p_user_id) INTO can_edit;
+
+    IF NOT can_edit THEN
+        RAISE EXCEPTION 'Cannot edit character: weekly limit exceeded';
+    END IF;
+
+    SELECT character_data INTO current_character_data
+    FROM characters
+    WHERE id = p_character_id AND user_id = p_user_id AND is_deleted = false;
+
+    IF current_character_data IS NULL THEN
+        RAISE EXCEPTION 'Character not found or not owned by user';
+    END IF;
+
+    UPDATE characters
+    SET character_data = jsonb_deep_merge(current_character_data, p_partial_data),
+        last_edited_at = NOW(),
+        is_edited = true
+    WHERE id = p_character_id AND user_id = p_user_id;
+
+    IF NOT FOUND THEN
+        RAISE EXCEPTION 'Character update failed';
+    END IF;
+END;
+$$ language plpgsql;

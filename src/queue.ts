@@ -151,22 +151,15 @@ class CharacterProcessingQueue {
       throw new Error("Character ID is required for update");
     }
 
-    const canEdit = await queuePool.query<{ can_edit: boolean }>(
-      "SELECT can_user_edit_character($1, $2) as can_edit",
-      [data.characterId, data.userId],
-    );
-
-    if (!canEdit.rows[0]?.can_edit) {
-      throw new Error(
-        "Cannot edit character: either in freeze period or weekly limit exceeded",
-      );
+    if (!data.characterData) {
+      throw new Error("Character data is required for update");
     }
 
-    await queuePool.query(
-      `UPDATE characters SET character_data = $1, last_edited_at = NOW(), is_edited = true
-       WHERE id = $2 AND user_id = $3`,
-      [JSON.stringify(data.characterData), data.characterId, data.userId],
-    );
+    await queuePool.query("SELECT update_character_data($1, $2, $3)", [
+      data.characterId,
+      data.userId,
+      JSON.stringify(data.characterData),
+    ]);
   }
 
   private async processDeleteCharacter(

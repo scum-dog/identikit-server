@@ -114,9 +114,7 @@ export const characterQueries = {
     );
 
     if (!canEdit.rows[0].can_edit) {
-      throw new Error(
-        "Cannot edit character: either in freeze period or weekly limit exceeded",
-      );
+      throw new Error("Cannot edit character: weekly limit exceeded");
     }
 
     const { characterJson } = updates;
