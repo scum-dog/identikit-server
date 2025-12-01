@@ -135,9 +135,9 @@ export const characterQueries = {
     return result.rows[0];
   },
 
-  getRandomCharacters: async (limit: number = 100, offset: number = 0) => {
+  getCharactersByAge: async (limit: number = 100, offset: number = 0) => {
     const result = await query<PlazaCharacterResult>(
-      "SELECT * FROM get_random_characters($1, $2)",
+      "SELECT * FROM get_characters_by_age($1, $2)",
       [limit, offset],
     );
     return result.rows;

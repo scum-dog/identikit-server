@@ -29,7 +29,7 @@ const mockCharacterQueries = {
   create: jest.fn(),
   update: jest.fn(),
   searchByLocation: jest.fn(),
-  getRandomCharacters: jest.fn(),
+  getCharactersByAge: jest.fn(),
   getTotalCount: jest.fn(),
   adminDelete: jest.fn(),
 } as any;
@@ -315,7 +315,7 @@ describe("Characters Routes", () => {
         },
       ];
 
-      mockCharacterQueries.getRandomCharacters.mockResolvedValue(
+      mockCharacterQueries.getCharactersByAge.mockResolvedValue(
         mockCharacters as any,
       );
       mockCharacterQueries.getTotalCount.mockResolvedValue(2);
@@ -368,7 +368,7 @@ describe("Characters Routes", () => {
     });
 
     it("should handle database errors in plaza view", async () => {
-      mockCharacterQueries.getRandomCharacters.mockRejectedValue(
+      mockCharacterQueries.getCharactersByAge.mockRejectedValue(
         new Error("Database error"),
       );
 

@@ -212,11 +212,11 @@ router.get(
           Number(offset) || 0,
         );
       } else {
-        log.debug("getting random characters", {
+        log.debug("getting characters by age", {
           limit: Number(limit) || 100,
           offset: Number(offset) || 0,
         });
-        characters = await characterQueries.getRandomCharacters(
+        characters = await characterQueries.getCharactersByAge(
           Number(limit) || 100,
           Number(offset) || 0,
         );

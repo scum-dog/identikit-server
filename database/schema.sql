@@ -117,7 +117,7 @@ EXCEPTION
 END;
 $$ language plpgsql;
 
-CREATE OR REPLACE FUNCTION get_random_characters (
+CREATE OR REPLACE FUNCTION get_characters_by_age (
   limit_count INTEGER DEFAULT 100,
   offset_count INTEGER DEFAULT 0
 ) returns TABLE (
@@ -135,7 +135,7 @@ BEGIN
         c.last_edited_at
     FROM characters c
     WHERE c.is_deleted = false
-    ORDER BY RANDOM()
+    ORDER BY c.created_at ASC
     LIMIT limit_count
     OFFSET offset_count;
 END;
