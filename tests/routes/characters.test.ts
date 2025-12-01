@@ -78,7 +78,7 @@ describe("Characters Routes", () => {
       const mockCharacter = {
         id: "char-123",
         user_id: mockUser.id,
-        character_data: JSON.stringify(mockCharacterData.character_data),
+        character_data: mockCharacterData.character_data,
         created_at: "2024-01-01T00:00:00.000Z",
         last_edited_at: "2024-01-01T00:00:00.000Z",
         is_edited: false,
@@ -301,15 +301,15 @@ describe("Characters Routes", () => {
       const mockCharacters = [
         {
           id: "char-1",
-          character_data: JSON.stringify({
+          character_data: {
             info: { location: "United States" },
-          }),
+          },
           created_at: "2024-01-01T00:00:00.000Z",
           last_edited_at: "2024-01-01T00:00:00.000Z",
         },
         {
           id: "char-2",
-          character_data: JSON.stringify({ info: { location: "Canada" } }),
+          character_data: { info: { location: "Canada" } },
           created_at: "2024-01-02T00:00:00.000Z",
           last_edited_at: "2024-01-03T00:00:00.000Z",
         },
@@ -335,7 +335,7 @@ describe("Characters Routes", () => {
       const mockCharacters = [
         {
           id: "char-1",
-          character_data: JSON.stringify({ info: { location: "Canada" } }),
+          character_data: { info: { location: "Canada" } },
           created_at: "2024-01-01T00:00:00.000Z",
           last_edited_at: "2024-01-01T00:00:00.000Z",
         },
@@ -386,7 +386,7 @@ describe("Characters Routes", () => {
         rows: [
           {
             id: "char-123",
-            character_data: JSON.stringify(mockCharacterData),
+            character_data: mockCharacterData,
             created_at: "2024-01-01T00:00:00.000Z",
             last_edited_at: "2024-01-02T00:00:00.000Z",
           },

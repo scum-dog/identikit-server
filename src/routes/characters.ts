@@ -21,6 +21,7 @@ import {
   PlazaCharacterData,
   PlazaCharacterResult,
   DatabaseQueryResult,
+  CharacterDataStructure,
 } from "../types";
 
 const router = Router();
@@ -62,9 +63,7 @@ router.get("/me", authenticateUser, async (req: Request, res: Response) => {
     }
 
     const parsedCharacterData =
-      typeof character.character_data === "string"
-        ? JSON.parse(character.character_data)
-        : character.character_data;
+      character.character_data as CharacterDataStructure;
 
     const canEdit = await query<{ can_user_edit_character: boolean }>(
       "SELECT can_user_edit_character($1, $2) as can_user_edit_character",
@@ -217,9 +216,7 @@ router.get(
       const formattedCharacters = characters.map(
         (char: PlazaCharacterResult) => {
           const parsedCharacterData =
-            typeof char.character_data === "string"
-              ? JSON.parse(char.character_data)
-              : char.character_data;
+            char.character_data as CharacterDataStructure;
 
           return {
             upload_id: char.id,
@@ -267,9 +264,7 @@ router.get("/:id", async (req: Request, res: Response) => {
 
     const character = result.rows[0];
     const parsedCharacterData =
-      typeof character.character_data === "string"
-        ? JSON.parse(character.character_data)
-        : character.character_data;
+      character.character_data as CharacterDataStructure;
 
     res.json({
       character_data: parsedCharacterData,
