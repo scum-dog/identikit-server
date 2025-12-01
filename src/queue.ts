@@ -158,7 +158,7 @@ class CharacterProcessingQueue {
     await queuePool.query("SELECT update_character_data($1, $2, $3)", [
       data.characterId,
       data.userId,
-      JSON.stringify(data.characterData),
+      data.characterData,
     ]);
   }
 
