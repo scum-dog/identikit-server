@@ -90,8 +90,8 @@ export const characterQueries = {
   },
 
   create: async (userId: string, characterData: CharacterCreateData) => {
-    const { character_data, characterJson } = characterData;
-    const fullCharacterData = character_data || characterJson;
+    const { character_data } = characterData;
+    const fullCharacterData = character_data;
 
     const result = await query<DatabaseCharacter>(
       `INSERT INTO characters
@@ -117,13 +117,13 @@ export const characterQueries = {
       throw new Error("Cannot edit character: weekly limit exceeded");
     }
 
-    const { characterJson } = updates;
+    const { character_data } = updates;
     const result = await query<DatabaseCharacter>(
       `UPDATE characters
        SET character_data = $3, last_edited_at = NOW(), is_edited = TRUE
        WHERE id = $1 AND user_id = $2
        RETURNING *`,
-      [characterId, userId, JSON.stringify(characterJson)],
+      [characterId, userId, JSON.stringify(character_data)],
     );
 
     if (result.rows.length === 0) {

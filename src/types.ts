@@ -8,12 +8,10 @@ export interface DatabaseQueryResult<T = unknown> {
 
 export interface CharacterCreateData {
   character_data: object;
-  characterJson?: object;
 }
 
 export interface CharacterUpdateData {
   character_data?: object;
-  characterJson?: object;
 }
 
 export interface DatabaseCharacter {

@@ -155,7 +155,7 @@ router.put(
           userId: req.user!.id,
           characterId: character.id,
           action: "update",
-          characterData: req.body.character_data || req.body,
+          characterData: req.body.character_data,
           metadata: {
             userAgent: req.get("User-Agent"),
             ipAddress: req.ip,
