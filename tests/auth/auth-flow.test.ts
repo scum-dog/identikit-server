@@ -136,7 +136,6 @@ describe("Auth Flow Integration", () => {
         id: "char-123",
         created_at: "2024-01-01T00:00:00.000Z",
         last_edited_at: "2024-01-02T00:00:00.000Z",
-        is_edited: true,
       };
 
       mockSessionManager.validateSession.mockResolvedValue({
@@ -160,7 +159,7 @@ describe("Auth Flow Integration", () => {
       expect(response.body.hasCharacter).toBe(true);
 
       expect(mockQuery).toHaveBeenCalledWith(
-        "SELECT id, created_at, last_edited_at, is_edited FROM characters WHERE user_id = $1 AND is_deleted = false",
+        "SELECT id, created_at, last_edited_at FROM characters WHERE user_id = $1 AND is_deleted = false",
         [mockUser.id],
       );
     });

@@ -232,11 +232,9 @@ export const characterDataSchema = z
   });
 
 export const characterMetadataSchema = z.object({
-  upload_id: z.string().uuid(),
   user_id: z.string().uuid(),
   created_at: z.string().datetime(),
   last_edited_at: z.string().datetime().nullable(),
-  is_edited: z.boolean().default(false),
   can_edit: z.boolean(),
   is_deleted: z.boolean().default(false),
   deleted_at: z.string().datetime().nullable(),
@@ -372,29 +370,6 @@ export const characterDataUpdateSchema = z.object({
   metadata: z.object({}).optional(),
 });
 
-export const characterUploadSchema = z.object({
-  character_data: characterDataSchema,
-});
-
-export const characterUpdateSchema = characterDataUpdateSchema
-  .refine((data) => Object.keys(data).length > 0, {
-    message: "At least one field must be provided for update",
-  })
-  .refine((data) => {
-    const hairColor = data.character_data?.info?.hair_color;
-    const hairAssetId = data.character_data?.static?.hair?.asset_id;
-
-    if (hairColor === undefined || hairAssetId === undefined) {
-      return true;
-    }
-
-    if (hairAssetId === 0) {
-      return true;
-    } else {
-      return hairColor !== "bald";
-    }
-  });
-
 export const plazaSearchSchema = z
   .object({
     country: z.union([z.string(), z.undefined()]).optional(),
@@ -488,22 +463,6 @@ export const itchTokenSchema = z.object({
   state: z.string().optional(),
 });
 
-export type CharacterData = z.infer<typeof characterDataSchema>;
-export type CharacterMetadata = z.infer<typeof characterMetadataSchema>;
-export type FullCharacter = z.infer<typeof fullCharacterSchema>;
-export type CharacterUpload = z.infer<typeof characterUploadSchema>;
-export type CharacterUpdate = z.infer<typeof characterUpdateSchema>;
-export type PlazaSearchInput = {
-  country?: string;
-  limit?: string;
-  random?: string;
-};
-
-export type PlazaSearch = {
-  country: string | undefined;
-  limit: number;
-  random: boolean;
-};
 export type AdminAction = z.infer<typeof adminActionSchema>;
 export type OAuthCallback = z.infer<typeof oauthCallbackSchema>;
 export type ItchToken = z.infer<typeof itchTokenSchema>;

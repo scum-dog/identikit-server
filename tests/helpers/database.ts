@@ -44,7 +44,7 @@ export const setupTestDatabase = async (): Promise<Pool> => {
   testDb.public.query(testSchema);
 
   testPool = {
-    query: async (text: string, params?: any[]) => {
+    query: async (text: string, params?: unknown[]) => {
       return testDb.public.query(text, params);
     },
     end: async () => {},

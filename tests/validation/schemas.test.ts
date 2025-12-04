@@ -1,7 +1,6 @@
 import {
   characterDataSchema,
   fullCharacterSchema,
-  characterUpdateSchema,
   plazaSearchSchema,
   adminActionSchema,
   oauthCallbackSchema,
@@ -13,28 +12,36 @@ import { generateMockCharacterData } from "../../src/utils/mockData";
 describe("Validation Schemas", () => {
   describe("characterDataSchema", () => {
     it("should validate valid character data", () => {
-      const validData = generateMockCharacterData();
-      const result = fullCharacterSchema.safeParse(validData);
+      const mockData = generateMockCharacterData();
+      const result = characterDataSchema.safeParse(mockData.character_data);
 
       expect(result.success).toBe(true);
       if (result.success) {
-        expect(result.data.metadata.upload_id).toBeDefined();
-        expect(result.data.character_data.info.name).toBeDefined();
-        expect(result.data.character_data.placeable_movable.eyes).toBeDefined();
+        expect(result.data.info.name).toBeDefined();
+        expect(result.data.placeable_movable.eyes).toBeDefined();
       }
     });
 
     it("should reject invalid UUIDs", () => {
-      const invalidData = generateMockCharacterData();
-      invalidData.metadata.upload_id = "invalid-uuid";
-      invalidData.metadata.user_id = "also-invalid";
+      const mockData = generateMockCharacterData();
+      const invalidData = {
+        character_data: mockData.character_data,
+        metadata: {
+          user_id: "also-invalid",
+          created_at: mockData.created_at,
+          last_edited_at: mockData.last_edited_at,
+          can_edit: mockData.can_edit,
+          is_deleted: mockData.is_deleted,
+          deleted_at: mockData.deleted_at,
+          deleted_by: mockData.deleted_by,
+        },
+      };
 
       const result = fullCharacterSchema.safeParse(invalidData);
 
       expect(result.success).toBe(false);
       if (!result.success) {
         const errors = result.error.errors;
-        expect(errors.some((e) => e.path.includes("upload_id"))).toBe(true);
         expect(errors.some((e) => e.path.includes("user_id"))).toBe(true);
       }
     });
@@ -43,7 +50,7 @@ describe("Validation Schemas", () => {
       const data = generateMockCharacterData();
       data.character_data.info.name = "";
 
-      const result = fullCharacterSchema.safeParse(data);
+      const result = characterDataSchema.safeParse(data.character_data);
 
       expect(result.success).toBe(false);
       if (!result.success) {
@@ -59,7 +66,7 @@ describe("Validation Schemas", () => {
       data.character_data.info.name =
         "ThisNameIsWayTooLongAndExceedsThirtyTwoCharacterLimit";
 
-      const result = fullCharacterSchema.safeParse(data);
+      const result = characterDataSchema.safeParse(data.character_data);
 
       expect(result.success).toBe(false);
       if (!result.success) {
@@ -85,11 +92,11 @@ describe("Validation Schemas", () => {
         const data = generateMockCharacterData();
         data.character_data.info.name = name;
 
-        const result = fullCharacterSchema.safeParse(data);
+        const result = characterDataSchema.safeParse(data.character_data);
 
         expect(result.success).toBe(true);
         if (result.success) {
-          expect(result.data.character_data.info.name).toBe(name);
+          expect(result.data.info.name).toBe(name);
         }
       });
     });
@@ -127,7 +134,7 @@ describe("Validation Schemas", () => {
         const data = generateMockCharacterData();
         data.character_data.info.name = name;
 
-        const result = fullCharacterSchema.safeParse(data);
+        const result = characterDataSchema.safeParse(data.character_data);
 
         expect(result.success).toBe(false);
         if (!result.success) {
@@ -158,7 +165,7 @@ describe("Validation Schemas", () => {
         const data = generateMockCharacterData();
         data.character_data.info.name = name;
 
-        const result = fullCharacterSchema.safeParse(data);
+        const result = characterDataSchema.safeParse(data.character_data);
 
         expect(result.success).toBe(false);
         if (!result.success) {
@@ -188,7 +195,7 @@ describe("Validation Schemas", () => {
         const data = generateMockCharacterData();
         data.character_data.info.name = name;
 
-        const result = fullCharacterSchema.safeParse(data);
+        const result = characterDataSchema.safeParse(data.character_data);
 
         expect(result.success).toBe(false);
         if (!result.success) {
@@ -215,7 +222,7 @@ describe("Validation Schemas", () => {
         const data = generateMockCharacterData();
         data.character_data.info.name = name;
 
-        const result = fullCharacterSchema.safeParse(data);
+        const result = characterDataSchema.safeParse(data.character_data);
 
         expect(result.success).toBe(false);
         if (!result.success) {
@@ -241,7 +248,7 @@ describe("Validation Schemas", () => {
         const data = generateMockCharacterData();
         data.character_data.info.name = name;
 
-        const result = fullCharacterSchema.safeParse(data);
+        const result = characterDataSchema.safeParse(data.character_data);
 
         expect(result.success).toBe(false);
         if (!result.success) {
@@ -267,7 +274,7 @@ describe("Validation Schemas", () => {
         const data = generateMockCharacterData();
         data.character_data.info.name = name;
 
-        const result = fullCharacterSchema.safeParse(data);
+        const result = characterDataSchema.safeParse(data.character_data);
 
         expect(result.success).toBe(false);
         if (!result.success) {
@@ -298,7 +305,7 @@ describe("Validation Schemas", () => {
         const data = generateMockCharacterData();
         data.character_data.info.name = name;
 
-        const result = fullCharacterSchema.safeParse(data);
+        const result = characterDataSchema.safeParse(data.character_data);
 
         expect(result.success).toBe(false);
         if (!result.success) {
@@ -316,13 +323,11 @@ describe("Validation Schemas", () => {
       const data = generateMockCharacterData();
       data.character_data.info.name = "Jean-Pierre Alexandre O'Sullivan"; // exactly 32 characters
 
-      const result = fullCharacterSchema.safeParse(data);
+      const result = characterDataSchema.safeParse(data.character_data);
 
       expect(result.success).toBe(true);
       if (result.success) {
-        expect(result.data.character_data.info.name).toBe(
-          "Jean-Pierre Alexandre O'Sullivan",
-        );
+        expect(result.data.info.name).toBe("Jean-Pierre Alexandre O'Sullivan");
       }
     });
 
@@ -330,7 +335,7 @@ describe("Validation Schemas", () => {
       const data = generateMockCharacterData();
       data.character_data.static.head.asset_id = -1; // below minimum
 
-      const result = fullCharacterSchema.safeParse(data);
+      const result = characterDataSchema.safeParse(data.character_data);
 
       expect(result.success).toBe(false);
       if (!result.success) {
@@ -345,7 +350,7 @@ describe("Validation Schemas", () => {
       const data = generateMockCharacterData();
       data.character_data.info.height_in = 10;
 
-      const result = fullCharacterSchema.safeParse(data);
+      const result = characterDataSchema.safeParse(data.character_data);
 
       expect(result.success).toBe(false);
       if (!result.success) {
@@ -360,7 +365,7 @@ describe("Validation Schemas", () => {
       const data = generateMockCharacterData();
       data.character_data.info.weight_lb = 1000;
 
-      const result = fullCharacterSchema.safeParse(data);
+      const result = characterDataSchema.safeParse(data.character_data);
 
       expect(result.success).toBe(false);
       if (!result.success) {
@@ -375,13 +380,11 @@ describe("Validation Schemas", () => {
       const data = generateMockCharacterData();
       data.character_data.placeable_movable.eyes.offset_y = 0.12345;
 
-      const result = fullCharacterSchema.safeParse(data);
+      const result = characterDataSchema.safeParse(data.character_data);
 
       expect(result.success).toBe(true);
       if (result.success) {
-        expect(result.data.character_data.placeable_movable.eyes.offset_y).toBe(
-          0.1,
-        );
+        expect(result.data.placeable_movable.eyes.offset_y).toBe(0.1);
       }
     });
 
@@ -389,13 +392,11 @@ describe("Validation Schemas", () => {
       const data = generateMockCharacterData();
       data.character_data.placeable_movable.eyes.scale = 1.23456;
 
-      const result = fullCharacterSchema.safeParse(data);
+      const result = characterDataSchema.safeParse(data.character_data);
 
       expect(result.success).toBe(true);
       if (result.success) {
-        expect(result.data.character_data.placeable_movable.eyes.scale).toBe(
-          1.2,
-        );
+        expect(result.data.placeable_movable.eyes.scale).toBe(1.2);
       }
     });
 
@@ -408,11 +409,11 @@ describe("Validation Schemas", () => {
         scale: 1.0,
       };
 
-      const result = fullCharacterSchema.safeParse(data);
+      const result = characterDataSchema.safeParse(data.character_data);
 
       expect(result.success).toBe(true);
       if (result.success) {
-        const glasses = result.data.character_data.placeable_movable.glasses;
+        const glasses = result.data.placeable_movable.glasses;
         expect(glasses).toBeDefined();
         expect(glasses!.asset_id).toBe(15);
       }
@@ -426,7 +427,7 @@ describe("Validation Schemas", () => {
         scale: 1.0,
       };
 
-      const result = fullCharacterSchema.safeParse(data);
+      const result = characterDataSchema.safeParse(data.character_data);
 
       expect(result.success).toBe(false);
       if (!result.success) {
@@ -442,7 +443,7 @@ describe("Validation Schemas", () => {
       data.character_data.info.hair_color = "bald";
       data.character_data.static.hair.asset_id = 0;
 
-      const result = fullCharacterSchema.safeParse(data);
+      const result = characterDataSchema.safeParse(data.character_data);
 
       expect(result.success).toBe(true);
     });
@@ -452,7 +453,7 @@ describe("Validation Schemas", () => {
       data.character_data.info.hair_color = "brown";
       data.character_data.static.hair.asset_id = 0;
 
-      const result = fullCharacterSchema.safeParse(data);
+      const result = characterDataSchema.safeParse(data.character_data);
 
       expect(result.success).toBe(true);
     });
@@ -462,7 +463,7 @@ describe("Validation Schemas", () => {
       data.character_data.info.hair_color = "bald";
       data.character_data.static.hair.asset_id = 123;
 
-      const result = fullCharacterSchema.safeParse(data);
+      const result = characterDataSchema.safeParse(data.character_data);
 
       expect(result.success).toBe(false);
     });
@@ -472,279 +473,16 @@ describe("Validation Schemas", () => {
       data.character_data.info.hair_color = "brown";
       data.character_data.static.hair.asset_id = 123;
 
-      const result = fullCharacterSchema.safeParse(data);
+      const result = characterDataSchema.safeParse(data.character_data);
 
       expect(result.success).toBe(true);
-    });
-  });
-
-  describe("characterUpdateSchema", () => {
-    it("should validate partial character updates", () => {
-      const updateData = {
-        character_data: {
-          info: {
-            name: "Updated Name",
-          },
-        },
-      };
-
-      const result = characterUpdateSchema.safeParse(updateData);
-
-      expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.data.character_data?.info?.name).toBe("Updated Name");
-      }
-    });
-
-    it("should reject name updates longer than 32 characters", () => {
-      const updateData = {
-        character_data: {
-          info: {
-            name: "ThisUpdatedNameIsWayTooLongAndExceedsThirtyTwoCharacterLimit",
-          },
-        },
-      };
-
-      const result = characterUpdateSchema.safeParse(updateData);
-
-      expect(result.success).toBe(false);
-      if (!result.success) {
-        const nameError = result.error.errors.find(
-          (e) => e.path.includes("name") && e.message.includes("32"),
-        );
-        expect(nameError).toBeDefined();
-      }
-    });
-
-    it("should reject name updates with invalid characters", () => {
-      const updateData = {
-        character_data: {
-          info: {
-            name: "Updated@Name123",
-          },
-        },
-      };
-
-      const result = characterUpdateSchema.safeParse(updateData);
-
-      expect(result.success).toBe(false);
-      if (!result.success) {
-        const nameError = result.error.errors.find(
-          (e) =>
-            e.path.includes("name") &&
-            e.message.includes("must start with a letter"),
-        );
-        expect(nameError).toBeDefined();
-      }
-    });
-
-    it("should reject name updates with only spaces, hyphens, or apostrophes", () => {
-      const invalidNames = ["   ", "---", "'''", " - '"];
-
-      invalidNames.forEach((name) => {
-        const updateData = {
-          character_data: {
-            info: {
-              name: name,
-            },
-          },
-        };
-
-        const result = characterUpdateSchema.safeParse(updateData);
-
-        expect(result.success).toBe(false);
-        if (!result.success) {
-          const nameError = result.error.errors.find(
-            (e) =>
-              e.path.includes("name") &&
-              e.message.includes("must start with a letter"),
-          );
-          expect(nameError).toBeDefined();
-        }
-      });
-    });
-
-    it("should reject name updates with whitespace and formatting issues", () => {
-      const invalidNames = [
-        " UpdatedName", // leading space
-        "UpdatedName ", // trailing space
-        "Updated  Name", // multiple spaces
-        "Updated--Name", // multiple hyphens
-        "Updated''Name", // multiple apostrophes
-        "-UpdatedName", // leading hyphen
-        "UpdatedName-", // trailing hyphen
-        "'UpdatedName", // leading apostrophe
-        "UpdatedName'", // trailing apostrophe
-        "Updated - Name", // spaces around hyphen
-        "Updated ' Name", // spaces around apostrophe
-      ];
-
-      invalidNames.forEach((name) => {
-        const updateData = {
-          character_data: {
-            info: {
-              name: name,
-            },
-          },
-        };
-
-        const result = characterUpdateSchema.safeParse(updateData);
-
-        expect(result.success).toBe(false);
-        if (!result.success) {
-          const nameError = result.error.errors.find(
-            (e) =>
-              e.path.includes("name") &&
-              e.message.includes("must start with a letter"),
-          );
-          expect(nameError).toBeDefined();
-        }
-      });
-    });
-
-    it("should accept valid name updates", () => {
-      const validNames = ["O'Brien", "Jean-Luc", "Mary Ann", "D'Artagnan"];
-
-      validNames.forEach((name) => {
-        const updateData = {
-          character_data: {
-            info: {
-              name: name,
-            },
-          },
-        };
-
-        const result = characterUpdateSchema.safeParse(updateData);
-
-        expect(result.success).toBe(true);
-        if (result.success) {
-          expect(result.data.character_data?.info?.name).toBe(name);
-        }
-      });
-    });
-
-    it("should reject empty update objects", () => {
-      const result = characterUpdateSchema.safeParse({});
-
-      expect(result.success).toBe(false);
-      if (!result.success) {
-        const error = result.error.errors.find((e) =>
-          e.message.includes("At least one field must be provided"),
-        );
-        expect(error).toBeDefined();
-      }
-    });
-
-    it("should validate location updates", () => {
-      const updateData = {
-        character_data: {
-          info: {
-            location: "Canada",
-          },
-        },
-      };
-
-      const result = characterUpdateSchema.safeParse(updateData);
-
-      expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.data.character_data?.info?.location).toBe("Canada");
-      }
-    });
-
-    it("should reject invalid country in updates", () => {
-      const updateData = {
-        character_data: {
-          info: {
-            location: "Invalid Country Name",
-          },
-        },
-      };
-
-      const result = characterUpdateSchema.safeParse(updateData);
-
-      expect(result.success).toBe(false);
-      if (!result.success) {
-        const locationError = result.error.errors.find((e) =>
-          e.path.includes("location"),
-        );
-        expect(locationError).toBeDefined();
-      }
-    });
-
-    it("should validate updating hair color only", () => {
-      const updateData = {
-        character_data: {
-          info: {
-            hair_color: "brown",
-          },
-        },
-      };
-
-      const result = characterUpdateSchema.safeParse(updateData);
-
-      expect(result.success).toBe(true);
-    });
-
-    it("should validate updating hair asset ID only", () => {
-      const updateData = {
-        character_data: {
-          static: {
-            hair: {
-              asset_id: 0,
-            },
-          },
-        },
-      };
-
-      const result = characterUpdateSchema.safeParse(updateData);
-
-      expect(result.success).toBe(true);
-    });
-
-    it("should validate updating both hair color and asset ID with valid combination", () => {
-      const updateData = {
-        character_data: {
-          info: {
-            hair_color: "brown",
-          },
-          static: {
-            hair: {
-              asset_id: 0,
-            },
-          },
-        },
-      };
-
-      const result = characterUpdateSchema.safeParse(updateData);
-
-      expect(result.success).toBe(true);
-    });
-
-    it("should reject bald hair color with non-zero asset ID in updates", () => {
-      const updateData = {
-        character_data: {
-          info: {
-            hair_color: "bald",
-          },
-          static: {
-            hair: {
-              asset_id: 123,
-            },
-          },
-        },
-      };
-
-      const result = characterUpdateSchema.safeParse(updateData);
-
-      expect(result.success).toBe(false);
     });
 
     it("should reject invalid country in character creation", () => {
       const data = generateMockCharacterData();
       data.character_data.info.location = "Invalid Country" as any;
 
-      const result = fullCharacterSchema.safeParse(data);
+      const result = characterDataSchema.safeParse(data.character_data);
 
       expect(result.success).toBe(false);
       if (!result.success) {
@@ -759,11 +497,11 @@ describe("Validation Schemas", () => {
       const data = generateMockCharacterData();
       data.character_data.info.location = "United States";
 
-      const result = fullCharacterSchema.safeParse(data);
+      const result = characterDataSchema.safeParse(data.character_data);
 
       expect(result.success).toBe(true);
       if (result.success) {
-        expect(result.data.character_data.info.location).toBe("United States");
+        expect(result.data.info.location).toBe("United States");
       }
     });
   });

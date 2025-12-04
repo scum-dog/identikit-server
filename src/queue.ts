@@ -141,7 +141,7 @@ class CharacterProcessingQueue {
 
     await queuePool.query(
       `INSERT INTO characters (user_id, character_data) VALUES ($1, $2)`,
-      [data.userId, JSON.stringify(data.characterData)],
+      [data.userId, data.characterData],
     );
   }
 

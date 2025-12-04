@@ -1,15 +1,12 @@
 import { Router, Request, Response } from "express";
+import { z } from "zod";
+import { characterDataSchema } from "../utils/validation";
 import { characterQueries, query } from "../database";
-import {
-  validateRequest,
-  validatePlazaQuery,
-  characterUploadSchema,
-  characterUpdateSchema,
-} from "../utils/validation";
+import { validateRequest, validatePlazaQuery } from "../utils/validation";
 import { authenticateUser } from "../auth/middleware";
 import rateLimit from "express-rate-limit";
 import { addCharacterProcessingJob } from "../queue";
-import { JobPriority } from "../types";
+import { JobPriority, GenericError } from "../types";
 import { log } from "../utils/logger";
 import {
   notFoundResponse,
@@ -18,10 +15,11 @@ import {
 } from "../utils/responseHelpers";
 import {
   PlazaQueryRequest,
-  PlazaCharacterData,
-  PlazaCharacterResult,
+  Character,
   DatabaseQueryResult,
-  CharacterDataStructure,
+  CharacterData,
+  QueueResponse,
+  PlazaResponse,
 } from "../types";
 import { ONE_MINUTE, ONE_HOUR } from "../utils/constants";
 
@@ -55,50 +53,39 @@ const plazaRateLimit = rateLimit({
 });
 
 // GET /characters/me - get current user's character
-router.get("/me", authenticateUser, async (req: Request, res: Response) => {
-  try {
-    const character = await characterQueries.findByUserId(req.user!.id);
+router.get(
+  "/me",
+  authenticateUser,
+  async (req: Request, res: Response<Character | GenericError>) => {
+    try {
+      const character = await characterQueries.findByUserId(req.user!.id);
 
-    if (!character) {
-      return notFoundResponse(res, "Character");
+      if (!character) {
+        return notFoundResponse(res, "Character");
+      }
+
+      res.json(character);
+    } catch (error) {
+      log.error("Get character error:", { error });
+      internalServerErrorResponse(res, "Failed to retrieve character");
     }
-
-    const parsedCharacterData =
-      character.character_data as CharacterDataStructure;
-
-    const canEdit = await query<{ can_user_edit_character: boolean }>(
-      "SELECT can_user_edit_character($1, $2) as can_user_edit_character",
-      [character.id, req.user!.id],
-    ).then((result) => result.rows[0]?.can_user_edit_character || false);
-
-    res.json({
-      character_data: parsedCharacterData,
-      metadata: {
-        upload_id: character.id,
-        user_id: character.user_id,
-        created_at: character.created_at,
-        last_edited_at: character.last_edited_at,
-        location: parsedCharacterData.info.location || "",
-        is_edited: character.is_edited,
-        is_deleted: character.is_deleted,
-        deleted_at: character.deleted_at,
-        deleted_by: character.deleted_by,
-      },
-      can_edit: canEdit,
-    });
-  } catch (error) {
-    log.error("Get character error:", { error });
-    internalServerErrorResponse(res, "Failed to retrieve character");
-  }
-});
+  },
+);
 
 // POST /characters - create new character
+interface CreateCharacterRequest extends Request {
+  body: z.infer<typeof characterDataSchema>;
+}
+
 router.post(
   "/",
   authenticateUser,
   uploadRateLimit,
-  validateRequest(characterUploadSchema),
-  async (req: Request, res: Response) => {
+  validateRequest(characterDataSchema),
+  async (
+    req: CreateCharacterRequest,
+    res: Response<QueueResponse | GenericError>,
+  ) => {
     try {
       // check if user already has a character
       const existingCharacter = await characterQueries.findByUserId(
@@ -115,7 +102,7 @@ router.post(
         {
           userId: req.user!.id,
           action: "create",
-          characterData: req.body.character_data,
+          characterData: req.body,
           metadata: {
             userAgent: req.get("User-Agent"),
             ipAddress: req.ip,
@@ -138,12 +125,19 @@ router.post(
 );
 
 // PUT /characters/me - update current user's character
+interface UpdateCharacterRequest extends Request {
+  body: z.infer<typeof characterDataSchema>;
+}
+
 router.put(
   "/me",
   authenticateUser,
   characterRateLimit,
-  validateRequest(characterUpdateSchema),
-  async (req: Request, res: Response) => {
+  validateRequest(characterDataSchema),
+  async (
+    req: UpdateCharacterRequest,
+    res: Response<QueueResponse | GenericError>,
+  ) => {
     try {
       const character = await characterQueries.findByUserId(req.user!.id);
 
@@ -156,7 +150,7 @@ router.put(
           userId: req.user!.id,
           characterId: character.id,
           action: "update",
-          characterData: req.body.character_data,
+          characterData: req.body,
           metadata: {
             userAgent: req.get("User-Agent"),
             ipAddress: req.ip,
@@ -191,7 +185,7 @@ router.get(
   "/",
   plazaRateLimit,
   validatePlazaQuery,
-  async (req: Request, res: Response) => {
+  async (req: Request, res: Response<PlazaResponse | GenericError>) => {
     if (req.query.view !== "plaza") {
       return res.status(404).json({ error: "Route not found" });
     }
@@ -215,15 +209,14 @@ router.get(
       }
 
       const formattedCharacters = characters.map(
-        (char: PlazaCharacterResult, index: number) => {
+        (char: Character, index: number) => {
           try {
-            const parsedCharacterData =
-              char.character_data as CharacterDataStructure;
+            const parsedCharacterData = char.character_data as CharacterData;
 
             return {
-              upload_id: char.id,
-              creation_time: char.created_at,
-              edit_time:
+              id: char.id,
+              created_at: char.created_at,
+              last_edited_at:
                 char.last_edited_at !== char.created_at
                   ? char.last_edited_at
                   : null,
@@ -250,7 +243,7 @@ router.get(
         characters: formattedCharacters,
         count: formattedCharacters.length,
         total: totalCount,
-        filters: { country },
+        filters: { country: country as string | undefined },
       });
     } catch (error) {
       log.error("full details:", {
@@ -267,39 +260,28 @@ router.get(
 );
 
 // GET /characters/:id - get specific character by ID
-router.get("/:id", async (req: Request, res: Response) => {
-  try {
-    const { id } = req.params;
+router.get(
+  "/:id",
+  async (req: Request, res: Response<Character | GenericError>) => {
+    try {
+      const { id } = req.params;
 
-    const result = (await query(
-      "SELECT id, character_data, created_at, last_edited_at FROM characters WHERE id = $1 AND is_deleted = false",
-      [id],
-    )) as DatabaseQueryResult<PlazaCharacterData>;
+      const result = (await query(
+        "SELECT id, character_data, created_at, last_edited_at FROM characters WHERE id = $1 AND is_deleted = false",
+        [id],
+      )) as DatabaseQueryResult<Character>;
 
-    if (result.rows.length === 0) {
-      return res.status(404).json({ error: "Character not found" });
+      if (result.rows.length === 0) {
+        return res.status(404).json({ error: "Character not found" });
+      }
+
+      const character = result.rows[0];
+      res.json(character);
+    } catch (error) {
+      log.error("Get character by ID error:", { error });
+      res.status(500).json({ error: "Failed to retrieve character" });
     }
-
-    const character = result.rows[0];
-    const parsedCharacterData =
-      character.character_data as CharacterDataStructure;
-
-    res.json({
-      character_data: parsedCharacterData,
-      metadata: {
-        upload_id: character.id,
-        creation_time: character.created_at,
-        edit_time:
-          character.last_edited_at !== character.created_at
-            ? character.last_edited_at
-            : null,
-        location: parsedCharacterData.info.location || "",
-      },
-    });
-  } catch (error) {
-    log.error("Get character by ID error:", { error });
-    res.status(500).json({ error: "Failed to retrieve character" });
-  }
-});
+  },
+);
 
 export default router;

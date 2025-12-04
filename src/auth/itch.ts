@@ -5,7 +5,7 @@ import {
   OAuthProvider,
   AuthUrlResult,
   PlatformUser,
-  ItchAuthResponse,
+  ItchOAuthResponse,
   ItchOAuthParams,
 } from "../types";
 import { TEN_MINUTES } from "../utils/constants";
@@ -69,7 +69,7 @@ export class ItchOAuth implements OAuthProvider<PlatformUser> {
         `https://itch.io/api/1/${accessToken}/me`,
       );
 
-      const data: ItchAuthResponse = response.data;
+      const data: ItchOAuthResponse = response.data;
       if (!data.user) {
         throw new AuthError(
           "Failed to get user info from Itch.io",
@@ -117,7 +117,7 @@ export class ItchOAuth implements OAuthProvider<PlatformUser> {
           const response = await axios.get(
             `https://itch.io/api/1/${session.platformSessionId}/me`,
           );
-          const data: ItchAuthResponse = response.data;
+          const data: ItchOAuthResponse = response.data;
 
           if (!data.user) {
             log.info(

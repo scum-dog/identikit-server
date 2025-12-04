@@ -1,7 +1,7 @@
 import { Router, Request, Response } from "express";
 import { authenticateUser } from "../../auth/middleware";
 import { query } from "../../database";
-import { CharacterInfo } from "../../types";
+import { CharacterBasicInfo } from "../../types";
 import { log } from "../../utils/logger";
 import { SessionManager } from "../../auth/sessions";
 
@@ -33,8 +33,8 @@ router.get("/session", authenticateUser, (req: Request, res: Response) => {
 // GET /auth/me - get current user info
 router.get("/me", authenticateUser, async (req: Request, res: Response) => {
   try {
-    const character = await query<CharacterInfo>(
-      "SELECT id, created_at, last_edited_at, is_edited FROM characters WHERE user_id = $1 AND is_deleted = false",
+    const character = await query<CharacterBasicInfo>(
+      "SELECT id, created_at, last_edited_at FROM characters WHERE user_id = $1 AND is_deleted = false",
       [req.user!.id],
     );
 

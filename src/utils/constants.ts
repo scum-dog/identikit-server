@@ -263,3 +263,17 @@ export const FIFTEEN_MINUTES = 15 * ONE_MINUTE;
 export const ONE_HOUR = 60 * ONE_MINUTE;
 export const ONE_DAY = 24 * ONE_HOUR;
 export const ONE_WEEK = 7 * ONE_DAY;
+
+export const ERROR_CODES = {
+  MISSING_PARAMETERS: "missing_parameters",
+  VALIDATION_ERROR: "validation_error",
+  ACCOUNT_EXISTS: "account_exists",
+  USERNAME_TAKEN: "username_taken",
+  CHARACTER_EXISTS: "character_exists",
+  SESSION_EXISTS: "session_exists",
+  INVALID_TOKEN: "invalid_token",
+  EXPIRED_TOKEN: "expired_token",
+  USER_NOT_FOUND: "user_not_found",
+  PLATFORM_ERROR: "platform_error",
+  NETWORK_ERROR: "network_error",
+} as const;

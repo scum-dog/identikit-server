@@ -81,10 +81,10 @@ describe("Characters Routes", () => {
         character_data: mockCharacterData.character_data,
         created_at: "2024-01-01T00:00:00.000Z",
         last_edited_at: "2024-01-01T00:00:00.000Z",
-        is_edited: false,
         is_deleted: false,
         deleted_at: null,
         deleted_by: null,
+        can_edit: true,
       };
 
       mockCharacterQueries.findByUserId.mockResolvedValue(mockCharacter);
@@ -101,7 +101,6 @@ describe("Characters Routes", () => {
       expect(response.body.character_data.static.head.asset_id).toBe(
         mockCharacterData.character_data.static.head.asset_id,
       );
-      expect(response.body.metadata.upload_id).toBe("char-123");
       expect(response.body.can_edit).toBe(true);
     });
 
@@ -135,7 +134,7 @@ describe("Characters Routes", () => {
 
       const response = await request(app)
         .post("/characters")
-        .send(mockCharacterData);
+        .send(mockCharacterData.character_data);
 
       expect(response.status).toBe(202);
       expect(response.body.message).toBe(
@@ -169,7 +168,7 @@ describe("Characters Routes", () => {
 
       const response = await request(app)
         .post("/characters")
-        .send(mockCharacterData);
+        .send(mockCharacterData.character_data);
 
       expect(response.status).toBe(409);
       expect(response.body.error.message).toBe(
@@ -201,7 +200,7 @@ describe("Characters Routes", () => {
 
       const response = await request(app)
         .post("/characters")
-        .send({ character_data: mockCharacterData.character_data });
+        .send(mockCharacterData.character_data);
 
       expect(response.status).toBe(500);
       expect(response.body.error.message).toBe("Failed to create character");
@@ -220,13 +219,8 @@ describe("Characters Routes", () => {
       );
       mockAddCharacterProcessingJob.mockResolvedValue("job-456");
 
-      const updateData = {
-        character_data: {
-          info: {
-            name: "Updated Name",
-          },
-        },
-      };
+      const updateData = generateMockCharacterData().character_data;
+      updateData.info.name = "Updated Name";
 
       const response = await request(app)
         .put("/characters/me")
@@ -243,7 +237,11 @@ describe("Characters Routes", () => {
           userId: mockUser.id,
           characterId: "char-123",
           action: "update",
-          characterData: updateData.character_data,
+          characterData: expect.objectContaining({
+            info: expect.objectContaining({
+              name: "Updated Name",
+            }),
+          }),
           metadata: expect.any(Object),
         }),
         3,
@@ -253,13 +251,8 @@ describe("Characters Routes", () => {
     it("should return 404 when character doesn't exist", async () => {
       mockCharacterQueries.findByUserId.mockResolvedValue(null);
 
-      const updateData = {
-        character_data: {
-          info: {
-            name: "Updated Name",
-          },
-        },
-      };
+      const updateData = generateMockCharacterData().character_data;
+      updateData.info.name = "Updated Name";
 
       const response = await request(app)
         .put("/characters/me")
@@ -279,13 +272,8 @@ describe("Characters Routes", () => {
         new Error("Cannot edit character: weekly limit exceeded"),
       );
 
-      const updateData = {
-        character_data: {
-          info: {
-            name: "Updated Name",
-          },
-        },
-      };
+      const updateData = generateMockCharacterData().character_data;
+      updateData.info.name = "Updated Name";
 
       const response = await request(app)
         .put("/characters/me")
@@ -327,8 +315,8 @@ describe("Characters Routes", () => {
       expect(response.status).toBe(200);
       expect(response.body.characters).toHaveLength(2);
       expect(response.body.count).toBe(2);
-      expect(response.body.characters[0].upload_id).toBe("char-1");
-      expect(response.body.characters[1].edit_time).not.toBeNull();
+      expect(response.body.characters[0].id).toBe("char-1");
+      expect(response.body.characters[1].last_edited_at).not.toBeNull();
     });
 
     it("should filter by country when specified", async () => {
@@ -399,8 +387,7 @@ describe("Characters Routes", () => {
 
       expect(response.status).toBe(200);
       expect(response.body.character_data).toEqual(mockCharacterData);
-      expect(response.body.metadata.upload_id).toBe("char-123");
-      expect(response.body.metadata.edit_time).not.toBeNull();
+      expect(response.body.last_edited_at).not.toBeNull();
     });
 
     it("should return 404 for non-existent character", async () => {

@@ -5,7 +5,7 @@ import {
   OAuthProvider,
   AuthUrlResult,
   PlatformUser,
-  GoogleAuthResponse,
+  GoogleOAuthResponse,
   GoogleUserInfoResponse,
   GoogleOAuthParams,
 } from "../types";
@@ -89,7 +89,7 @@ export class GoogleAuth implements OAuthProvider<PlatformUser> {
 
   private async exchangeCodeForTokens(
     code: string,
-  ): Promise<GoogleAuthResponse> {
+  ): Promise<GoogleOAuthResponse> {
     const tokenData = {
       client_id: this.clientId!,
       client_secret: this.clientSecret!,

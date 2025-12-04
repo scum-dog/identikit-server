@@ -1,4 +1,4 @@
-import { query } from "./database";
+import { query, oauthStateQueries } from "./database";
 import { log } from "./utils/logger";
 import { ONE_MINUTE, ONE_HOUR } from "./utils/constants";
 
@@ -41,8 +41,9 @@ export class DatabaseScheduler {
   private async runCleanup(): Promise<void> {
     try {
       await this.runSessionCleanup();
+      await this.runOAuthStateCleanup();
     } catch (error) {
-      log.error("Session cleanup failed", {
+      log.error("Cleanup failed", {
         error: error instanceof Error ? error.message : String(error),
       });
     }
@@ -56,6 +57,14 @@ export class DatabaseScheduler {
 
     log.info("Session cleanup completed", {
       deletedSessions,
+    });
+  }
+
+  private async runOAuthStateCleanup(): Promise<void> {
+    const deletedStates = await oauthStateQueries.cleanup();
+
+    log.info("OAuth state cleanup completed", {
+      deletedStates,
     });
   }
 }

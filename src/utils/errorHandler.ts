@@ -1,17 +1,5 @@
 import { log } from "./logger";
-
-export interface DatabaseConstraintError {
-  code: string;
-  constraint: string;
-  detail: string;
-  table: string;
-}
-
-export interface UserFriendlyError {
-  error: string;
-  message: string;
-  field?: string;
-}
+import { DatabaseConstraintError, UserFriendlyError } from "../types";
 
 export function isDatabaseConstraintError(
   error: unknown,
@@ -114,20 +102,6 @@ export function getConstraintError(error: unknown): UserFriendlyError | null {
   }
   return null;
 }
-
-export const ERROR_CODES = {
-  MISSING_PARAMETERS: "missing_parameters",
-  VALIDATION_ERROR: "validation_error",
-  ACCOUNT_EXISTS: "account_exists",
-  USERNAME_TAKEN: "username_taken",
-  CHARACTER_EXISTS: "character_exists",
-  SESSION_EXISTS: "session_exists",
-  INVALID_TOKEN: "invalid_token",
-  EXPIRED_TOKEN: "expired_token",
-  USER_NOT_FOUND: "user_not_found",
-  PLATFORM_ERROR: "platform_error",
-  NETWORK_ERROR: "network_error",
-} as const;
 
 export function errorResponse(
   code: string,

@@ -3,11 +3,8 @@ import { newgroundsAuth } from "../../auth/newgrounds";
 import { NewgroundsAuthRequest } from "../../types";
 import { newgroundsAuthSchema } from "../../utils/validation";
 import { log } from "../../utils/logger";
-import {
-  getConstraintError,
-  ERROR_CODES,
-  errorResponse,
-} from "../../utils/errorHandler";
+import { getConstraintError, errorResponse } from "../../utils/errorHandler";
+import { ERROR_CODES } from "../../utils/constants";
 
 const router = Router();
 

@@ -1,7 +1,6 @@
 import { randomUUID } from "crypto";
-import { Race, EyeColor, HairColor, Sex, Ethnicity } from "../types";
+import { Race, EyeColor, HairColor, Sex, Ethnicity, Character } from "../types";
 import { COUNTRIES, Country } from "./constants";
-import { FullCharacter } from "./validation";
 
 const characterNames = [
   "Filippo Meozzi",
@@ -180,7 +179,7 @@ function generateHairData(): { hairColor: HairColor; hairAssetId: number } {
   return { hairColor, hairAssetId };
 }
 
-export function generateMockCharacterData(): FullCharacter {
+export function generateMockCharacterData(): Character {
   const country: Country = randomChoice(COUNTRIES);
   const sex = randomChoice(sexOptions);
   const shouldHaveBeard = sex !== "female";
@@ -246,16 +245,13 @@ export function generateMockCharacterData(): FullCharacter {
         ...generateAccessories(),
       },
     },
-    metadata: {
-      upload_id: randomUUID(),
-      user_id: randomUUID(),
-      created_at: new Date().toISOString(),
-      last_edited_at: null,
-      is_edited: false,
-      can_edit: true,
-      is_deleted: false,
-      deleted_at: null,
-      deleted_by: null,
-    },
+    id: randomUUID(),
+    user_id: randomUUID(),
+    created_at: new Date().toISOString(),
+    last_edited_at: null,
+    can_edit: true,
+    is_deleted: false,
+    deleted_at: null,
+    deleted_by: null,
   };
 }

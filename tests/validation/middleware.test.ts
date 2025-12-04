@@ -2,7 +2,7 @@ import {
   validateRequest,
   validateQuery,
   validatePlazaQuery,
-  characterUploadSchema,
+  characterDataSchema,
   plazaSearchSchema,
 } from "../../src/utils/validation";
 import { generateMockCharacterData } from "../../src/utils/mockData";
@@ -19,12 +19,12 @@ describe("Validation Middleware (Logic Tests)", () => {
   });
 
   describe("validateRequest", () => {
-    const validateCharacterUpload = validateRequest(characterUploadSchema);
+    const validateCharacterUpload = validateRequest(characterDataSchema);
 
     it("should validate and transform valid request body", () => {
       const validCharacterData = generateMockCharacterData();
       const req = createMockRequest({
-        body: { character_data: validCharacterData.character_data },
+        body: validCharacterData.character_data,
       });
       const res = createMockResponse();
 
@@ -32,12 +32,12 @@ describe("Validation Middleware (Logic Tests)", () => {
 
       expect(mockNext).toHaveBeenCalled();
       expect(res.status).not.toHaveBeenCalled();
-      expect(req.body.character_data).toBeDefined();
+      expect(req.body.info).toBeDefined();
     });
 
     it("should reject invalid request body", () => {
       const req = createMockRequest({
-        body: { character_data: { invalid: "data" } },
+        body: { invalid: "data" },
       });
       const res = createMockResponse();
 
@@ -78,18 +78,16 @@ describe("Validation Middleware (Logic Tests)", () => {
     it("should provide detailed validation error messages", () => {
       const req = createMockRequest({
         body: {
-          character_data: {
-            info: {
-              name: "", // should fail
-              sex: "invalid",
-              height_in: 0, // too small
-              race: "invalid",
-              location: "INVALID_COUNTRY",
-            },
-            static: {
-              head: {
-                asset_id: "INVALID_FORMAT",
-              },
+          info: {
+            name: "", // should fail
+            sex: "invalid",
+            height_in: 0, // too small
+            race: "invalid",
+            location: "INVALID_COUNTRY",
+          },
+          static: {
+            head: {
+              asset_id: "INVALID_FORMAT",
             },
           },
         },
@@ -104,8 +102,8 @@ describe("Validation Middleware (Logic Tests)", () => {
           error: "Validation failed",
           details: expect.arrayContaining([
             expect.objectContaining({
-              field: expect.stringContaining("character_data.info.name"),
-              message: expect.stringContaining("character"),
+              field: expect.stringContaining("info.name"),
+              message: expect.stringContaining("least 1"),
             }),
           ]),
         }),
@@ -274,7 +272,7 @@ describe("Validation Middleware (Logic Tests)", () => {
 
   describe("error handling", () => {
     it("should handle validation errors gracefully", () => {
-      const validator = validateRequest(characterUploadSchema);
+      const validator = validateRequest(characterDataSchema);
       const req = createMockRequest({
         body: null,
       });
@@ -292,7 +290,7 @@ describe("Validation Middleware (Logic Tests)", () => {
     });
 
     it("should provide meaningful error messages for different validation failures", () => {
-      const validator = validateRequest(characterUploadSchema);
+      const validator = validateRequest(characterDataSchema);
       const req = createMockRequest({
         body: {
           character_data: {

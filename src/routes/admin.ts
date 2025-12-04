@@ -6,7 +6,7 @@ import { authenticateUser, requireAdmin } from "../auth/middleware";
 import rateLimit from "express-rate-limit";
 import { addCharacterProcessingJob } from "../queue";
 import { JobPriority } from "../types";
-import { AdminCharacterWithUser, AdminUser } from "../types";
+import { CharacterWithUser, User } from "../types";
 import { log } from "../utils/logger";
 import { FIVE_MINUTES } from "../utils/constants";
 
@@ -35,10 +35,10 @@ router.get("/characters", async (req: Request, res: Response) => {
     const whereClause = showDeleted ? "" : "WHERE is_deleted = false";
     const orderBy = "ORDER BY created_at DESC";
 
-    const result = await query<AdminCharacterWithUser>(
+    const result = await query<CharacterWithUser>(
       `
       SELECT
-        c.id, c.user_id, c.character_data, c.created_at, c.last_edited_at, c.is_edited,
+        c.id, c.user_id, c.character_data, c.created_at, c.last_edited_at,
         c.is_deleted, c.deleted_at, c.deleted_by,
         u.username, u.platform, u.platform_user_id
       FROM characters c
@@ -76,7 +76,7 @@ router.get("/characters/:id", async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
 
-    const result = await query<AdminCharacterWithUser>(
+    const result = await query<CharacterWithUser>(
       `
       SELECT
         c.*,
@@ -96,13 +96,7 @@ router.get("/characters/:id", async (req: Request, res: Response) => {
     const character = result.rows[0];
 
     res.json({
-      character: {
-        ...character,
-        character_data:
-          typeof character.character_data === "string"
-            ? JSON.parse(character.character_data)
-            : character.character_data,
-      },
+      character,
     });
   } catch (error) {
     log.error("Admin get character details error", { error });
@@ -183,7 +177,7 @@ router.get("/users", async (req: Request, res: Response) => {
     const limit = Math.min(parseInt(req.query.limit as string) || 50, 100);
     const offset = (page - 1) * limit;
 
-    const result = await query<AdminUser>(
+    const result = await query<User>(
       `
       SELECT
         u.id, u.username, u.platform, u.platform_user_id,

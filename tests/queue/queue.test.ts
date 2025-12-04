@@ -1,11 +1,50 @@
 import { Pool } from "pg";
 import { addCharacterProcessingJob } from "../../src/queue";
-import { JobPriority } from "../../src/types";
+import { JobPriority, CharacterData } from "../../src/types";
 import {
   setupTestDatabase,
   teardownTestDatabase,
   clearTestDatabase,
 } from "../helpers/database";
+
+function createTestCharacterData(name = "Test Character"): CharacterData {
+  return {
+    info: {
+      name,
+      sex: "male" as const,
+      date_of_birth: "1990-01-01",
+      height_in: 72,
+      weight_lb: 180,
+      eye_color: "brown" as const,
+      hair_color: "black" as const,
+      race: ["white"],
+      ethnicity: "not_hispanic_latino" as const,
+      location: "United States",
+    },
+    static: {
+      head: { asset_id: 1 },
+      hair: { asset_id: 1 },
+    },
+    placeable_movable: {
+      eyes: {
+        asset_id: 1,
+        offset_x: 0,
+        offset_y: 0,
+        scale: 1.0,
+        rotation: 0,
+      },
+      eyebrows: {
+        asset_id: 1,
+        offset_x: 0,
+        offset_y: 0,
+        scale: 1.0,
+        rotation: 0,
+      },
+      nose: { asset_id: 1, offset_y: 0, scale: 1.0 },
+      lips: { asset_id: 1, offset_y: 0, scale: 1.0 },
+    },
+  };
+}
 
 jest.mock("pg");
 
@@ -66,29 +105,7 @@ describe("Character Processing Queue", () => {
       const jobData = {
         userId: "user-123",
         action: "create" as const,
-        characterData: {
-          info: { name: "Test Character" },
-          static: { head: { asset_id: 1 }, hair: { asset_id: 1 } },
-          placeable_movable: {
-            eyes: {
-              asset_id: 1,
-              offset_x: 0,
-              offset_y: 0,
-              scale: 1.0,
-              rotation: 0,
-            },
-            eyebrows: {
-              asset_id: 1,
-              offset_x: 0,
-              offset_y: 0,
-              scale: 1.0,
-              rotation: 0,
-            },
-            nose: { asset_id: 1, offset_y: 0, scale: 1.0 },
-            lips: { asset_id: 1, offset_y: 0, scale: 1.0 },
-            accessories: {},
-          },
-        },
+        characterData: createTestCharacterData(),
         metadata: {
           userAgent: "test-agent",
           ipAddress: "127.0.0.1",
@@ -110,9 +127,7 @@ describe("Character Processing Queue", () => {
         userId: "user-123",
         characterId: "char-456",
         action: "update" as const,
-        characterData: {
-          info: { name: "Updated Character" },
-        },
+        characterData: createTestCharacterData("Updated Character"),
         metadata: {
           userAgent: "test-agent",
           ipAddress: "127.0.0.1",
@@ -150,29 +165,7 @@ describe("Character Processing Queue", () => {
 
   describe("Job Processing", () => {
     it("should process character creation job", async () => {
-      const mockCharacterData = {
-        info: { name: "Test Character" },
-        static: { head: { asset_id: 1 }, hair: { asset_id: 1 } },
-        placeable_movable: {
-          eyes: {
-            asset_id: 1,
-            offset_x: 0,
-            offset_y: 0,
-            scale: 1.0,
-            rotation: 0,
-          },
-          eyebrows: {
-            asset_id: 1,
-            offset_x: 0,
-            offset_y: 0,
-            scale: 1.0,
-            rotation: 0,
-          },
-          nose: { asset_id: 1, offset_y: 0, scale: 1.0 },
-          lips: { asset_id: 1, offset_y: 0, scale: 1.0 },
-          accessories: {},
-        },
-      };
+      const mockCharacterData = createTestCharacterData();
 
       const jobData = {
         userId: "user-123",
@@ -202,9 +195,7 @@ describe("Character Processing Queue", () => {
         userId: "user-123",
         characterId: "char-456",
         action: "update" as const,
-        characterData: {
-          info: { name: "Updated Character Name" },
-        },
+        characterData: createTestCharacterData("Updated Character Name"),
         metadata: {
           userAgent: "test-agent",
           ipAddress: "127.0.0.1",
@@ -253,7 +244,7 @@ describe("Character Processing Queue", () => {
       const baseJobData = {
         userId: "user-123",
         action: "create" as const,
-        characterData: { info: { name: "Test" } },
+        characterData: createTestCharacterData("Test"),
         metadata: {
           userAgent: "test",
           ipAddress: "127.0.0.1",
@@ -292,7 +283,7 @@ describe("Character Processing Queue", () => {
       const jobData = {
         userId: "user-123",
         action: "create" as const,
-        characterData: { info: { name: "Test" } },
+        characterData: createTestCharacterData("Test"),
         metadata: {
           userAgent: "test",
           ipAddress: "127.0.0.1",
@@ -311,7 +302,7 @@ describe("Character Processing Queue", () => {
       const jobData = {
         userId: "user-123",
         action: "create" as const,
-        characterData: { info: { name: "Test" } },
+        characterData: createTestCharacterData("Test"),
         metadata: {
           userAgent: "test",
           ipAddress: "127.0.0.1",
@@ -346,7 +337,7 @@ describe("Character Processing Queue", () => {
       const jobData = {
         userId: "user-123",
         action: "update" as const,
-        characterData: { info: { name: "Test" } },
+        characterData: createTestCharacterData("Test"),
         metadata: {
           userAgent: "test",
           ipAddress: "127.0.0.1",
@@ -382,7 +373,7 @@ describe("Character Processing Queue", () => {
         userId: "user-123",
         characterId: "char-456",
         action: "update" as const,
-        characterData: { info: { name: "Test" } },
+        characterData: createTestCharacterData("Test"),
         metadata: {
           userAgent: "test",
           ipAddress: "127.0.0.1",
@@ -406,7 +397,7 @@ describe("Character Processing Queue", () => {
         const jobData = {
           userId: `user-${i}`,
           action: "create" as const,
-          characterData: { info: { name: `Character ${i}` } },
+          characterData: createTestCharacterData(`Character ${i}`),
           metadata: {
             userAgent: "test",
             ipAddress: "127.0.0.1",
@@ -442,7 +433,7 @@ describe("Character Processing Queue", () => {
         const jobData = {
           userId: `user-${i}`,
           action: "create" as const,
-          characterData: { info: { name: `Character ${i}` } },
+          characterData: createTestCharacterData(`Character ${i}`),
           metadata: {
             userAgent: "test",
             ipAddress: "127.0.0.1",

@@ -23,7 +23,7 @@ CREATE TABLE characters (
   character_data JSONB NOT NULL,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT now(),
   last_edited_at TIMESTAMP WITH TIME ZONE, -- nullable until first edit
-  is_edited BOOLEAN DEFAULT FALSE,
+  can_edit BOOLEAN DEFAULT TRUE,
   is_deleted BOOLEAN DEFAULT FALSE,
   deleted_at TIMESTAMP WITH TIME ZONE,
   deleted_by UUID REFERENCES users (id),
@@ -82,41 +82,6 @@ CREATE INDEX idx_user_sessions_expires_at ON user_sessions (expires_at);
 CREATE INDEX idx_oauth_states_expires_at ON oauth_states (expires_at);
 
 -- business logic
-CREATE OR REPLACE FUNCTION can_user_edit_character (character_uuid UUID, user_uuid UUID) returns BOOLEAN AS $$
-DECLARE
-    char_created_at TIMESTAMP WITH TIME ZONE;
-    last_edit_at TIMESTAMP WITH TIME ZONE;
-BEGIN
-
-    IF character_uuid IS NULL OR user_uuid IS NULL THEN
-        RAISE WARNING 'can_user_edit_character: NULL parameters provided (character_uuid: %, user_uuid: %)', character_uuid, user_uuid;
-        RETURN false;
-    END IF;
-
-    SELECT created_at, last_edited_at
-    INTO char_created_at, last_edit_at
-    FROM characters
-    WHERE id = character_uuid AND user_id = user_uuid AND is_deleted = false;
-
-    IF char_created_at IS NULL THEN
-        RAISE WARNING 'can_user_edit_character: Character % not found or not owned by user %', character_uuid, user_uuid;
-        RETURN false;
-    END IF;
-
-    IF last_edit_at IS NOT NULL AND last_edit_at > NOW() - INTERVAL '7 days' THEN
-        RAISE INFO 'can_user_edit_character: Character % has recent edit at %, weekly limit exceeded', character_uuid, last_edit_at;
-        RETURN false;
-    END IF;
-
-    RETURN true;
-
-EXCEPTION
-    WHEN OTHERS THEN
-        RAISE WARNING 'can_user_edit_character: Unexpected database error occurred';
-        RETURN false;
-END;
-$$ language plpgsql;
-
 CREATE OR REPLACE FUNCTION get_characters_by_age (
   limit_count INTEGER DEFAULT 100,
   offset_count INTEGER DEFAULT 0
@@ -164,9 +129,26 @@ EXCEPTION
 END;
 $$ language plpgsql;
 
+CREATE OR REPLACE FUNCTION update_can_edit_column () returns trigger AS $$
+BEGIN
+    IF NEW.last_edited_at IS NOT NULL AND NEW.last_edited_at > NOW() - INTERVAL '7 days' THEN
+        NEW.can_edit = FALSE;
+    ELSE
+        NEW.can_edit = TRUE;
+    END IF;
+
+    RETURN NEW;
+END;
+$$ language plpgsql;
+
 CREATE TRIGGER check_character_not_deleted before
 UPDATE ON characters FOR each ROW
 EXECUTE function prevent_deleted_character_edit ();
+
+CREATE TRIGGER update_can_edit_trigger before insert
+OR
+UPDATE ON characters FOR each ROW
+EXECUTE function update_can_edit_column ();
 
 CREATE OR REPLACE FUNCTION cleanup_expired_sessions () returns INTEGER AS $$
 DECLARE
@@ -215,15 +197,9 @@ CREATE OR REPLACE FUNCTION update_character_data (
 ) returns void AS $$
 DECLARE
     current_character_data JSONB;
-    can_edit BOOLEAN;
+    can_edit_flag BOOLEAN;
 BEGIN
-    SELECT can_user_edit_character(p_character_id, p_user_id) INTO can_edit;
-
-    IF NOT can_edit THEN
-        RAISE EXCEPTION 'Cannot edit character: weekly limit exceeded';
-    END IF;
-
-    SELECT character_data INTO current_character_data
+    SELECT character_data, can_edit INTO current_character_data, can_edit_flag
     FROM characters
     WHERE id = p_character_id AND user_id = p_user_id AND is_deleted = false;
 
@@ -231,10 +207,13 @@ BEGIN
         RAISE EXCEPTION 'Character not found or not owned by user';
     END IF;
 
+    IF NOT can_edit_flag THEN
+        RAISE EXCEPTION 'Cannot edit character: weekly limit exceeded';
+    END IF;
+
     UPDATE characters
     SET character_data = jsonb_deep_merge(current_character_data, p_partial_data),
-        last_edited_at = NOW(),
-        is_edited = true
+        last_edited_at = NOW()
     WHERE id = p_character_id AND user_id = p_user_id;
 
     IF NOT FOUND THEN

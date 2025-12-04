@@ -2,11 +2,8 @@ import { Router, Request, Response } from "express";
 import { itchAuth } from "../../auth/itch";
 import { userQueries } from "../../database";
 import { log } from "../../utils/logger";
-import {
-  getConstraintError,
-  ERROR_CODES,
-  errorResponse,
-} from "../../utils/errorHandler";
+import { getConstraintError, errorResponse } from "../../utils/errorHandler";
+import { ERROR_CODES } from "../../utils/constants";
 
 const router = Router();
 

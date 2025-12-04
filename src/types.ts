@@ -1,139 +1,26 @@
-import { Request } from "express";
-import { ParsedQs } from "qs";
+import { Country } from "./utils/constants";
 
 export interface DatabaseQueryResult<T = unknown> {
   rows: T[];
   rowCount?: number;
 }
 
-export interface CharacterCreateData {
-  character_data: object;
-}
-
-export interface CharacterUpdateData {
-  character_data?: object;
-}
-
-export interface DatabaseCharacter {
-  id: string;
+export interface UserContext {
   user_id: string;
-  character_data: string | CharacterDataStructure;
-  created_at: string;
-  last_edited_at: string | null;
-  is_edited: boolean;
-  is_deleted: boolean;
-  deleted_at: string | null;
-  deleted_by: string | null;
+  username: string;
+  platform: Platform;
 }
 
-export interface CharacterMetadata {
-  upload_id: string;
-  user_id: string;
-  created_at: string;
-  last_edited_at: string | null;
-  is_edited: boolean;
-  can_edit: boolean;
-  is_deleted: boolean;
-  deleted_at: string | null;
-  deleted_by: string | null;
+export interface AssetTransform {
+  asset_id: number;
+  offset_x?: number;
+  offset_y?: number;
+  scale?: number;
+  rotation?: number;
 }
 
-export interface CharacterPersonalInfo {
-  name: string;
-  sex: Sex;
-  date_of_birth: string;
-  height_in: number;
-  weight_lb: number;
-  eye_color: EyeColor;
-  hair_color: HairColor;
-  race: Race[];
-  ethnicity: Ethnicity;
-  location: string;
-}
-
-export interface CharacterStatic {
-  head: {
-    asset_id: number;
-  };
-  hair: {
-    asset_id: number;
-  };
-  beard?: {
-    asset_id: number;
-  };
-  age_lines?: {
-    asset_id: number;
-  };
-}
-
-export interface CharacterPlaceableMovable {
-  eyes: {
-    asset_id: number;
-    offset_x: number;
-    offset_y: number;
-    scale: number;
-    rotation: number;
-  };
-  eyebrows: {
-    asset_id: number;
-    offset_x: number;
-    offset_y: number;
-    scale: number;
-    rotation: number;
-  };
-  nose: {
-    asset_id: number;
-    offset_y: number;
-    scale: number;
-  };
-  lips: {
-    asset_id: number;
-    offset_y: number;
-    scale: number;
-  };
-  glasses?: {
-    asset_id: number;
-    offset_y: number;
-    scale: number;
-  };
-  mustache?: {
-    asset_id: number;
-    offset_y: number;
-    scale: number;
-  };
-  misc?: {
-    asset_id: number;
-    offset_x?: number;
-    offset_y: number;
-    scale?: number;
-  };
-}
-
-export interface CharacterDataStructure {
-  info: CharacterPersonalInfo;
-  static: CharacterStatic;
-  placeable_movable: CharacterPlaceableMovable;
-}
-
-export interface FullCharacterData {
-  character_data: CharacterDataStructure;
-  metadata: CharacterMetadata;
-}
-
-export interface PlazaQueryRequest {
-  validatedQuery?: {
-    country?: string;
-    limit?: number;
-    offset?: number;
-  };
-}
-
-export interface PlazaCharacterData {
-  id: string;
-  created_at: string;
-  last_edited_at: string | null;
-  character_data: string | CharacterDataStructure;
-}
+// CHARACTERS
+export type Sex = "male" | "female" | "other";
 
 export type Race = "ai_an" | "asian" | "black" | "nh_pi" | "white" | "other";
 
@@ -159,56 +46,120 @@ export type HairColor =
   | "sandy"
   | "white";
 
-export type Sex = "male" | "female" | "other";
-
-export interface QueryValidationRequest extends Request {
-  query: ParsedQs;
+export interface CharacterInfo {
+  name: string;
+  sex: Sex;
+  date_of_birth: string;
+  height_in: number;
+  weight_lb: number;
+  eye_color: EyeColor;
+  hair_color: HairColor;
+  race: Race[];
+  ethnicity: Ethnicity;
+  location: Country;
 }
 
-export interface PlazaValidationRequest extends Request {
-  validatedQuery: unknown;
+export interface CharacterStatic {
+  head: { asset_id: number };
+  hair: { asset_id: number };
+  beard?: { asset_id: number };
+  age_lines?: { asset_id: number };
 }
 
-export type SearchParams = (string | number)[];
+export interface CharacterPlaceableMovable {
+  eyes: Required<AssetTransform>;
+  eyebrows: Required<AssetTransform>;
+  nose: Pick<AssetTransform, "asset_id" | "offset_y" | "scale">;
+  lips: Pick<AssetTransform, "asset_id" | "offset_y" | "scale">;
+  glasses?: Pick<AssetTransform, "asset_id" | "offset_y" | "scale">;
+  mustache?: Pick<AssetTransform, "asset_id" | "offset_y" | "scale">;
+  misc?: AssetTransform & { offset_y: number };
+}
+
+export interface CharacterData {
+  info: CharacterInfo;
+  static: CharacterStatic;
+  placeable_movable: CharacterPlaceableMovable;
+}
+
+export interface CharacterMetadata {
+  id: string;
+  user_id: string;
+  created_at: string;
+  last_edited_at: string | null;
+  can_edit: boolean;
+  is_deleted: boolean;
+  deleted_at: string | null;
+  deleted_by: string | null;
+}
+
+export interface CharacterBasicInfo {
+  id: string;
+  created_at: string;
+  last_edited_at: string | null;
+}
+
+export interface Character extends CharacterMetadata {
+  character_data: CharacterData;
+}
+
+export interface CharacterWithUser extends Character {
+  username: string;
+  platform: Platform;
+  platform_user_id: string;
+  user_created_at?: string;
+  last_login?: string;
+}
+
+export interface PlazaQueryRequest {
+  validatedQuery?: {
+    country?: string;
+    limit?: number;
+    offset?: number;
+  };
+}
+
+// AUTHENTICATION
+export type Platform = "newgrounds" | "itch" | "google";
 
 export interface PlatformUser {
   id: string;
   username: string;
-  platform?: string;
+  platform?: Platform;
   is_admin?: boolean;
-  [key: string]: unknown;
 }
 
-export interface AuthResult {
-  user: {
-    id: string;
-    username: string;
-    platform: string;
-    isAdmin: boolean;
-  };
-  sessionId: string;
-  tokenType: "Bearer";
-  message: string;
+interface BaseUser {
+  id: string;
+  platform: Platform;
+  platform_user_id: string;
+  username: string;
+  is_admin: boolean;
 }
 
 export interface AuthUrlResult {
   authUrl: string;
   state: string;
-  codeVerifier?: string; // for PKCE (google)
+  codeVerifier?: string;
   expiresAt: Date;
+}
+
+interface OAuthStateData {
+  platform: Platform;
+  codeVerifier?: string;
+  redirectUri?: string;
 }
 
 export interface CallbackValidation {
   isValid: boolean;
-  stateData?: {
-    platform: Platform;
-    codeVerifier?: string;
-    redirectUri?: string;
-  };
+  stateData?: OAuthStateData;
   error?: string;
 }
 
-export type Platform = "newgrounds" | "itch" | "google";
+export interface AuthenticatedUser<T extends PlatformUser> {
+  sessionId: string;
+  user: T;
+}
 
 export interface OAuthProvider<T extends PlatformUser> {
   platform: Platform;
@@ -217,8 +168,21 @@ export interface OAuthProvider<T extends PlatformUser> {
     code: string,
     state?: string,
     codeVerifier?: string,
-  ): Promise<{ sessionId: string; user: T }>;
+  ): Promise<AuthenticatedUser<T>>;
   validateSession(sessionId: string): Promise<T | null>;
+}
+
+export interface User extends BaseUser {
+  created_at: Date;
+  last_login: Date;
+}
+
+export interface DatabaseSession extends User {
+  session_id: string;
+  user_id: string;
+  platform_session_id?: string;
+  created_at: Date;
+  expires_at: Date;
 }
 
 export interface SessionData {
@@ -233,38 +197,20 @@ export interface SessionData {
   expiresAt: Date;
 }
 
-export interface CreateSessionData {
-  userId: string;
-  platform: Platform;
-  platformUserId: string;
-  platformSessionId?: string;
-  username: string;
-  isAdmin: boolean;
+export type CreateSessionData = Omit<
+  SessionData,
+  "id" | "createdAt" | "expiresAt"
+>;
+
+export interface GoogleOAuthParams extends Record<string, string> {
+  client_id: string;
+  redirect_uri: string;
+  scope: "openid email";
+  response_type: "code";
+  state: string;
 }
 
-export interface DatabaseUser {
-  id: string;
-  platform: Platform;
-  platform_user_id: string;
-  username: string;
-  is_admin: boolean;
-  created_at: string;
-  last_login: string;
-}
-
-export interface DatabaseSession {
-  session_id: string;
-  user_id: string;
-  platform: Platform;
-  platform_user_id: string;
-  platform_session_id?: string;
-  username: string;
-  is_admin: boolean;
-  created_at: Date;
-  expires_at: Date;
-}
-
-export interface GoogleAuthResponse {
+export interface GoogleOAuthResponse {
   access_token: string;
   token_type: string;
   expires_in: number;
@@ -277,11 +223,23 @@ export interface GoogleUserInfoResponse {
   email: string;
 }
 
-export interface ItchAuthResponse {
+export interface ItchOAuthParams extends Record<string, string> {
+  client_id: string;
+  redirect_uri: string;
+  scope: "profile:me";
+  response_type: "token";
+  state: string;
+}
+
+export interface ItchOAuthResponse {
   user: {
     id: number;
     username: string;
   };
+}
+
+export interface NewgroundsAuthRequest {
+  session_id: string;
 }
 
 export interface NewgroundsGatewayRequest {
@@ -322,69 +280,8 @@ export interface NewgroundsSession {
   passport_url?: string;
 }
 
-export interface NewgroundsAuthRequest {
-  session_id: string;
-}
-
-export interface CharacterInfo {
-  id: string;
-  created_at: string;
-  last_edited_at: string;
-  is_edited: boolean;
-}
-
-export interface PlazaCharacterResult {
-  id: string;
-  character_data: string | object;
-  created_at: string;
-  last_edited_at: string | null;
-}
-
-export interface AdminCharacter {
-  id: string;
-  user_id: string;
-  character_data: string | CharacterDataStructure;
-  created_at: string;
-  last_edited_at: string | null;
-  is_edited: boolean;
-  is_deleted: boolean;
-  deleted_at: string | null;
-  deleted_by: string | null;
-}
-
-export interface AdminUser {
-  id: string;
-  username: string;
-  platform: string;
-  platform_user_id: string;
-  created_at: string;
-  last_login: string;
-  is_admin: boolean;
-}
-
-export interface AdminCharacterWithUser extends AdminCharacter {
-  username: string;
-  platform: string;
-  platform_user_id: string;
-  user_created_at?: string;
-  last_login?: string;
-}
-
-export interface ItchOAuthParams extends Record<string, string> {
-  client_id: string;
-  scope: "profile:me";
-  redirect_uri: string;
-  response_type: "token";
-  state: string;
-}
-
-export interface GoogleOAuthParams extends Record<string, string> {
-  client_id: string;
-  redirect_uri: string;
-  scope: "openid email";
-  response_type: "code";
-  state: string;
-}
+// REQUEST/RESPONSE
+export type SearchParams = (string | number)[];
 
 export enum JobPriority {
   LOW = 1,
@@ -397,7 +294,7 @@ export interface CharacterProcessingJobData {
   userId: string;
   characterId?: string;
   action: "create" | "update" | "delete";
-  characterData?: object;
+  characterData?: CharacterData;
   metadata?: {
     adminUserId?: string;
     reason?: string;
@@ -413,6 +310,12 @@ export interface QueueJob {
   priority: JobPriority;
 }
 
+export interface QueueResponse {
+  message: string;
+  jobId: string;
+  status: string;
+}
+
 export interface APIError {
   error: {
     code: string;
@@ -421,13 +324,77 @@ export interface APIError {
   };
 }
 
+// ERROR HANDLING
+export interface DatabaseConstraintError {
+  code: string;
+  constraint: string;
+  detail: string;
+  table: string;
+}
+
+export interface GenericError {
+  error: string;
+}
+
+export interface UserFriendlyError extends GenericError {
+  message: string;
+  field?: string;
+}
+
+// ROUTE INTERFACES
+export interface PlazaCharacter
+  extends Pick<
+    Character,
+    "id" | "created_at" | "last_edited_at" | "character_data"
+  > {
+  location: string;
+}
+
+export interface Pagination {
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
+}
+
+export interface PlazaResponse {
+  characters: PlazaCharacter[];
+  count: number;
+  total: number;
+  filters: { country?: string };
+}
+
+export interface CharacterPageQuery {
+  page?: string;
+  limit?: string;
+  showDeleted?: string;
+}
+
+export interface CharacterPageResponse {
+  characters: CharacterWithUser[];
+  pagination: Pagination;
+}
+
+export interface DeleteCharacterResponse extends QueueResponse {
+  success: boolean;
+  deletedCharacter: {
+    id: string;
+  };
+  reason: string;
+}
+
+export interface AdminUsersQuery {
+  page?: string;
+  limit?: string;
+}
+
 declare global {
   namespace Express {
     interface Request {
       user?: {
         id: string;
         username: string;
-        platform: string;
+        platform: Platform;
         platformUserId: string;
         isAdmin: boolean;
       };
