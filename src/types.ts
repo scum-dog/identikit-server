@@ -342,11 +342,10 @@ export interface UserFriendlyError extends GenericError {
 }
 
 // ROUTE INTERFACES
-export interface PlazaCharacter
-  extends Pick<
-    Character,
-    "id" | "created_at" | "last_edited_at" | "character_data"
-  > {
+export interface PlazaCharacter extends Pick<
+  Character,
+  "id" | "created_at" | "last_edited_at" | "character_data"
+> {
   location: string;
 }
 

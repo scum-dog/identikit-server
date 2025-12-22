@@ -103,7 +103,7 @@ describe("Validation Middleware (Logic Tests)", () => {
           details: expect.arrayContaining([
             expect.objectContaining({
               field: expect.stringContaining("info.name"),
-              message: expect.stringContaining("at least 1 character"),
+              message: expect.stringContaining(">=1 characters"),
             }),
           ]),
         }),

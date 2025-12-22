@@ -19,9 +19,8 @@ afterAll(async () => {
   console.log = originalConsoleLog;
 
   try {
-    const { cleanup: oauthCleanup } = await import(
-      "../../src/utils/oauthPolling"
-    );
+    const { cleanup: oauthCleanup } =
+      await import("../../src/utils/oauthPolling");
     oauthCleanup();
   } catch (error) {}
 

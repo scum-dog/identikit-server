@@ -55,7 +55,8 @@ describe("Validation Schemas", () => {
       expect(result.success).toBe(false);
       if (!result.success) {
         const nameError = result.error.issues.find(
-          (e) => e.path.includes("name") && e.message.includes("at least 1 character"),
+          (e) =>
+            e.path.includes("name") && e.message.includes(">=1 characters"),
         );
         expect(nameError).toBeDefined();
       }

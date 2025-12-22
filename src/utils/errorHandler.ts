@@ -6,12 +6,12 @@ export function isDatabaseConstraintError(
 ): error is DatabaseConstraintError {
   return Boolean(
     error &&
-      typeof error === "object" &&
-      error !== null &&
-      "code" in error &&
-      (error as Record<string, unknown>).code === "23505" && // unique_violation
-      "constraint" in error &&
-      typeof (error as Record<string, unknown>).constraint === "string",
+    typeof error === "object" &&
+    error !== null &&
+    "code" in error &&
+    (error as Record<string, unknown>).code === "23505" && // unique_violation
+    "constraint" in error &&
+    typeof (error as Record<string, unknown>).constraint === "string",
   );
 }
 
