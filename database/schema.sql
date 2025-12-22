@@ -100,7 +100,7 @@ BEGIN
         c.last_edited_at
     FROM characters c
     WHERE c.is_deleted = false
-    ORDER BY c.created_at ASC
+    ORDER BY c.created_at DESC
     LIMIT limit_count
     OFFSET offset_count;
 END;
