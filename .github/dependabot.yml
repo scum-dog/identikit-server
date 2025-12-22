@@ -1,0 +1,53 @@
+version: 2
+updates:
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+    open-pull-requests-limit: 5
+    target-branch: "master"
+    assignees:
+      - "johnqherman"
+    commit-message:
+      prefix: "deps"
+      prefix-development: "deps-dev"
+      include: "scope"
+    ignore:
+      - dependency-name: "express"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "pg"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "axios"
+        update-types: ["version-update:semver-major"]
+    groups:
+      production-dependencies:
+        patterns:
+          - "*"
+        exclude-patterns:
+          - "@types/*"
+          - "*eslint*"
+          - "prettier*"
+          - "jest"
+          - "ts-*"
+          - "nodemon"
+          - "supertest"
+      development-dependencies:
+        patterns:
+          - "@types/*"
+          - "*eslint*"
+          - "prettier*"
+          - "jest"
+          - "ts-*"
+          - "nodemon"
+          - "supertest"
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+    target-branch: "master"
+    assignees:
+      - "johnqherman"
