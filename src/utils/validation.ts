@@ -477,7 +477,7 @@ export const validateRequest = <T>(schema: z.ZodSchema<T>) => {
       if (error instanceof z.ZodError) {
         return res.status(400).json({
           error: "Validation failed",
-          details: error.errors.map((err) => ({
+          details: error.issues.map((err) => ({
             field: err.path.join("."),
             message: err.message,
           })),
@@ -505,7 +505,7 @@ export const validateQuery = <T>(schema: z.ZodType<T>) => {
       if (error instanceof z.ZodError) {
         return res.status(400).json({
           error: "Query validation failed",
-          details: error.errors.map((err) => ({
+          details: error.issues.map((err) => ({
             field: err.path.join("."),
             message: err.message,
           })),
@@ -535,7 +535,7 @@ export const validatePlazaQuery = (
     if (error instanceof z.ZodError) {
       return res.status(400).json({
         error: "Query validation failed",
-        details: error.errors.map((err) => ({
+        details: error.issues.map((err) => ({
           field: err.path.join("."),
           message: err.message,
         })),

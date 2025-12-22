@@ -41,7 +41,7 @@ describe("Validation Schemas", () => {
 
       expect(result.success).toBe(false);
       if (!result.success) {
-        const errors = result.error.errors;
+        const errors = result.error.issues;
         expect(errors.some((e) => e.path.includes("user_id"))).toBe(true);
       }
     });
@@ -54,7 +54,7 @@ describe("Validation Schemas", () => {
 
       expect(result.success).toBe(false);
       if (!result.success) {
-        const nameError = result.error.errors.find(
+        const nameError = result.error.issues.find(
           (e) => e.path.includes("name") && e.message.includes("least 1"),
         );
         expect(nameError).toBeDefined();
@@ -70,7 +70,7 @@ describe("Validation Schemas", () => {
 
       expect(result.success).toBe(false);
       if (!result.success) {
-        const nameError = result.error.errors.find(
+        const nameError = result.error.issues.find(
           (e) => e.path.includes("name") && e.message.includes("32"),
         );
         expect(nameError).toBeDefined();
@@ -138,7 +138,7 @@ describe("Validation Schemas", () => {
 
         expect(result.success).toBe(false);
         if (!result.success) {
-          const nameError = result.error.errors.find(
+          const nameError = result.error.issues.find(
             (e) =>
               e.path.includes("name") &&
               e.message.includes("must start with a letter"),
@@ -169,7 +169,7 @@ describe("Validation Schemas", () => {
 
         expect(result.success).toBe(false);
         if (!result.success) {
-          const nameError = result.error.errors.find(
+          const nameError = result.error.issues.find(
             (e) =>
               e.path.includes("name") &&
               e.message.includes("must start with a letter"),
@@ -199,7 +199,7 @@ describe("Validation Schemas", () => {
 
         expect(result.success).toBe(false);
         if (!result.success) {
-          const nameError = result.error.errors.find(
+          const nameError = result.error.issues.find(
             (e) =>
               e.path.includes("name") &&
               e.message.includes("must start with a letter"),
@@ -226,7 +226,7 @@ describe("Validation Schemas", () => {
 
         expect(result.success).toBe(false);
         if (!result.success) {
-          const nameError = result.error.errors.find(
+          const nameError = result.error.issues.find(
             (e) =>
               e.path.includes("name") &&
               e.message.includes("must start with a letter"),
@@ -252,7 +252,7 @@ describe("Validation Schemas", () => {
 
         expect(result.success).toBe(false);
         if (!result.success) {
-          const nameError = result.error.errors.find(
+          const nameError = result.error.issues.find(
             (e) =>
               e.path.includes("name") &&
               e.message.includes("must start with a letter"),
@@ -278,7 +278,7 @@ describe("Validation Schemas", () => {
 
         expect(result.success).toBe(false);
         if (!result.success) {
-          const nameError = result.error.errors.find(
+          const nameError = result.error.issues.find(
             (e) =>
               e.path.includes("name") &&
               e.message.includes("must start with a letter"),
@@ -309,7 +309,7 @@ describe("Validation Schemas", () => {
 
         expect(result.success).toBe(false);
         if (!result.success) {
-          const nameError = result.error.errors.find(
+          const nameError = result.error.issues.find(
             (e) =>
               e.path.includes("name") &&
               e.message.includes("must start with a letter"),
@@ -339,7 +339,7 @@ describe("Validation Schemas", () => {
 
       expect(result.success).toBe(false);
       if (!result.success) {
-        const shapeError = result.error.errors.find((e) =>
+        const shapeError = result.error.issues.find((e) =>
           e.path.includes("asset_id"),
         );
         expect(shapeError).toBeDefined();
@@ -354,7 +354,7 @@ describe("Validation Schemas", () => {
 
       expect(result.success).toBe(false);
       if (!result.success) {
-        const heightError = result.error.errors.find((e) =>
+        const heightError = result.error.issues.find((e) =>
           e.path.includes("height_in"),
         );
         expect(heightError).toBeDefined();
@@ -369,7 +369,7 @@ describe("Validation Schemas", () => {
 
       expect(result.success).toBe(false);
       if (!result.success) {
-        const weightError = result.error.errors.find((e) =>
+        const weightError = result.error.issues.find((e) =>
           e.path.includes("weight_lb"),
         );
         expect(weightError).toBeDefined();
@@ -431,7 +431,7 @@ describe("Validation Schemas", () => {
 
       expect(result.success).toBe(false);
       if (!result.success) {
-        const assetError = result.error.errors.find((e) =>
+        const assetError = result.error.issues.find((e) =>
           e.path.includes("asset_id"),
         );
         expect(assetError).toBeDefined();
@@ -486,7 +486,7 @@ describe("Validation Schemas", () => {
 
       expect(result.success).toBe(false);
       if (!result.success) {
-        const locationError = result.error.errors.find((e) =>
+        const locationError = result.error.issues.find((e) =>
           e.path.includes("location"),
         );
         expect(locationError).toBeDefined();
@@ -582,7 +582,7 @@ describe("Validation Schemas", () => {
 
       expect(result.success).toBe(false);
       if (!result.success) {
-        const uuidError = result.error.errors.find((e) =>
+        const uuidError = result.error.issues.find((e) =>
           e.path.includes("characterId"),
         );
         expect(uuidError).toBeDefined();
@@ -600,7 +600,7 @@ describe("Validation Schemas", () => {
 
       expect(result.success).toBe(false);
       if (!result.success) {
-        const reasonError = result.error.errors.find((e) =>
+        const reasonError = result.error.issues.find((e) =>
           e.path.includes("reason"),
         );
         expect(reasonError).toBeDefined();
@@ -636,7 +636,7 @@ describe("Validation Schemas", () => {
 
       expect(result.success).toBe(false);
       if (!result.success) {
-        const platformError = result.error.errors.find((e) =>
+        const platformError = result.error.issues.find((e) =>
           e.path.includes("platform"),
         );
         expect(platformError).toBeDefined();
@@ -667,7 +667,7 @@ describe("Validation Schemas", () => {
 
       expect(result.success).toBe(false);
       if (!result.success) {
-        const sessionError = result.error.errors.find((e) =>
+        const sessionError = result.error.issues.find((e) =>
           e.path.includes("session_id"),
         );
         expect(sessionError).toBeDefined();
@@ -700,7 +700,7 @@ describe("Validation Schemas", () => {
 
       expect(result.success).toBe(false);
       if (!result.success) {
-        const tokenError = result.error.errors.find((e) =>
+        const tokenError = result.error.issues.find((e) =>
           e.path.includes("access_token"),
         );
         expect(tokenError).toBeDefined();
