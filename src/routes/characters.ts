@@ -46,7 +46,7 @@ const uploadRateLimit = rateLimit({
 
 const plazaRateLimit = rateLimit({
   windowMs: ONE_MINUTE,
-  max: 30,
+  max: 150,
   message: { error: "Too many plaza requests, please slow down" },
   standardHeaders: "draft-7",
   legacyHeaders: false,
