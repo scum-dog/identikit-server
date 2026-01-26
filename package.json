@@ -26,15 +26,15 @@
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
-    "axios": "^1.13.2",
-    "cors": "^2.8.5",
+    "axios": "^1.13.3",
+    "cors": "^2.8.6",
     "dotenv": "^17.2.3",
     "express": "^5.2.1",
     "express-rate-limit": "^8.2.1",
     "helmet": "^8.1.0",
-    "pg": "^8.17.1",
+    "pg": "^8.17.2",
     "winston": "^3.19.0",
-    "zod": "^4.3.5"
+    "zod": "^4.3.6"
   },
   "devDependencies": {
     "@types/cors": "^2.8.19",
@@ -46,7 +46,7 @@
     "@typescript-eslint/eslint-plugin": "^8.53.0",
     "@typescript-eslint/parser": "^8.46.1",
     "eslint": "^9.37.0",
-    "globals": "^17.0.0",
+    "globals": "^17.1.0",
     "jest": "^30.2.0",
     "nodemon": "^3.1.11",
     "pg-mem": "^3.0.5",
